@@ -1,4 +1,5 @@
 
+
 pub fn one_max(bits: &[u8]) -> i32 {
     let mut one_count: i32 = 0;
     for bit in bits.iter() {
@@ -32,10 +33,22 @@ pub fn sphere(x: &[f64], o: &[f64]) -> f64 {
     res
 }
 
+pub fn rosenbrock(x: &[f64]) -> f64 {
+    let mut res = 0.0;
+    for i in 0..x.len()-1 {
+        let l = x[i + 1] - x[i]*x[i];
+        let r = 1.0 - x[i];
+        res += 100.0 * l * l + r * r;
+    }
+    res
+}
+
 #[cfg(test)]
 mod tests {
 
     use super::*;
+
+    const EPSILON: f64 = 1.0e-6;
 
     fn check_one_max(bits: &[u8], res: i32) {
         assert_eq!(one_max(bits), res);
@@ -47,6 +60,10 @@ mod tests {
 
     fn check_sphere(x: &[f64], o: &[f64], res: f64) {
         assert_eq!(sphere(x, o), res);
+    }
+
+    fn check_rosenbrock(x: &[f64], res: f64) {
+        assert!((rosenbrock(x) - res).abs() < EPSILON);
     }
 
     #[test]
@@ -136,6 +153,41 @@ mod tests {
         check_sphere(&[0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.1], &o10, 248.45999999999998);
         check_sphere(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &o10, 10.0);
         check_sphere(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], &o10, 0.0);
+    }
+
+    #[test]
+    fn test_rosenbrock() {
+        check_rosenbrock(&[ 0.0], 0.0);
+        check_rosenbrock(&[ 0.5], 0.0);
+        check_rosenbrock(&[ 1.0], 0.0);
+        check_rosenbrock(&[-0.5], 0.0);
+        check_rosenbrock(&[-5.0], 0.0);
+        check_rosenbrock(&[ 5.0], 0.0);
+        check_rosenbrock(&[ 0.0,  0.0], 1.0);
+        check_rosenbrock(&[-1.0, -1.0], 404.0);
+        check_rosenbrock(&[-1.0,  1.0], 4.0);
+        check_rosenbrock(&[ 1.0, -1.0], 400.0);
+        check_rosenbrock(&[ 1.0,  1.0], 0.0);
+        check_rosenbrock(&[-0.1, -0.2], 5.620000000000001);
+        check_rosenbrock(&[ 0.1,  0.2], 4.42);
+        check_rosenbrock(&[-5.0, -5.0], 90036.0);
+        check_rosenbrock(&[-5.0,  5.0], 40036.0);
+        check_rosenbrock(&[ 5.0, -5.0], 90016.0);
+        check_rosenbrock(&[ 5.0,  5.0], 40016.0);
+        check_rosenbrock(&[ 0.0,  0.0,  0.0], 2.0);
+        check_rosenbrock(&[ 1.0,  1.0,  1.0], 0.0);
+        check_rosenbrock(&[-5.0, -5.0, -5.0], 180072.0);
+        check_rosenbrock(&[-5.0, -5.0,  5.0], 130072.0);
+        check_rosenbrock(&[-5.0,  5.0, -5.0], 130052.0);
+        check_rosenbrock(&[-5.0,  5.0,  5.0], 80052.0);
+        check_rosenbrock(&[ 5.0, -5.0, -5.0], 180052.0);
+        check_rosenbrock(&[ 5.0, -5.0,  5.0], 130052.0);
+        check_rosenbrock(&[ 5.0,  5.0, -5.0], 130032.0);
+        check_rosenbrock(&[ 5.0,  5.0,  5.0], 80032.0);
+        check_rosenbrock(&[-0.1, -1.2, -2.3, -3.4, -4.5, -5.6, -6.7, -7.8, -8.9, -9.1], 1790768.58);
+        check_rosenbrock(&[0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.1], 986898.1800000002);
+        check_rosenbrock(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 9.0);
+        check_rosenbrock(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], 0.0);
     }
 
 }
