@@ -43,6 +43,19 @@ pub fn rosenbrock(x: &[f64]) -> f64 {
     res
 }
 
+pub fn perturbe_mut(bits: &mut [u8], prob: f64) {
+    for bit in bits.iter_mut() {
+        *bit = if rand::random::<f64>() > prob { *bit } else { *bit ^ 1 };
+    }
+}
+
+pub fn perturbe(bits: &[u8], prob: f64) -> Vec<u8> {
+    let mut res = Vec::from(bits);
+    let l = res.len();
+    perturbe_mut(&mut res[0..l], prob);
+    res
+}
+
 #[cfg(test)]
 mod tests {
 
