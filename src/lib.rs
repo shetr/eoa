@@ -51,8 +51,30 @@ pub fn perturbe_mut(bits: &mut [u8], prob: f64) {
 
 pub fn perturbe(bits: &[u8], prob: f64) -> Vec<u8> {
     let mut res = Vec::from(bits);
-    let l = res.len();
-    perturbe_mut(&mut res[0..l], prob);
+    perturbe_mut(&mut res[..], prob);
+    res
+}
+
+pub struct Bounds {
+    pub upper: f64,
+    pub lower: f64
+}
+
+pub fn bin_to_real(bits: &[u8], bounds: &[Bounds]) -> Vec<f64> {
+    let mut res = vec![0.0; bounds.len()];
+    let chunk_size = bits.len() / bounds.len();
+    for i in 0..bounds.len() {
+        let mut acc: i32 = 0;
+        let mut pow: i32 = 1;
+        let from = i * chunk_size;
+        let to = std::cmp::min((i + 1) * chunk_size, bits.len());
+        for b in from..to {
+            acc += bits[b] as i32 * pow;
+            pow <<= 1;
+        }
+        let bound_size = bounds[i].upper - bounds[i].lower;
+        res[i] = bounds[i].lower + bound_size * (acc as f64) / ((pow - 1) as f64);
+    }
     res
 }
 
