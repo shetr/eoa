@@ -1,3 +1,5 @@
+use crate::helpers::*;
+
 
 pub fn one_max(bits: &[u8]) -> i32 {
     let mut one_count: i32 = 0;
@@ -32,6 +34,10 @@ pub fn sphere(x: &[f64], o: &[f64]) -> f64 {
     res
 }
 
+pub fn sphere_bin(bits: &[u8], bounds: &[Bounds], o: &[f64]) -> f64 {
+    sphere(&bin_to_real(bits, bounds), o)
+}
+
 pub fn rosenbrock(x: &[f64]) -> f64 {
     let mut res = 0.0;
     for i in 0..x.len()-1 {
@@ -40,6 +46,10 @@ pub fn rosenbrock(x: &[f64]) -> f64 {
         res += 100.0 * l * l + r * r;
     }
     res
+}
+
+pub fn rosenbrock_bin(bits: &[u8], bounds: &[Bounds]) -> f64 {
+    rosenbrock(&bin_to_real(bits, bounds))
 }
 
 #[cfg(test)]
