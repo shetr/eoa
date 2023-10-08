@@ -1,6 +1,10 @@
 use crate::helpers::*;
 
 
+trait NaiveBitFitnessFunc {
+    fn eval(bits: &[u8]) -> f64;
+}
+
 pub fn one_max(bits: &[u8]) -> i32 {
     let mut one_count: i32 = 0;
     for bit in bits.iter() {
