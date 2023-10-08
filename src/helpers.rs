@@ -1,4 +1,21 @@
 
+pub trait NaiveBitTerminationCond {
+    fn eval(&self, iter: usize, fitness: f64) -> bool;
+}
+
+pub struct MaxIterNaiveBitTerminationCond {
+    pub n_iters: usize
+}
+
+impl NaiveBitTerminationCond for MaxIterNaiveBitTerminationCond {
+    fn eval(&self, iter: usize, _: f64) -> bool {
+        return iter >= self.n_iters;
+    }
+}
+
+pub trait NaiveBitPerturbeMutOp {
+    fn eval(&self, bits: &mut [u8]);
+}
 
 pub fn perturbe_mut(bits: &mut [u8], prob: f64) {
     for bit in bits.iter_mut() {
@@ -12,14 +29,22 @@ pub fn perturbe(bits: &[u8], prob: f64) -> Vec<u8> {
     res
 }
 
+pub struct BasicNaiveBitPerturbeMutOp {}
+
+impl NaiveBitPerturbeMutOp for BasicNaiveBitPerturbeMutOp {
+    fn eval(&self, bits: &mut [u8]) {
+        perturbe_mut(bits, 1.0 / (bits.len() as f64))
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 pub struct Bounds {
     pub upper: f64,
     pub lower: f64
 }
 
-pub fn bin_to_real(bits: &[u8], bounds: &[Bounds]) -> Vec<f64> {
-    let mut res = vec![0.0; bounds.len()];
+pub fn bin_to_real_mut(bits: &[u8], bounds: &[Bounds], res: &mut Vec<f64>) {
+    res.clear();
     let chunk_size = bits.len() / bounds.len();
     for i in 0..bounds.len() {
         let mut acc: i32 = 0;
@@ -31,8 +56,13 @@ pub fn bin_to_real(bits: &[u8], bounds: &[Bounds]) -> Vec<f64> {
             pow <<= 1;
         }
         let bound_size = bounds[i].upper - bounds[i].lower;
-        res[i] = bounds[i].lower + bound_size * (acc as f64) / ((pow - 1) as f64);
+        res.push(bounds[i].lower + bound_size * (acc as f64) / ((pow - 1) as f64));
     }
+}
+
+pub fn bin_to_real(bits: &[u8], bounds: &[Bounds]) -> Vec<f64> {
+    let mut res = vec![0.0; bounds.len()];
+    bin_to_real_mut(bits, bounds, &mut res);
     res
 }
 

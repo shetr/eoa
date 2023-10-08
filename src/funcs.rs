@@ -1,11 +1,7 @@
 use crate::helpers::*;
 
 
-trait NaiveBitFitnessFunc {
-    fn eval(bits: &[u8]) -> f64;
-}
-
-pub fn one_max(bits: &[u8]) -> i32 {
+pub fn naive_one_max(bits: &[u8]) -> i32 {
     let mut one_count: i32 = 0;
     for bit in bits.iter() {
         one_count += *bit as i32;
@@ -17,7 +13,7 @@ fn bit_to_sign(bit: u8) -> i32 {
     (bit as i32 * 2) - 1
 }
 
-pub fn labs(bits: &[u8]) -> i32 {
+pub fn naive_labs(bits: &[u8]) -> i32 {
     let mut es: i32 = 0;
     for k in 1..bits.len() {
         let mut ck_s = 0;
@@ -56,6 +52,52 @@ pub fn rosenbrock_bin(bits: &[u8], bounds: &[Bounds]) -> f64 {
     rosenbrock(&bin_to_real(bits, bounds))
 }
 
+pub trait NaiveBitFitnessFunc {
+    fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64;
+}
+
+pub struct OneMaxFunc { }
+
+pub struct LabsFunc { }
+
+pub struct SphereFunc<const N: usize> {
+    o: [f64; N]
+}
+
+impl<const N: usize> SphereFunc<{N}> {
+    pub fn new(o: &[f64; N]) -> Self {
+        SphereFunc { o:*o }
+    }
+}
+
+pub struct RosenbrockFunc { }
+
+impl NaiveBitFitnessFunc for OneMaxFunc {
+    fn eval(&self, bits: &[u8], _: &[Bounds], _: &mut Vec<f64>) -> f64 {
+        naive_one_max(bits) as f64
+    }
+}
+
+impl NaiveBitFitnessFunc for LabsFunc {
+    fn eval(&self, bits: &[u8], _: &[Bounds], _: &mut Vec<f64>) -> f64 {
+        naive_labs(bits) as f64
+    }
+}
+
+impl<const N: usize> NaiveBitFitnessFunc for SphereFunc<{N}> {
+    fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64 {
+        bin_to_real_mut(bits, bounds, temp);
+        sphere(temp, &self.o)
+    }
+}
+
+impl NaiveBitFitnessFunc for RosenbrockFunc {
+    fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64 {
+        bin_to_real_mut(bits, bounds, temp);
+        rosenbrock(temp)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -64,11 +106,11 @@ mod tests {
     const EPSILON: f64 = 1.0e-6;
 
     fn check_one_max(bits: &[u8], res: i32) {
-        assert_eq!(one_max(bits), res);
+        assert_eq!(naive_one_max(bits), res);
     }
 
     fn check_labs(bits: &[u8], res: i32) {
-        assert_eq!(labs(bits), res);
+        assert_eq!(naive_labs(bits), res);
     }
 
     fn check_sphere(x: &[f64], o: &[f64], res: f64) {
