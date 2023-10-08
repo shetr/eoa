@@ -61,13 +61,7 @@ pub struct OneMaxFunc { }
 pub struct LabsFunc { }
 
 pub struct SphereFunc<const N: usize> {
-    o: [f64; N]
-}
-
-impl<const N: usize> SphereFunc<{N}> {
-    pub fn new(o: &[f64; N]) -> Self {
-        SphereFunc { o:*o }
-    }
+    pub o: [f64; N]
 }
 
 pub struct RosenbrockFunc { }
