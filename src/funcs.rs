@@ -1,6 +1,13 @@
 use crate::helpers::*;
 
 
+pub trait NaiveBitFitnessFunc {
+    fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64;
+}
+pub trait RealFitnessFunc {
+    fn eval(&self, values: &[f64]) -> f64;
+}
+
 pub fn naive_one_max(bits: &[u8]) -> i32 {
     let mut one_count: i32 = 0;
     for bit in bits.iter() {
@@ -52,16 +59,12 @@ pub fn rosenbrock_bin(bits: &[u8], bounds: &[Bounds]) -> f64 {
     rosenbrock(&bin_to_real(bits, bounds))
 }
 
-pub trait NaiveBitFitnessFunc {
-    fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64;
-}
-
 pub struct OneMaxFunc { }
 
 pub struct LabsFunc { }
 
-pub struct SphereFunc<const N: usize> {
-    pub o: [f64; N]
+pub struct SphereFunc {
+    pub o: Vec<f64>
 }
 
 pub struct RosenbrockFunc { }
@@ -78,7 +81,7 @@ impl NaiveBitFitnessFunc for LabsFunc {
     }
 }
 
-impl<const N: usize> NaiveBitFitnessFunc for SphereFunc<{N}> {
+impl NaiveBitFitnessFunc for SphereFunc {
     fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64 {
         bin_to_real_mut(bits, bounds, temp);
         sphere(temp, &self.o)
@@ -89,6 +92,18 @@ impl NaiveBitFitnessFunc for RosenbrockFunc {
     fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64 {
         bin_to_real_mut(bits, bounds, temp);
         rosenbrock(temp)
+    }
+}
+
+impl RealFitnessFunc for SphereFunc {
+    fn eval(&self, values: &[f64]) -> f64 {
+        sphere(values, &self.o)
+    }
+}
+
+impl RealFitnessFunc for RosenbrockFunc {
+    fn eval(&self, values: &[f64]) -> f64 {
+        rosenbrock(values)
     }
 }
 

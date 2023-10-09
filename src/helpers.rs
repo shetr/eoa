@@ -1,13 +1,24 @@
+use rand_distr::{Normal, Distribution};
 
 pub trait NaiveBitTerminationCond {
     fn eval(&self, iter: usize, fitness: f64) -> bool;
 }
 
-pub struct MaxIterNaiveBitTerminationCond {
+pub trait RealTerminationCond {
+    fn eval(&self, iter: usize, fitness: f64) -> bool;
+}
+
+pub struct MaxIterTerminationCond {
     pub n_iters: usize
 }
 
-impl NaiveBitTerminationCond for MaxIterNaiveBitTerminationCond {
+impl NaiveBitTerminationCond for MaxIterTerminationCond {
+    fn eval(&self, iter: usize, _: f64) -> bool {
+        return iter >= self.n_iters;
+    }
+}
+
+impl RealTerminationCond for MaxIterTerminationCond {
     fn eval(&self, iter: usize, _: f64) -> bool {
         return iter >= self.n_iters;
     }
@@ -15,6 +26,10 @@ impl NaiveBitTerminationCond for MaxIterNaiveBitTerminationCond {
 
 pub trait NaiveBitPerturbeMutOp {
     fn eval(&self, bits: &mut [u8]);
+}
+
+pub trait PerturbeRealMutOp {
+    fn eval(&self, values: &mut [f64]);
 }
 
 pub fn perturbe_mut(bits: &mut [u8], prob: f64) {
@@ -34,6 +49,24 @@ pub struct BasicNaiveBitPerturbeMutOp {}
 impl NaiveBitPerturbeMutOp for BasicNaiveBitPerturbeMutOp {
     fn eval(&self, bits: &mut [u8]) {
         perturbe_mut(bits, 1.0 / (bits.len() as f64))
+    }
+}
+
+pub struct NormalPerturbeRealMutOp {
+    normal: Normal<f64>
+}
+
+impl NormalPerturbeRealMutOp {
+    pub fn new(sigma: f64) -> Self {
+        NormalPerturbeRealMutOp { normal: Normal::new(0.0, sigma).unwrap() }
+    }
+}
+
+impl PerturbeRealMutOp for NormalPerturbeRealMutOp {
+    fn eval(&self, values: &mut [f64]) {
+        for value in values {
+            *value = *value + self.normal.sample(&mut rand::thread_rng());
+        }
     }
 }
 

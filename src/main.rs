@@ -13,10 +13,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
     println!("Perturbed: {:?}", v2);
     println!("Real: {:?}", v3);
 
-    let fitness = SphereFunc { o: [0.0; 2] };
+    let fitness = SphereFunc { o: vec![0.0; 2] };
     //let fitness = RosenbrockFunc {};
     let perturbe_mut_op = BasicNaiveBitPerturbeMutOp {};
-    let termination_cond = MaxIterNaiveBitTerminationCond { n_iters: 30 };
+    let termination_cond = MaxIterTerminationCond { n_iters: 30 };
     let bounds = [Bounds { lower: 0.0, upper: 1.0 }; 2];
     //let bounds = [Bounds { lower: -10.0, upper: 10.0 }; 2];
     let init_value = zeros;
