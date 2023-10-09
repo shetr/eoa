@@ -2,7 +2,7 @@ use crate::opt::*;
 
 use plotters::prelude::*;
 
-pub fn plot(stats: &NaiveBitStatistics, out_name: &str, fun_name: &str) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot(stats: &Statistics, out_name: &str, fun_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let max_fitness = stats.fitness.iter().copied().fold(f64::NEG_INFINITY, f64::max);
     let min_fitness = stats.fitness.iter().copied().fold(f64::INFINITY, f64::min);

@@ -1,6 +1,5 @@
 use crate::helpers::*;
 
-
 pub trait NaiveBitFitnessFunc {
     fn eval(&self, bits: &[u8], bounds: &[Bounds], temp: &mut Vec<f64>) -> f64;
 }
@@ -59,6 +58,48 @@ pub fn rosenbrock_bin(bits: &[u8], bounds: &[Bounds]) -> f64 {
     rosenbrock(&bin_to_real(bits, bounds))
 }
 
+pub fn linear(x: &[f64], a: f64, b: &[f64]) -> f64 {
+    let mut res = a;
+    for i in 0..x.len() {
+        res += x[i] * b[i];
+    }
+    res
+}
+
+pub fn step(x: &[f64], a: f64, b: &[f64]) -> f64 {
+    let mut res = a;
+    for i in 0..x.len() {
+        res += (x[i] * b[i]).floor();
+    }
+    res
+}
+
+pub fn rastrigin(x: &[f64]) -> f64 {
+    let mut res = 10.0 * (x.len() as f64);
+    for i in 0..x.len() {
+        res += x[i] * x[i] - 10.0 * (2.0 * std::f64::consts::PI * x[i]).cos();
+    }
+    res
+}
+
+pub fn griewank(x: &[f64]) -> f64 {
+    let mut sum = 0.0;
+    let mut prod = 0.0;
+    for i in 0..x.len() {
+        sum += x[i] * x[i];
+        prod *= (x[i] / (i as f64).sqrt()).cos();
+    }
+    1.0 + (1.0/4000.0) * sum - prod
+}
+
+pub fn schwefel(x: &[f64]) -> f64 {
+    let mut sum = 0.0;
+    for i in 0..x.len() {
+        sum += x[i] * x[i].abs().sqrt().sin();
+    }
+    -sum
+}
+
 pub struct OneMaxFunc { }
 
 pub struct LabsFunc { }
@@ -68,6 +109,22 @@ pub struct SphereFunc {
 }
 
 pub struct RosenbrockFunc { }
+
+pub struct LinearFunc {
+    a: f64,
+    b: Vec<f64>
+}
+
+pub struct StepFunc {
+    a: f64,
+    b: Vec<f64>
+}
+
+pub struct RastriginFunc {}
+
+pub struct GriewankFunc {}
+
+pub struct SchwefelFunc {}
 
 impl NaiveBitFitnessFunc for OneMaxFunc {
     fn eval(&self, bits: &[u8], _: &[Bounds], _: &mut Vec<f64>) -> f64 {
@@ -104,6 +161,36 @@ impl RealFitnessFunc for SphereFunc {
 impl RealFitnessFunc for RosenbrockFunc {
     fn eval(&self, values: &[f64]) -> f64 {
         rosenbrock(values)
+    }
+}
+
+impl RealFitnessFunc for LinearFunc {
+    fn eval(&self, values: &[f64]) -> f64 {
+        linear(values, self.a, &self.b)
+    }
+}
+
+impl RealFitnessFunc for StepFunc {
+    fn eval(&self, values: &[f64]) -> f64 {
+        step(values, self.a, &self.b)
+    }
+}
+
+impl RealFitnessFunc for RastriginFunc {
+    fn eval(&self, values: &[f64]) -> f64 {
+        rastrigin(values)
+    }
+}
+
+impl RealFitnessFunc for GriewankFunc {
+    fn eval(&self, values: &[f64]) -> f64 {
+        griewank(values)
+    }
+}
+
+impl RealFitnessFunc for SchwefelFunc {
+    fn eval(&self, values: &[f64]) -> f64 {
+        schwefel(values)
     }
 }
 
