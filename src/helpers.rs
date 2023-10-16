@@ -1,10 +1,7 @@
-use rand_distr::{Normal, Distribution};
+use rand_distr::{Normal, Cauchy, Distribution};
 
-pub trait NaiveBitTerminationCond {
-    fn eval(&self, iter: usize, fitness: f64) -> bool;
-}
 
-pub trait RealTerminationCond {
+pub trait TerminationCond<T: Clone + Copy> {
     fn eval(&self, iter: usize, fitness: f64) -> bool;
 }
 
@@ -12,24 +9,20 @@ pub struct MaxIterTerminationCond {
     pub n_iters: usize
 }
 
-impl NaiveBitTerminationCond for MaxIterTerminationCond {
+impl TerminationCond<u8> for MaxIterTerminationCond {
     fn eval(&self, iter: usize, _: f64) -> bool {
         return iter >= self.n_iters;
     }
 }
 
-impl RealTerminationCond for MaxIterTerminationCond {
+impl TerminationCond<f64> for MaxIterTerminationCond {
     fn eval(&self, iter: usize, _: f64) -> bool {
         return iter >= self.n_iters;
     }
 }
 
-pub trait NaiveBitPerturbeMutOp {
-    fn eval(&self, bits: &mut [u8]);
-}
-
-pub trait PerturbeRealMutOp {
-    fn eval(&self, values: &mut [f64]);
+pub trait PerturbeMutOp<T: Clone + Copy> {
+    fn eval(&self, value: &mut [T]);
 }
 
 pub fn perturbe_mut(bits: &mut [u8], prob: f64) {
@@ -46,7 +39,7 @@ pub fn perturbe(bits: &[u8], prob: f64) -> Vec<u8> {
 
 pub struct BasicNaiveBitPerturbeMutOp {}
 
-impl NaiveBitPerturbeMutOp for BasicNaiveBitPerturbeMutOp {
+impl PerturbeMutOp<u8> for BasicNaiveBitPerturbeMutOp {
     fn eval(&self, bits: &mut [u8]) {
         perturbe_mut(bits, 1.0 / (bits.len() as f64))
     }
@@ -62,10 +55,28 @@ impl NormalPerturbeRealMutOp {
     }
 }
 
-impl PerturbeRealMutOp for NormalPerturbeRealMutOp {
+impl PerturbeMutOp<f64> for NormalPerturbeRealMutOp {
     fn eval(&self, values: &mut [f64]) {
         for value in values {
             *value = *value + self.normal.sample(&mut rand::thread_rng());
+        }
+    }
+}
+
+pub struct CauchyPerturbeRealMutOp {
+    cauchy: Cauchy<f64>
+}
+
+impl CauchyPerturbeRealMutOp {
+    pub fn new(scale: f64) -> Self {
+        CauchyPerturbeRealMutOp { cauchy: Cauchy::new(0.0, scale).unwrap() }
+    }
+}
+
+impl PerturbeMutOp<f64> for CauchyPerturbeRealMutOp {
+    fn eval(&self, values: &mut [f64]) {
+        for value in values {
+            *value = *value + self.cauchy.sample(&mut rand::thread_rng());
         }
     }
 }

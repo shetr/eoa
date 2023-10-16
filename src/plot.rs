@@ -2,6 +2,8 @@ use crate::opt::*;
 
 use plotters::prelude::*;
 
+// TODO: plotovat do svg
+
 pub fn plot(stats: &Statistics, out_name: &str, fun_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let max_fitness = stats.fitness.iter().copied().fold(f64::NEG_INFINITY, f64::max);
