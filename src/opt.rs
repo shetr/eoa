@@ -11,7 +11,7 @@ pub struct Statistics {
 }
 
 pub fn local_search<T: Clone + Copy, FitnessT : FitnessFunc<T>, PerturbeMutOpT : PerturbeMutOp<T>, TerminationCondT: TerminationCond<T>>
-    (fitness: &FitnessT, perturbe_mut_op: &PerturbeMutOpT, termination_cond: &TerminationCondT, bounds: &[Bounds], init_value: &[T])
+    (fitness: &FitnessT, mut perturbe_mut_op: PerturbeMutOpT, termination_cond: &TerminationCondT, bounds: &[Bounds], init_value: &[T])
     -> (Solution<T>, Statistics)
 {
     let mut stats = Statistics { fitness: Vec::<f64>::new() };
@@ -27,7 +27,9 @@ pub fn local_search<T: Clone + Copy, FitnessT : FitnessFunc<T>, PerturbeMutOpT :
         perturbe_mut_op.eval(&mut next_value);
         let next_fitness = fitness.eval(&next_value, bounds, &mut temp_value);
         diff = next_fitness - curr_fitness;
-        if next_fitness < curr_fitness {
+        let is_better = next_fitness < curr_fitness;
+        perturbe_mut_op.update(is_better, init_value.len());
+        if is_better {
             curr_value.copy_from_slice(&next_value);
             curr_fitness = next_fitness;
         }

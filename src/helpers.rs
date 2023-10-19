@@ -23,6 +23,8 @@ impl TerminationCond<f64> for MaxIterTerminationCond {
 
 pub trait PerturbeMutOp<T: Clone + Copy> {
     fn eval(&self, value: &mut [T]);
+
+    fn update(&mut self, is_better: bool, dim: usize) {}
 }
 
 pub fn perturbe_mut(bits: &mut [u8], prob: f64) {
@@ -60,6 +62,29 @@ impl PerturbeMutOp<f64> for NormalPerturbeRealMutOp {
         for value in values {
             *value = *value + self.normal.sample(&mut rand::thread_rng());
         }
+    }
+}
+
+pub struct NormalOneFiftPerturbeRealMutOp {
+    normal: Normal<f64>
+}
+
+impl NormalOneFiftPerturbeRealMutOp {
+    pub fn new(sigma: f64) -> Self {
+        NormalOneFiftPerturbeRealMutOp { normal: Normal::new(0.0, sigma).unwrap() }
+    }
+}
+
+impl PerturbeMutOp<f64> for NormalOneFiftPerturbeRealMutOp {
+    fn eval(&self, values: &mut [f64]) {
+        for value in values {
+            *value = *value + self.normal.sample(&mut rand::thread_rng());
+        }
+    }
+
+    fn update(&mut self, is_better: bool, dim: usize) {
+        let sigma = self.normal.std_dev() * (if is_better { 1.0 } else { 0.0 } - 0.2f64).exp().powf(1.0 / (dim as f64));
+        self.normal = Normal::new(0.0, sigma).unwrap();
     }
 }
 
