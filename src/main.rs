@@ -25,7 +25,7 @@ fn test_bin() -> Result<(), Box<dyn std::error::Error>>
         local_search(&fitness, perturbe_mut_op, &termination_cond, &bounds, &init_value);
     println!("Solution:  {:?}", solution.value);
     println!("Fitness:  {:?}", solution.fitness);
-    plot(&stats, "out.png", "Sphere")
+    plot(&stats, "out.svg", "Sphere")
 }
 
 fn test_real() -> Result<(), Box<dyn std::error::Error>>
@@ -40,7 +40,7 @@ fn test_real() -> Result<(), Box<dyn std::error::Error>>
         local_search(&fitness, perturbe_mut_op, &termination_cond, &bounds, &init_value);
     println!("Solution:  {:?}", solution.value);
     println!("Fitness:  {:?}", solution.fitness);
-    plot(&stats, "out.png", "Sphere")
+    plot(&stats, "out.svg", "Sphere")
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>>
