@@ -26,7 +26,7 @@ fn test_bin() -> Result<(), Box<dyn std::error::Error>>
     let init_value = ones;
     let init_func = InitValue { value: NaiveBitVec{ bits: Vec::from(init_value) } };
     let (solution, stats) =
-        local_search(&mut fitness, perturbe_mut_op, &termination_cond, init_func);
+        local_search(&mut fitness, init_func, perturbe_mut_op, &termination_cond);
     println!("Solution:  {:?}", solution.value.bits);
     println!("Fitness:  {:?}", solution.fitness);
     plot(&stats, "out.svg", "Sphere")
@@ -42,7 +42,7 @@ fn test_real() -> Result<(), Box<dyn std::error::Error>>
     let init_value = data;
     let init_func = InitValue { value: FloatVec{ values: Vec::from(init_value) } };
     let (solution, stats) =
-        local_search(&mut fitness, perturbe_mut_op, &termination_cond, init_func);
+        local_search(&mut fitness, init_func, perturbe_mut_op, &termination_cond);
     println!("Solution:  {:?}", solution.value.values);
     println!("Fitness:  {:?}", solution.fitness);
     plot(&stats, "out.svg", "Sphere")

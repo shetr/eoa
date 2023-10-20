@@ -1,9 +1,18 @@
 use crate::opt_traits::*;
 use crate::opt_data::*;
 
-pub fn local_search
-    <T: OptValue, FitnessT : FitnessFunc<T>, PerturbeMutOpT : PerturbeMutOp<T>, TerminationCondT: TerminationCond<T>, InitFuncT: InitFunc<T>>
-    (fitness: &mut FitnessT, mut perturbe_mut_op: PerturbeMutOpT, termination_cond: &TerminationCondT, init_func: InitFuncT)
+pub fn local_search<
+        T: OptData,
+        FitnessT : FitnessFunc<T>,
+        InitFuncT: InitFunc<T>,
+        PerturbeMutOpT : PerturbeMutOp<T>,
+        TerminationCondT: TerminationCond<T>
+    >(
+        fitness: &mut FitnessT,
+        init_func: InitFuncT,
+        mut perturbe_mut_op: PerturbeMutOpT,
+        termination_cond: &TerminationCondT
+    )
     -> (Solution<T>, Statistics)
 {
     let init_value = init_func.init();
@@ -31,3 +40,25 @@ pub fn local_search
     (Solution::<T> { value: curr_value, fitness: curr_fitness }, stats)
 }
 
+pub fn evolutionary_search<
+        T: OptData,
+        FitnessT : FitnessFunc<T>,
+        InitPopulationT: InitPopulation<T>,
+        SelectionT: Selection<T>,
+        CrossoverT: Crossover<T>,
+        PerturbeMutOpT: PerturbeMutOp<T>,
+        ReplacementStrategyT: ReplacementStrategy<T>,
+        TerminationCondT: TerminationCond<T>
+    >(
+        fitness: &mut FitnessT,
+        init_population: InitPopulationT,
+        selection: &SelectionT,
+        crossover: &CrossoverT,
+        mut perturbe_mut_op: PerturbeMutOpT,
+        replacement_strategy: ReplacementStrategyT,
+        termination_cond: &TerminationCondT
+    )
+    -> (Solution<T>, Statistics)
+{
+
+}

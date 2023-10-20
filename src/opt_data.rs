@@ -16,19 +16,19 @@ pub struct NaiveBitVec {
     pub bits: Vec<u8>
 }
 
-impl OptValue for FloatVec {
+impl OptData for FloatVec {
     fn dim(&self) -> usize {
         self.values.len()
     }
 }
 
-impl OptValue for NaiveBitVec {
+impl OptData for NaiveBitVec {
     fn dim(&self) -> usize {
         self.bits.len()
     }
 }
 
-pub struct Solution<T: OptValue> {
+pub struct Solution<T: OptData> {
     pub value: T,
     pub fitness: f64
 }
