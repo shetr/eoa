@@ -1,8 +1,48 @@
 use crate::funcs::*;
 use crate::helpers::*;
 
-pub struct Solution<T: Clone + Copy> {
-    pub value: Vec<T>,
+pub trait OptValue : Clone {
+    fn dim(&self) -> usize;
+}
+
+#[derive(Clone)]
+pub struct FloatVec {
+    pub values: Vec<f64>
+}
+
+#[derive(Clone)]
+pub struct NaiveBitVec {
+    pub bits: Vec<u8>
+}
+
+impl OptValue for FloatVec {
+    fn dim(&self) -> usize {
+        self.values.len()
+    }
+}
+
+impl OptValue for NaiveBitVec {
+    fn dim(&self) -> usize {
+        self.bits.len()
+    }
+}
+
+pub trait InitFunc<T : OptValue> {
+    fn init(&self) -> T;
+}
+
+pub struct InitValue<T : OptValue> {
+    pub value: T
+}
+
+impl<T: OptValue> InitFunc<T> for InitValue<T> {
+    fn init(&self) -> T {
+        self.value.clone()
+    }
+}
+
+pub struct Solution<T: OptValue> {
+    pub value: T,
     pub fitness: f64
 }
 
@@ -10,27 +50,28 @@ pub struct Statistics {
     pub fitness: Vec<f64>
 }
 
-pub fn local_search<T: Clone + Copy, FitnessT : FitnessFunc<T>, PerturbeMutOpT : PerturbeMutOp<T>, TerminationCondT: TerminationCond<T>>
-    (fitness: &FitnessT, mut perturbe_mut_op: PerturbeMutOpT, termination_cond: &TerminationCondT, bounds: &[Bounds], init_value: &[T])
+pub fn local_search
+    <T: OptValue, FitnessT : FitnessFunc<T>, PerturbeMutOpT : PerturbeMutOp<T>, TerminationCondT: TerminationCond<T>, InitFuncT: InitFunc<T>>
+    (fitness: &mut FitnessT, mut perturbe_mut_op: PerturbeMutOpT, termination_cond: &TerminationCondT, init_func: InitFuncT)
     -> (Solution<T>, Statistics)
 {
+    let init_value = init_func.init();
     let mut stats = Statistics { fitness: Vec::<f64>::new() };
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
-    let mut temp_value = Vec::<f64>::with_capacity(bounds.len());
-    let mut curr_value = Vec::<T>::from(init_value);
-    let mut curr_fitness = fitness.eval(&curr_value, bounds, &mut temp_value);
-    let mut next_value = Vec::<T>::from(init_value);
+    let mut curr_value = init_value.clone();
+    let mut curr_fitness = fitness.eval(&curr_value);
+    let mut next_value = init_value.clone();
     stats.fitness.push(curr_fitness);
     while !termination_cond.eval(iter, diff) {
-        next_value.copy_from_slice(&curr_value);
+        next_value.clone_from(&curr_value);
         perturbe_mut_op.eval(&mut next_value);
-        let next_fitness = fitness.eval(&next_value, bounds, &mut temp_value);
+        let next_fitness = fitness.eval(&next_value);
         diff = next_fitness - curr_fitness;
         let is_better = next_fitness < curr_fitness;
-        perturbe_mut_op.update(is_better, init_value.len());
+        perturbe_mut_op.update(is_better, init_value.dim());
         if is_better {
-            curr_value.copy_from_slice(&next_value);
+            curr_value.clone_from(&next_value);
             curr_fitness = next_fitness;
         }
         stats.fitness.push(curr_fitness);

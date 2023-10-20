@@ -14,16 +14,20 @@ fn test_bin() -> Result<(), Box<dyn std::error::Error>>
     //println!("Perturbed: {:?}", v2);
     //println!("Real: {:?}", v3);
 
-    let fitness = SphereFunc { o: vec![0.0; 2] };
+    let bounds = [Bounds { lower: 0.0, upper: 1.0 }; 2];
+    let mut fitness = NaiveBitRealFunc::new( 
+        SphereFunc { o: vec![0.0; 2] },
+        Vec::from(bounds)
+    );
     //let fitness = RosenbrockFunc {};
     let perturbe_mut_op = BasicNaiveBitPerturbeMutOp {};
     let termination_cond = MaxIterTerminationCond { n_iters: 30 };
-    let bounds = [Bounds { lower: 0.0, upper: 1.0 }; 2];
     //let bounds = [Bounds { lower: -10.0, upper: 10.0 }; 2];
     let init_value = ones;
+    let init_func = InitValue { value: NaiveBitVec{ bits: Vec::from(init_value) } };
     let (solution, stats) =
-        local_search(&fitness, perturbe_mut_op, &termination_cond, &bounds, &init_value);
-    println!("Solution:  {:?}", solution.value);
+        local_search(&mut fitness, perturbe_mut_op, &termination_cond, init_func);
+    println!("Solution:  {:?}", solution.value.bits);
     println!("Fitness:  {:?}", solution.fitness);
     plot(&stats, "out.svg", "Sphere")
 }
@@ -31,14 +35,15 @@ fn test_bin() -> Result<(), Box<dyn std::error::Error>>
 fn test_real() -> Result<(), Box<dyn std::error::Error>>
 {
     let data = [10.0; 2];
-    let fitness = SphereFunc { o: vec![0.0; 2] };
+    let mut fitness = SphereFunc { o: vec![0.0; 2] };
     let perturbe_mut_op = NormalOneFiftPerturbeRealMutOp::new(1.0);
     let termination_cond = MaxIterTerminationCond { n_iters: 100 };
     let bounds = [Bounds { lower: f64::NEG_INFINITY, upper: f64::INFINITY }; 2];
     let init_value = data;
+    let init_func = InitValue { value: FloatVec{ values: Vec::from(init_value) } };
     let (solution, stats) =
-        local_search(&fitness, perturbe_mut_op, &termination_cond, &bounds, &init_value);
-    println!("Solution:  {:?}", solution.value);
+        local_search(&mut fitness, perturbe_mut_op, &termination_cond, init_func);
+    println!("Solution:  {:?}", solution.value.values);
     println!("Fitness:  {:?}", solution.fitness);
     plot(&stats, "out.svg", "Sphere")
 }

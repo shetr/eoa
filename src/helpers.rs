@@ -1,7 +1,10 @@
+use plotters::data;
 use rand_distr::{Normal, Cauchy, Distribution};
 
+use crate::{OptValue, NaiveBitVec, FloatVec};
 
-pub trait TerminationCond<T: Clone + Copy> {
+
+pub trait TerminationCond<T: OptValue> {
     fn eval(&self, iter: usize, fitness: f64) -> bool;
 }
 
@@ -9,20 +12,20 @@ pub struct MaxIterTerminationCond {
     pub n_iters: usize
 }
 
-impl TerminationCond<u8> for MaxIterTerminationCond {
+impl TerminationCond<NaiveBitVec> for MaxIterTerminationCond {
     fn eval(&self, iter: usize, _: f64) -> bool {
         return iter >= self.n_iters;
     }
 }
 
-impl TerminationCond<f64> for MaxIterTerminationCond {
+impl TerminationCond<FloatVec> for MaxIterTerminationCond {
     fn eval(&self, iter: usize, _: f64) -> bool {
         return iter >= self.n_iters;
     }
 }
 
-pub trait PerturbeMutOp<T: Clone + Copy> {
-    fn eval(&self, value: &mut [T]);
+pub trait PerturbeMutOp<T: OptValue> {
+    fn eval(&self, data: &mut T);
 
     fn update(&mut self, is_better: bool, dim: usize) {}
 }
@@ -41,9 +44,10 @@ pub fn perturbe(bits: &[u8], prob: f64) -> Vec<u8> {
 
 pub struct BasicNaiveBitPerturbeMutOp {}
 
-impl PerturbeMutOp<u8> for BasicNaiveBitPerturbeMutOp {
-    fn eval(&self, bits: &mut [u8]) {
-        perturbe_mut(bits, 1.0 / (bits.len() as f64))
+impl PerturbeMutOp<NaiveBitVec> for BasicNaiveBitPerturbeMutOp {
+    fn eval(&self, data: &mut NaiveBitVec) {
+        let bit_count = data.bits.len() as f64;
+        perturbe_mut(&mut data.bits, 1.0 / bit_count)
     }
 }
 
@@ -57,9 +61,9 @@ impl NormalPerturbeRealMutOp {
     }
 }
 
-impl PerturbeMutOp<f64> for NormalPerturbeRealMutOp {
-    fn eval(&self, values: &mut [f64]) {
-        for value in values {
+impl PerturbeMutOp<FloatVec> for NormalPerturbeRealMutOp {
+    fn eval(&self, data: &mut FloatVec) {
+        for value in &mut data.values {
             *value = *value + self.normal.sample(&mut rand::thread_rng());
         }
     }
@@ -75,9 +79,9 @@ impl NormalOneFiftPerturbeRealMutOp {
     }
 }
 
-impl PerturbeMutOp<f64> for NormalOneFiftPerturbeRealMutOp {
-    fn eval(&self, values: &mut [f64]) {
-        for value in values {
+impl PerturbeMutOp<FloatVec> for NormalOneFiftPerturbeRealMutOp {
+    fn eval(&self, data: &mut FloatVec) {
+        for value in &mut data.values {
             *value = *value + self.normal.sample(&mut rand::thread_rng());
         }
     }
@@ -98,9 +102,9 @@ impl CauchyPerturbeRealMutOp {
     }
 }
 
-impl PerturbeMutOp<f64> for CauchyPerturbeRealMutOp {
-    fn eval(&self, values: &mut [f64]) {
-        for value in values {
+impl PerturbeMutOp<FloatVec> for CauchyPerturbeRealMutOp {
+    fn eval(&self, data: &mut FloatVec) {
+        for value in &mut data.values {
             *value = *value + self.cauchy.sample(&mut rand::thread_rng());
         }
     }
