@@ -1,54 +1,5 @@
-use crate::funcs::*;
-use crate::helpers::*;
-
-pub trait OptValue : Clone {
-    fn dim(&self) -> usize;
-}
-
-#[derive(Clone)]
-pub struct FloatVec {
-    pub values: Vec<f64>
-}
-
-#[derive(Clone)]
-pub struct NaiveBitVec {
-    pub bits: Vec<u8>
-}
-
-impl OptValue for FloatVec {
-    fn dim(&self) -> usize {
-        self.values.len()
-    }
-}
-
-impl OptValue for NaiveBitVec {
-    fn dim(&self) -> usize {
-        self.bits.len()
-    }
-}
-
-pub trait InitFunc<T : OptValue> {
-    fn init(&self) -> T;
-}
-
-pub struct InitValue<T : OptValue> {
-    pub value: T
-}
-
-impl<T: OptValue> InitFunc<T> for InitValue<T> {
-    fn init(&self) -> T {
-        self.value.clone()
-    }
-}
-
-pub struct Solution<T: OptValue> {
-    pub value: T,
-    pub fitness: f64
-}
-
-pub struct Statistics {
-    pub fitness: Vec<f64>
-}
+use crate::opt_traits::*;
+use crate::opt_data::*;
 
 pub fn local_search
     <T: OptValue, FitnessT : FitnessFunc<T>, PerturbeMutOpT : PerturbeMutOp<T>, TerminationCondT: TerminationCond<T>, InitFuncT: InitFunc<T>>

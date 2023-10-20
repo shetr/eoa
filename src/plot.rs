@@ -1,4 +1,4 @@
-use crate::opt::*;
+use crate::opt_data::*;
 
 use plotters::prelude::*;
 

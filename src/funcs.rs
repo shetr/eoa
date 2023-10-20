@@ -1,10 +1,6 @@
-use plotters::data;
-
-use crate::{helpers::*, OptValue, FloatVec, NaiveBitVec};
-
-pub trait FitnessFunc<T: OptValue> {
-    fn eval(&mut self, data: &T) -> f64;
-}
+use crate::opt_traits::*;
+use crate::opt_data::*;
+use crate::utils::*;
 
 pub fn naive_one_max(bits: &[u8]) -> i32 {
     let mut one_count: i32 = 0;
