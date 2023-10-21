@@ -3,11 +3,6 @@ pub trait OptData : Clone {
     fn dim(&self) -> usize;
 }
 
-pub struct OptDataEntry<T: OptData> {
-    pub data: T,
-    pub fitness: f64
-}
-
 pub trait FitnessFunc<T: OptData> {
     fn eval(&mut self, data: &T) -> f64;
 }
@@ -31,13 +26,13 @@ pub trait InitPopulation<T : OptData> {
 }
 
 pub trait Selection<T : OptData> {
-    fn select(population: &Vec<OptDataEntry<T>>, parents: &mut Vec<OptDataEntry<T>>);
+    fn select(&self, population: &Vec<T>, fitness: &Vec<f64>, parents: &mut Vec<T>);
 }
 
 pub trait Crossover<T : OptData> {
-    fn crossover(parents: &Vec<OptDataEntry<T>>, offsprings: &mut Vec<OptDataEntry<T>>);
+    fn crossover(&self, parents: &Vec<T>, offsprings: &mut Vec<T>);
 }
 
 pub trait ReplacementStrategy<T : OptData> {
-    fn replace(population: &mut Vec<OptDataEntry<T>>, offsprings: &Vec<OptDataEntry<T>>);
+    fn replace(&self, population: &mut Vec<T>, fitness: &mut Vec<f64>, offsprings: &Vec<T>, offsprings_fitness: &Vec<f64>);
 }
