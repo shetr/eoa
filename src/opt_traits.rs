@@ -10,7 +10,7 @@ pub trait FitnessFunc<T: OptData> {
 pub trait PerturbeMutOp<T: OptData> {
     fn eval(&self, data: &mut T);
 
-    fn update(&mut self, _is_better: bool, _dim: usize) {}
+    fn update(&mut self, _iter_diff: f64, _dim: usize) {}
 }
 
 pub trait TerminationCond<T: OptData> {

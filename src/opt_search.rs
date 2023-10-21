@@ -29,7 +29,7 @@ pub fn local_search<
         let next_fitness = fitness.eval(&next_value);
         diff = next_fitness - curr_fitness;
         let is_better = next_fitness < curr_fitness;
-        perturbe_mut_op.update(is_better, init_value.dim());
+        perturbe_mut_op.update(diff, init_value.dim());
         if is_better {
             curr_value.clone_from(&next_value);
             curr_fitness = next_fitness;
@@ -46,6 +46,17 @@ pub fn evaluate_population<T: OptData, FitnessFuncT : FitnessFunc<T>>(fitness_fu
     for value in population {
         fitness.push(fitness_func.eval(value));
     }
+}
+
+pub fn find_best(fitness: &Vec<f64>) -> usize
+{
+    let mut best_index = 0;
+    for i in 0..fitness.len() {
+        if fitness[i] < fitness[best_index] {
+            best_index = i;
+        }
+    }
+    best_index
 }
 
 fn mutate<T: OptData, PerturbeMutOpT: PerturbeMutOp<T>>(population: &mut Vec<T>, perturbe_mut_op: &PerturbeMutOpT)
@@ -83,16 +94,22 @@ pub fn evolutionary_search<
     evaluate_population(fitness_func, &population, &mut fitness);
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
-    let best_value = population[0].clone();
-    let best_fitness = 0.0;
+    let mut best_index = find_best(&fitness);
     let mut stats = Statistics { fitness: Vec::<f64>::new() };
+    stats.fitness.push(fitness[best_index]);
     while !termination_cond.eval(iter, diff) {
         selection.select(&population, &fitness, &mut parents);
         crossover.crossover(&parents, &mut offsprings);
         mutate(&mut offsprings, &perturbe_mut_op);
         evaluate_population(fitness_func, &offsprings, &mut offsprings_fitness);
-        // TODO: update perturebe op
+        let prev_best_fitness = fitness[best_index];
+        replacement_strategy.replace(&mut population, &mut fitness, &offsprings, &offsprings_fitness);
+        best_index = find_best(&fitness);
+        let curr_best_fitness = fitness[best_index];
+        diff = curr_best_fitness - prev_best_fitness;
+        perturbe_mut_op.update(diff, population[0].dim());
+        stats.fitness.push(curr_best_fitness);
         iter += 1;
     }
-    (Solution::<T> { value: best_value, fitness: best_fitness }, stats)
+    (Solution::<T> { value: population[best_index].clone(), fitness: fitness[best_index] }, stats)
 }

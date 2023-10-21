@@ -59,8 +59,8 @@ impl PerturbeMutOp<FloatVec> for NormalOneFiftPerturbeRealMutOp {
         }
     }
 
-    fn update(&mut self, is_better: bool, dim: usize) {
-        let sigma = self.normal.std_dev() * (if is_better { 1.0 } else { 0.0 } - 0.2f64).exp().powf(1.0 / (dim as f64));
+    fn update(&mut self, iter_diff: f64, dim: usize) {
+        let sigma = self.normal.std_dev() * (if iter_diff < 0.0 { 1.0 } else { 0.0 } - 0.2f64).exp().powf(1.0 / (dim as f64));
         self.normal = Normal::new(0.0, sigma).unwrap();
     }
 }
