@@ -1,4 +1,5 @@
 mod bit_array;
+mod crossover;
 mod funcs;
 mod init;
 mod opt_data;
@@ -6,11 +7,13 @@ mod opt_traits;
 mod opt_search;
 mod perturbe;
 mod plot;
+mod replacement;
 mod selection;
 mod termination;
 mod utils;
 
 pub use bit_array::*;
+pub use crossover::*;
 pub use funcs::*;
 pub use init::*;
 pub use opt_data::*;
@@ -18,6 +21,7 @@ pub use opt_traits::*;
 pub use opt_search::*;
 pub use perturbe::*;
 pub use plot::*;
+pub use replacement::*;
 pub use selection::*;
 pub use termination::*;
 pub use utils::*;
