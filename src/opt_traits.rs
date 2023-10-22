@@ -26,11 +26,11 @@ pub trait InitPopulation<T : OptData> {
 }
 
 pub trait Selection<T : OptData> {
-    fn select(&self, population: &Vec<T>, fitness: &Vec<f64>, parents: &mut Vec<T>);
+    fn select(&self, fitness: &Vec<f64>, parents_indices: &mut Vec<usize>);
 }
 
 pub trait Crossover<T : OptData> {
-    fn crossover(&self, parents: &Vec<T>, offsprings: &mut Vec<T>);
+    fn crossover(&self, population: &Vec<T>, parents_indices: &Vec<usize>, offsprings: &mut Vec<T>);
 }
 
 pub trait ReplacementStrategy<T : OptData> {

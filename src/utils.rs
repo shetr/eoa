@@ -1,4 +1,5 @@
 use crate::opt_data::*;
+use std::collections::{BinaryHeap, binary_heap::Iter};
 
 pub fn bin_to_real_mut(bits: &[u8], bounds: &[Bounds], res: &mut Vec<f64>) {
     res.clear();
@@ -29,6 +30,30 @@ pub fn bin_to_real_uniform(bits: &[u8], bounds: &[Bounds]) -> Option<Vec<f64>> {
     } else {
         None
     }
+}
+
+pub struct LimitedBinaryHeap<T: Ord> {
+    max_size: usize,
+    heap: BinaryHeap<T>
+}
+
+impl<T: Ord> LimitedBinaryHeap<T> {
+
+    pub fn new(max_size: usize) -> Self {
+        LimitedBinaryHeap { max_size: max_size, heap: BinaryHeap::new() }
+    }
+
+    pub fn push(&mut self, item: T) {
+        self.heap.push(item);
+        if self.heap.len() > self.max_size {
+            self.heap.pop();
+        }
+    }
+
+    pub fn iter(&self) -> Iter<'_, T> {
+        self.heap.iter()
+    }
+
 }
 
 #[cfg(test)]

@@ -88,7 +88,7 @@ pub fn evolutionary_search<
 {
     let mut population = init_population.init();
     let mut fitness = Vec::<f64>::with_capacity(population.len());
-    let mut parents = Vec::<T>::new();
+    let mut parents_indices = Vec::<usize>::new();
     let mut offsprings = Vec::<T>::new();
     let mut offsprings_fitness = Vec::<f64>::new();
     evaluate_population(fitness_func, &population, &mut fitness);
@@ -98,8 +98,8 @@ pub fn evolutionary_search<
     let mut stats = Statistics { fitness: Vec::<f64>::new() };
     stats.fitness.push(fitness[best_index]);
     while !termination_cond.eval(iter, diff) {
-        selection.select(&population, &fitness, &mut parents);
-        crossover.crossover(&parents, &mut offsprings);
+        selection.select(&fitness, &mut parents_indices);
+        crossover.crossover(&population, &parents_indices, &mut offsprings);
         mutate(&mut offsprings, &perturbe_mut_op);
         evaluate_population(fitness_func, &offsprings, &mut offsprings_fitness);
         let prev_best_fitness = fitness[best_index];

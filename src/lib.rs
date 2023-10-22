@@ -6,6 +6,7 @@ mod opt_traits;
 mod opt_search;
 mod perturbe;
 mod plot;
+mod selection;
 mod termination;
 mod utils;
 
@@ -17,5 +18,6 @@ pub use opt_traits::*;
 pub use opt_search::*;
 pub use perturbe::*;
 pub use plot::*;
+pub use selection::*;
 pub use termination::*;
 pub use utils::*;
