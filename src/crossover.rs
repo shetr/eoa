@@ -1,7 +1,8 @@
-use crate::{opt_traits::*, FloatVec};
+use crate::opt_traits::*;
+use crate::opt_data::*;
 use rand::Rng;
 
-struct OnePointCrossover {
+pub struct OnePointCrossover {
 }
 
 fn one_point_crossover<T : Clone>(parent1: &Vec<T>, parent2: &Vec<T>, offspring1: &mut Vec<T>, offspring2: &mut Vec<T>) {
@@ -30,6 +31,24 @@ impl Crossover<FloatVec> for OnePointCrossover {
             let mut offspring1 = FloatVec { values: Vec::new() };
             let mut offspring2 = FloatVec { values: Vec::new() };
             one_point_crossover(&parent1.values, &parent2.values, &mut offspring1.values, &mut offspring2.values);
+            offsprings.push(offspring1);
+            offsprings.push(offspring2);
+        }
+    }
+}
+
+impl Crossover<NaiveBitVec> for OnePointCrossover {
+    fn crossover(&self, population: &Vec<NaiveBitVec>, parents_indices: &Vec<usize>, offsprings: &mut Vec<NaiveBitVec>) {
+        offsprings.clear();
+        for i in (0..parents_indices.len()).step_by(2) {
+            if i + 1 >= parents_indices.len() {
+                continue;
+            }
+            let parent1 = population.get(parents_indices[i]).unwrap();
+            let parent2 = population.get(parents_indices[i + 1]).unwrap();
+            let mut offspring1 = NaiveBitVec { bits: Vec::new() };
+            let mut offspring2 = NaiveBitVec { bits: Vec::new() };
+            one_point_crossover(&parent1.bits, &parent2.bits, &mut offspring1.bits, &mut offspring2.bits);
             offsprings.push(offspring1);
             offsprings.push(offspring2);
         }
