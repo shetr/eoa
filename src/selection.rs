@@ -86,4 +86,24 @@ impl<T : OptData> Selection<T> for RandomSelection {
     }
 }
 
-// TODO: implement Roulette-wheel selection (preferably using stochastic universal sampling).
+pub struct RouletteWheelSelection {
+    select_count: usize
+}
+
+impl<T : OptData> Selection<T> for RouletteWheelSelection {
+    fn select(&self, fitness: &Vec<f64>, parents_indices: &mut Vec<usize>) {
+        parents_indices.clear();
+        let fitness_sum: f64 = fitness.iter().sum();
+        let select_step = fitness_sum / (self.select_count as f64);
+        let mut current_offset = rand::random::<f64>() * select_step;
+        let mut fitness_acc = 0f64;
+        for i in 0..fitness.len() {
+            let next_fitness_acc = fitness_acc + fitness[i];
+            while fitness_acc <= current_offset && next_fitness_acc > current_offset {
+                parents_indices.push(i);
+                current_offset += select_step;
+            }
+            fitness_acc = next_fitness_acc;
+        }
+    }
+}
