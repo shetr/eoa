@@ -10,6 +10,7 @@ mod plot;
 mod replacement;
 mod selection;
 mod termination;
+mod tsp;
 mod utils;
 
 pub use bit_array::*;
@@ -24,4 +25,5 @@ pub use plot::*;
 pub use replacement::*;
 pub use selection::*;
 pub use termination::*;
+pub use tsp::*;
 pub use utils::*;

@@ -1,0 +1,28 @@
+1) cas v poctu iteraci
+2) statistiky:
+ - co měřit
+ - jak ukladat
+ - kdy merit: 
+   - konst okamziky, napr 1, 2, 5, 10, 20, 50
+   - lepsi v okamziku zmeny
+3) statistiky f_BSF (fitness best so far), f_BSF^_ (carka nad) prumerny best so far
+ + navic muzu merit napr rozptyl nebo max a min. Pripadne statistiky v prostoru dat
+ TODO: mam blbe v implementaci, pamatovat si globalne, ne pro aktualni iteraci
+
+4) udelat tabulku, pokud nestihnu grafy
+     | f_bsf | min, max, median
+  A1 | 101,7 +- 1.3
+  A2 | 96.3 +- 6.6
+
+pouzit budget
+
+s rozptylem muzu pouzit pasovy grafy, v pythonu neco jako area plot
+nebo box plot v konkretnich intervalech (popripade violin plot - ukazuje i distribuci, nebo candle plots)
+
+u obchodniho cestujiciho se hodi i nakreslit ten samotnej graf
+
+pokud budu delat porovnani vic algoritmu
+ - udelat treba tri varianty a ty porovnat
+ - muzu optimalizovat parametry, ale neni nutnost, hlavne poznamenat jake parametry jsem pouzil
+
+opakovani u jednoho algoritmu udelat 5 az 7
