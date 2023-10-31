@@ -1,6 +1,8 @@
 use std::{mem::swap, ptr::swap_nonoverlapping};
 
 use crate::opt_traits::*;
+use crate::opt_data::*;
+use crate::crossover::*;
 use rand::Rng;
 
 #[derive(Clone)]
@@ -11,6 +13,21 @@ struct TspPermutation {
 impl OptData for TspPermutation {
     fn dim(&self) -> usize {
         self.vert_perm.len()
+    }
+}
+
+impl VecOptData<usize> for TspPermutation {
+    fn new() -> Self {
+        TspPermutation { vert_perm: Vec::new() }
+    }
+    fn with_capacity(capacity: usize) -> Self {
+        TspPermutation { vert_perm: Vec::with_capacity(capacity) }
+    }
+    fn get(&self) -> &Vec<usize> {
+        &self.vert_perm
+    }
+    fn get_mut(&mut self) -> &mut Vec<usize> {
+        &mut self.vert_perm
     }
 }
 
@@ -82,5 +99,50 @@ impl PerturbeMutOp<TspPermutation> for TspReversePerturbation {
             data.vert_perm[pos1] = data.vert_perm[pos2];
             data.vert_perm[pos2] = temp;
         }
+    }
+}
+
+fn cycle_crossover(parents: [&Vec<usize>; 2], offsprings: [&mut Vec<usize>; 2]) {
+    for i in 0..parents[0].len() {
+        for o in 0..2 {
+            offsprings[o].push(parents[o][i].clone());
+        }
+    }
+    let start_index = rand::thread_rng().gen_range(0..parents[0].len());
+    let start_vert = offsprings[0][start_index];
+    let mut current_index = start_index;
+    let mut next_vert = offsprings[1][current_index];
+    while next_vert != start_vert {
+        let temp = offsprings[0][current_index];
+        offsprings[0][current_index] = offsprings[1][current_index];
+        offsprings[1][current_index] = temp;
+        for i in 0..offsprings[0].len() {
+            if offsprings[0][i] == next_vert {
+                current_index = i;
+                break;
+            }
+        }
+        next_vert = offsprings[1][current_index];
+    }
+    let temp = offsprings[0][current_index];
+    offsprings[0][current_index] = offsprings[1][current_index];
+    offsprings[1][current_index] = temp;
+}
+
+struct TspCycleCrossover {
+}
+
+impl Crossover<TspPermutation> for TspCycleCrossover {
+    fn crossover(&self, population: &Vec<TspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<TspPermutation>) {
+        crossover_vec_data(population, parents_indices, offsprings, cycle_crossover);
+    }
+}
+
+struct TspOrderCrossover {
+}
+
+impl Crossover<TspPermutation> for TspOrderCrossover {
+    fn crossover(&self, population: &Vec<TspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<TspPermutation>) {
+        
     }
 }

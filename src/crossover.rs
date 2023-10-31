@@ -5,13 +5,11 @@ use rand::Rng;
 pub struct OnePointCrossover {
 }
 
-fn one_point_crossover<T : Clone>(parent1: &Vec<T>, parent2: &Vec<T>, offspring1: &mut Vec<T>, offspring2: &mut Vec<T>) {
-    offspring1.clear();
-    offspring2.clear();
-    let parents = [parent1, parent2];
-    let offsprings = [offspring1, offspring2];
-    let split_index = rand::thread_rng().gen_range(0..parent1.len());
-    for i in 0..parent1.len() {
+type CrossoverFun<T : Clone> = fn([&Vec<T>; 2], [&mut Vec<T>; 2]) -> ();
+
+fn one_point_crossover<T : Clone>(parents: [&Vec<T>; 2], offsprings: [&mut Vec<T>; 2]) {
+    let split_index = rand::thread_rng().gen_range(0..parents[0].len());
+    for i in 0..parents[0].len() {
         for o in 0..2 {
             let offspring_parent = if i < split_index { o } else { 1 - o } as usize;
             offsprings[o].push(parents[offspring_parent][i].clone());
@@ -19,38 +17,34 @@ fn one_point_crossover<T : Clone>(parent1: &Vec<T>, parent2: &Vec<T>, offspring1
     }
 }
 
+pub fn crossover_vec_data<T : Clone, VecOptDataT : VecOptData<T>>
+    (population: &Vec<VecOptDataT>, parents_indices: &Vec<usize>, offsprings: &mut Vec<VecOptDataT>, crossover_fun: CrossoverFun<T>)
+{
+    offsprings.clear();
+    for i in (0..parents_indices.len()).step_by(2) {
+        if i + 1 >= parents_indices.len() {
+            continue;
+        }
+        let parent1 = population.get(parents_indices[i]).unwrap();
+        let parent2 = population.get(parents_indices[i + 1]).unwrap();
+        let mut offspring1 = VecOptDataT::with_capacity(parent1.get().len());
+        let mut offspring2 = VecOptDataT::with_capacity(parent1.get().len());
+        let curr_parents = [parent1.get(), parent2.get()];
+        let curr_offsprings = [offspring1.get_mut(), offspring2.get_mut()];
+        crossover_fun(curr_parents, curr_offsprings);
+        offsprings.push(offspring1);
+        offsprings.push(offspring2);
+    }
+}
+
 impl Crossover<FloatVec> for OnePointCrossover {
     fn crossover(&self, population: &Vec<FloatVec>, parents_indices: &Vec<usize>, offsprings: &mut Vec<FloatVec>) {
-        offsprings.clear();
-        for i in (0..parents_indices.len()).step_by(2) {
-            if i + 1 >= parents_indices.len() {
-                continue;
-            }
-            let parent1 = population.get(parents_indices[i]).unwrap();
-            let parent2 = population.get(parents_indices[i + 1]).unwrap();
-            let mut offspring1 = FloatVec { values: Vec::new() };
-            let mut offspring2 = FloatVec { values: Vec::new() };
-            one_point_crossover(&parent1.values, &parent2.values, &mut offspring1.values, &mut offspring2.values);
-            offsprings.push(offspring1);
-            offsprings.push(offspring2);
-        }
+        crossover_vec_data(population, parents_indices, offsprings, one_point_crossover);
     }
 }
 
 impl Crossover<NaiveBitVec> for OnePointCrossover {
     fn crossover(&self, population: &Vec<NaiveBitVec>, parents_indices: &Vec<usize>, offsprings: &mut Vec<NaiveBitVec>) {
-        offsprings.clear();
-        for i in (0..parents_indices.len()).step_by(2) {
-            if i + 1 >= parents_indices.len() {
-                continue;
-            }
-            let parent1 = population.get(parents_indices[i]).unwrap();
-            let parent2 = population.get(parents_indices[i + 1]).unwrap();
-            let mut offspring1 = NaiveBitVec { bits: Vec::new() };
-            let mut offspring2 = NaiveBitVec { bits: Vec::new() };
-            one_point_crossover(&parent1.bits, &parent2.bits, &mut offspring1.bits, &mut offspring2.bits);
-            offsprings.push(offspring1);
-            offsprings.push(offspring2);
-        }
+        crossover_vec_data(population, parents_indices, offsprings, one_point_crossover);
     }
 }
