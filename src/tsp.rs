@@ -129,6 +129,39 @@ fn cycle_crossover(parents: [&Vec<usize>; 2], offsprings: [&mut Vec<usize>; 2]) 
     offsprings[1][current_index] = temp;
 }
 
+fn order_crossover(parents: [&Vec<usize>; 2], offsprings: [&mut Vec<usize>; 2]) {
+    for i in 0..parents[0].len() {
+        for o in 0..2 {
+            offsprings[o].push(parents[o][i].clone());
+        }
+    }
+    let from = rand::thread_rng().gen_range(0..parents[0].len());
+    let to = rand::thread_rng().gen_range(from..parents[0].len());
+    for o in 0..2 {
+        let p1 = o;
+        let p2 = 1 - p1 as usize;
+        for i in from..to {
+            offsprings[o][i] = parents[p1][i];
+        }
+        let mut p2_index = 0;
+        for i in (0..from).chain(to..parents[0].len()) {
+            let mut inside_p1 = true;
+            while inside_p1 {
+                inside_p1 = false;
+                for j in from..to {
+                    if parents[p1][j] == parents[p2][p2_index] {
+                        inside_p1 = true;
+                        p2_index += 1;
+                        break;
+                    }
+                }
+            }
+            offsprings[o][i] = parents[p2][p2_index];
+            p2_index += 1;
+        }
+    }
+}
+
 struct TspCycleCrossover {
 }
 
@@ -143,6 +176,6 @@ struct TspOrderCrossover {
 
 impl Crossover<TspPermutation> for TspOrderCrossover {
     fn crossover(&self, population: &Vec<TspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<TspPermutation>) {
-        
+        crossover_vec_data(population, parents_indices, offsprings, order_crossover);
     }
 }
