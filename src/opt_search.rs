@@ -81,7 +81,7 @@ pub fn evolutionary_search<
         selection: &SelectionT,
         crossover: &CrossoverT,
         mut perturbe_mut_op: PerturbeMutOpT,
-        replacement_strategy: ReplacementStrategyT,
+        replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT
     )
     -> (Solution<T>, Statistics)
@@ -94,6 +94,7 @@ pub fn evolutionary_search<
     evaluate_population(fitness_func, &population, &mut fitness);
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
+    // TODO: change to best in whole run, not just current iteration
     let mut best_index = find_best(&fitness);
     let mut stats = Statistics { fitness: Vec::<f64>::new() };
     stats.fitness.push(fitness[best_index]);

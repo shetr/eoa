@@ -1,4 +1,4 @@
-use std::mem::swap;
+use std::{mem::swap, ptr::swap_nonoverlapping};
 
 use crate::opt_traits::*;
 use rand::Rng;
@@ -36,10 +36,16 @@ struct TspMovePerturbation {
 impl PerturbeMutOp<TspPermutation> for TspMovePerturbation {
     fn eval(&self, data: &mut TspPermutation) {
         let move_from = rand::thread_rng().gen_range(0..data.dim());
-        let move_to = rand::thread_rng().gen_range(move_from..data.dim());
+        let move_to = rand::thread_rng().gen_range(0..data.dim());
         let vert_to_move = data.vert_perm[move_from];
-        for i in move_from..move_to {
-            data.vert_perm[i] = data.vert_perm[i+1];
+        if move_to >= move_from {
+            for i in move_from..move_to {
+                data.vert_perm[i] = data.vert_perm[i + 1];
+            }
+        } else {
+            for i in (move_to..move_from).rev() {
+                data.vert_perm[i + 1] = data.vert_perm[i];
+            }
         }
         data.vert_perm[move_to] = vert_to_move;
     }
@@ -52,6 +58,29 @@ impl PerturbeMutOp<TspPermutation> for TspSwapPerturbation {
     fn eval(&self, data: &mut TspPermutation) {
         let pos1 = rand::thread_rng().gen_range(0..data.dim());
         let pos2 = rand::thread_rng().gen_range(0..data.dim());
-        swap(&mut data.vert_perm[pos1], &mut data.vert_perm[pos2]);
+        let temp = data.vert_perm[pos1];
+        data.vert_perm[pos1] = data.vert_perm[pos2];
+        data.vert_perm[pos2] = temp;
+    }
+}
+
+struct TspReversePerturbation {
+}
+
+impl PerturbeMutOp<TspPermutation> for TspReversePerturbation {
+    fn eval(&self, data: &mut TspPermutation) {
+        let from = rand::thread_rng().gen_range(0..data.dim());
+        let mut to = rand::thread_rng().gen_range(0..data.dim());
+        if to < from {
+            to += data.dim();
+        }
+        let range_len = to - from;
+        for offset in 0..(range_len / 2) {
+            let pos1 = (from + offset) % data.dim();
+            let pos2 = (to - offset) % data.dim();
+            let temp = data.vert_perm[pos1];
+            data.vert_perm[pos1] = data.vert_perm[pos2];
+            data.vert_perm[pos2] = temp;
+        }
     }
 }

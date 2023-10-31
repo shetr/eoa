@@ -4,8 +4,8 @@ use rand::Rng;
 use std::cmp::Ordering;
 
 pub struct TournamentSelection {
-    select_count: usize,
-    rounds_count: usize
+    pub select_count: usize,
+    pub rounds_count: usize
 }
 
 impl<T : OptData> Selection<T> for TournamentSelection {

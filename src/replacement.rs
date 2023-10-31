@@ -51,7 +51,6 @@ impl<T : OptData> ReplacementStrategy<T> for TruncationReplacementStrategy {
 }
 
 // TODO: implement:
-// Truncation (join old and new population and throw away the worst individuals).
 // Turnament.
 // Roulette.
 // Rank-based.
