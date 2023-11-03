@@ -1,5 +1,3 @@
-use std::{mem::swap, ptr::swap_nonoverlapping};
-
 use crate::opt_traits::*;
 use crate::opt_data::*;
 use crate::crossover::*;
@@ -44,6 +42,37 @@ impl FitnessFunc<TspPermutation> for TspFitness {
             total_len += self.distances[data.vert_perm[(i + 1) % data.dim()] + data.vert_perm[i] * data.dim()];
         }
         total_len
+    }
+}
+
+pub struct InitTspPopulation {
+    pub size: usize,
+    pub vert_count: usize
+}
+
+impl InitPopulation<TspPermutation> for InitTspPopulation {
+    fn init(&self) -> Vec<TspPermutation> {
+        let mut population = Vec::<TspPermutation>::with_capacity(self.size);
+        let mut place_used: Vec<bool> = vec![false; self.size];
+        for _ in 0..self.size {
+            place_used.fill(false);
+            let mut vert_perm = Vec::<usize>::with_capacity(self.vert_count);
+            for i in 0..self.vert_count {
+                let mut gen_index = rand::thread_rng().gen_range(0..(self.vert_count - i));
+                for j in 0..self.vert_count {
+                    if j > gen_index {
+                        break;
+                    }
+                    if place_used[j] {
+                        gen_index += 1;
+                    }
+                }
+                place_used[gen_index] = true;
+                vert_perm.push(gen_index);
+            }
+            population.push(TspPermutation { vert_perm: vert_perm });
+        }
+        population
     }
 }
 

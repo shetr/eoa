@@ -2,6 +2,19 @@ use crate::opt_traits::*;
 use crate::opt_data::*;
 use rand::Rng;
 
+pub struct IdentityCrossover {
+
+}
+
+impl<T : OptData> Crossover<T> for IdentityCrossover {
+    fn crossover(&self, population: &Vec<T>, parents_indices: &Vec<usize>, offsprings: &mut Vec<T>) {
+        offsprings.clear();
+        for i in 0..parents_indices.len() {
+            offsprings.push(population[parents_indices[i]].clone());
+        }
+    }
+}
+
 pub struct OnePointCrossover {
 }
 

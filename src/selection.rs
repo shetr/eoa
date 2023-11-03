@@ -27,8 +27,8 @@ impl<T : OptData> Selection<T> for TournamentSelection {
 }
 
 struct ParentEntry {
-    fitness: f64,
-    index: usize
+    pub fitness: f64,
+    pub index: usize
 }
 
 impl Ord for ParentEntry {
@@ -57,7 +57,7 @@ impl PartialEq for ParentEntry {
 impl Eq for ParentEntry {}
 
 pub struct RankSelection {
-    select_count: usize
+    pub select_count: usize
 }
 
 impl<T : OptData> Selection<T> for RankSelection {
@@ -74,7 +74,7 @@ impl<T : OptData> Selection<T> for RankSelection {
 }
 
 pub struct RandomSelection {
-    select_count: usize
+    pub select_count: usize
 }
 
 impl<T : OptData> Selection<T> for RandomSelection {
@@ -87,7 +87,7 @@ impl<T : OptData> Selection<T> for RandomSelection {
 }
 
 pub struct RouletteWheelSelection {
-    select_count: usize
+    pub select_count: usize
 }
 
 impl<T : OptData> Selection<T> for RouletteWheelSelection {
