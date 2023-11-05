@@ -94,7 +94,7 @@ pub struct InitTspPopulation {
 impl InitPopulation<TspPermutation> for InitTspPopulation {
     fn init(&self) -> Vec<TspPermutation> {
         let mut population = Vec::<TspPermutation>::with_capacity(self.size);
-        let mut place_used: Vec<bool> = vec![false; self.size];
+        let mut place_used: Vec<bool> = vec![false; self.vert_count];
         for _ in 0..self.size {
             place_used.fill(false);
             let mut vert_perm = Vec::<usize>::with_capacity(self.vert_count);
