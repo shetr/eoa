@@ -70,6 +70,7 @@ pub struct Solution<T: OptData> {
     pub fitness: f64
 }
 
+#[derive(Clone)]
 pub struct Statistics {
     pub fitness: Vec<f64>
 }

@@ -1,5 +1,6 @@
 use std::mem::swap;
 
+use crate::init;
 use crate::opt_traits::*;
 use crate::opt_data::*;
 use crate::crossover::*;
@@ -86,6 +87,7 @@ impl FitnessFunc<TspPermutation> for TspFitness {
     }
 }
 
+#[derive(Clone)]
 pub struct InitTspPopulation {
     pub size: usize,
     pub vert_count: usize
@@ -117,6 +119,14 @@ impl InitPopulation<TspPermutation> for InitTspPopulation {
     }
 }
 
+impl InitFunc<TspPermutation> for InitTspPopulation {
+    fn init(&self) -> TspPermutation {
+        let population = InitPopulation::<TspPermutation>::init(self);
+        population[0].clone()
+    }
+}
+
+#[derive(Clone)]
 pub struct TspMovePerturbation {
 }
 
@@ -138,6 +148,7 @@ impl PerturbeMutOp<TspPermutation> for TspMovePerturbation {
     }
 }
 
+#[derive(Clone)]
 pub struct TspSwapPerturbation {
 }
 
@@ -151,6 +162,7 @@ impl PerturbeMutOp<TspPermutation> for TspSwapPerturbation {
     }
 }
 
+#[derive(Clone)]
 pub struct TspReversePerturbation {
 }
 
