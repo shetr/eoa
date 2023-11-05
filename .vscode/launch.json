@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "lldb",
             "request": "launch",
@@ -24,6 +25,17 @@
             "cwd": "${workspaceFolder}"
         },
         {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/target/debug/eoa.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
             "type": "lldb",
             "request": "launch",
             "name": "Debug executable 'eoa'",
@@ -35,6 +47,24 @@
                 ],
                 "filter": {
                     "name": "eoa",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'tsp_test'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=tsp_test",
+                    "--package=eoa"
+                ],
+                "filter": {
+                    "name": "tsp_test",
                     "kind": "bin"
                 }
             },

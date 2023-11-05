@@ -1,6 +1,6 @@
-use eoa::*;
+use crate::*;
 
-fn test_tsp() -> Result<(), Box<dyn std::error::Error>>
+fn test_tsp()
 {
     const VERT_COUNT: usize = 5;
     let mut fitness = TspFitness { distances: DistanceHalfMatrix::from(VERT_COUNT, vec![
@@ -27,10 +27,5 @@ fn test_tsp() -> Result<(), Box<dyn std::error::Error>>
         &termination_cond);
     println!("Solution:  {:?}", solution.value.vert_perm);
     println!("Fitness:  {:?}", solution.fitness);
-    plot(&stats, "out/tsp_test.svg", "TSP")
-}
-
-fn main() -> Result<(), Box<dyn std::error::Error>>
-{
-    test_tsp()
+    plot(&stats, "out/tsp_test.svg", "TSP").unwrap();
 }
