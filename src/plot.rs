@@ -61,8 +61,8 @@ pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &Ve
                 (0..stats[i].fitness.len()).map(|iter| (iter, stats[i].fitness[iter])),
                 colors[i].clone(),
             ))?
-            .label(fun_names[i]);
-            //.legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], color));
+            .label(fun_names[i])
+            .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], color));
     }
 
     chart
