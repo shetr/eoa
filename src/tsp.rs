@@ -93,27 +93,33 @@ pub struct InitTspPopulation {
     pub vert_count: usize
 }
 
+impl InitTspPopulation {
+    fn gen_vert_perm(&self, place_used: &mut Vec<bool>) -> Vec::<usize> {
+        place_used.fill(false);
+        let mut vert_perm = Vec::<usize>::with_capacity(self.vert_count);
+        for i in 0..self.vert_count {
+            let mut gen_index = rand::thread_rng().gen_range(0..(self.vert_count - i));
+            for j in 0..self.vert_count {
+                if j > gen_index {
+                    break;
+                }
+                if place_used[j] {
+                    gen_index += 1;
+                }
+            }
+            place_used[gen_index] = true;
+            vert_perm.push(gen_index);
+        }
+        vert_perm
+    }
+}
+
 impl InitPopulation<TspPermutation> for InitTspPopulation {
     fn init(&self) -> Vec<TspPermutation> {
         let mut population = Vec::<TspPermutation>::with_capacity(self.size);
         let mut place_used: Vec<bool> = vec![false; self.vert_count];
         for _ in 0..self.size {
-            place_used.fill(false);
-            let mut vert_perm = Vec::<usize>::with_capacity(self.vert_count);
-            for i in 0..self.vert_count {
-                let mut gen_index = rand::thread_rng().gen_range(0..(self.vert_count - i));
-                for j in 0..self.vert_count {
-                    if j > gen_index {
-                        break;
-                    }
-                    if place_used[j] {
-                        gen_index += 1;
-                    }
-                }
-                place_used[gen_index] = true;
-                vert_perm.push(gen_index);
-            }
-            population.push(TspPermutation { vert_perm: vert_perm });
+            population.push(TspPermutation { vert_perm: self.gen_vert_perm(&mut place_used) });
         }
         population
     }
@@ -121,8 +127,8 @@ impl InitPopulation<TspPermutation> for InitTspPopulation {
 
 impl InitFunc<TspPermutation> for InitTspPopulation {
     fn init(&self) -> TspPermutation {
-        let population = InitPopulation::<TspPermutation>::init(self);
-        population[0].clone()
+        let mut place_used: Vec<bool> = vec![false; self.vert_count];
+        TspPermutation { vert_perm: self.gen_vert_perm(&mut place_used) }
     }
 }
 

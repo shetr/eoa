@@ -82,7 +82,7 @@ pub fn create_comparison_graphs()
             }
             //plot(&avg_stats[s], format!("out/tsp/{}_{}.svg", method_names[s], input_file).as_str(), method_names[s]).unwrap();
         }
-        plot_multiple(&avg_stats, &method_names, &colors, format!("out/tsp/{}.svg", input_file).as_str(), input_file, opt_value).unwrap();
+        plot_multiple(&avg_stats, &method_names, &colors, format!("out/tsp/{}.svg", input_file).as_str(), input_file, opt_value.log10()).unwrap();
         
     }
 }

@@ -31,7 +31,7 @@ pub fn plot(stats: &Statistics, out_name: &str, fun_name: &str) -> Result<(), Bo
     Ok(())
 }
 
-pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &Vec<RGBColor>, out_file_name: &str, plot_name: &str, optimum: f64) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &Vec<RGBColor>, out_file_name: &str, plot_name: &str, log_optimum: f64) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max_fitness = f64::NEG_INFINITY;
     let mut min_fitness = f64::INFINITY;
@@ -39,7 +39,9 @@ pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &Ve
         max_fitness = max_fitness.max(stats[i].fitness.iter().copied().fold(f64::NEG_INFINITY, f64::max));
         min_fitness = min_fitness.min(stats[i].fitness.iter().copied().fold(f64::INFINITY, f64::min));
     }
-    min_fitness = min_fitness.min(optimum - 1.0);
+    min_fitness = min_fitness.min(log_optimum);
+    let range = max_fitness - min_fitness;
+    min_fitness -= 0.1 * range;
     let root = SVGBackend::new(out_file_name, (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
@@ -64,6 +66,14 @@ pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &Ve
             .label(fun_names[i])
             .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], color));
     }
+
+    chart
+            .draw_series(LineSeries::new(
+                (0..stats[0].fitness.len()).map(|iter| (iter, log_optimum)),
+                CYAN,
+            ))?
+            .label("optimum")
+            .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], CYAN));
 
     chart
         .configure_series_labels()
