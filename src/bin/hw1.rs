@@ -15,4 +15,5 @@ fn main()
 {
     let args = Cli::parse();
     create_comparison_graphs(args.num_rep, args.num_iters, args.pop_size);
+    create_vizualization_graphs(args.num_iters, args.pop_size);
 }

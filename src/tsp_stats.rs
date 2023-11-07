@@ -116,3 +116,36 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
         
     }
 }
+
+pub fn create_vizualization_graphs(num_iters: usize, population_size: usize)
+{
+    let input_file  = "berlin52";
+    let vert_positions = load_vert_positions(format!("data/{}.tsp", input_file).as_str());
+    let opt_vert_permutation = load_opt_permutation(format!("data/{}.opt.tour", input_file).as_str());
+    let vert_distances = vert_positions_to_distances(&vert_positions);
+    let mut fitness = TspFitness { distances: vert_distances };
+    let opt_value = fitness.eval(&opt_vert_permutation);
+    let vert_count = vert_positions.len();
+    
+    let selection = TournamentSelection { select_count: vert_count / 2, rounds_count: 8 };
+    let replacement_strategy = TruncationReplacementStrategy {};
+    let perturbation = TspMovePerturbation {};
+    let crossover = TspCycleCrossover {};
+    
+    let init_population = InitTspPopulation { size: population_size, vert_count: vert_count };
+
+    
+    let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+
+    let (solution, stats) = evolutionary_search(
+        &mut fitness, 
+        init_population.clone(),
+        &selection,
+        &crossover,
+        perturbation.clone(), 
+        &replacement_strategy,
+        &termination_cond);
+
+    plot_tsp_viz(&vert_positions, &opt_vert_permutation, "out/tsp/opt_viz.svg", "berlin52 optimum").unwrap();
+    plot_tsp_viz(&vert_positions, &solution.value, format!("out/tsp/iter{}_viz.svg", num_iters).as_str(), format!("berlin52 iter{}", num_iters).as_str()).unwrap();
+}

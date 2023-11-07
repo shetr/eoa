@@ -1,4 +1,5 @@
 use crate::opt_data::*;
+use crate::tsp::*;
 
 use plotters::prelude::*;
 
@@ -96,5 +97,37 @@ pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &[R
 
     root.present()?;
 
+    Ok(())
+}
+
+pub fn plot_tsp_viz(positions: &Vec<[f64; 2]>, perm: &TspPermutation, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
+{
+    let mut max = [f64::NEG_INFINITY; 2];
+    let mut min = [f64::INFINITY; 2];
+    for i in 0..positions.len() {
+        for d in 0..2 {
+            max[d] = max[d].max(positions[i][d]);
+            min[d] = min[d].min(positions[i][d]);
+        }
+    }
+
+
+    let root = SVGBackend::new(out_file_name, (640, 480)).into_drawing_area();
+
+    root.fill(&WHITE)?;
+
+    let mut chart = ChartBuilder::on(&root)
+        .caption(plot_name, ("sans-serif", 50))
+        .build_cartesian_2d(min[0]..max[0], min[1]..max[1])?;
+
+    let mut vertices: Vec<(f64, f64)> = (0..perm.vert_perm.len()).map(|i| {
+        (positions[perm.vert_perm[i]][0], positions[perm.vert_perm[i]][1])
+    }).collect();
+    vertices.push((positions[perm.vert_perm[0]][0], positions[perm.vert_perm[0]][1]));
+
+    chart.draw_series(std::iter::once(PathElement::new(vertices, RED)))?;
+
+    // To avoid the IO failure being ignored silently, we manually call the present function
+    root.present()?;
     Ok(())
 }

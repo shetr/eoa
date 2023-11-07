@@ -18,6 +18,20 @@ Zde jsou vysledky mereni. Je videt ze local search konverguje vyrazne pomaleji n
 ![berlin52](out/tsp/berlin52.svg)
 ![eil76](out/tsp/eil76.svg)
 
+## Vizualizace
+
+100 iteraci:
+
+![opt](out/tsp/iter100_viz.svg)
+
+3000 iteraci:
+
+![opt](out/tsp/iter3000_viz.svg)
+
+Optimum:
+
+![opt](out/tsp/opt_viz.svg)
+
 ## bonusove body
 
 +1 3x local search
