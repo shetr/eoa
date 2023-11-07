@@ -2,6 +2,17 @@ use crate::opt_data::*;
 
 use plotters::prelude::*;
 
+pub const TAB_COLORS: [RGBColor; 8] = [
+    RGBColor(4, 88, 147),
+    RGBColor(219, 97, 0),
+    RGBColor(16, 128, 16),
+    RGBColor(116, 73, 156),
+    RGBColor(0, 157, 174),
+    RGBColor(180, 12, 13),
+    RGBColor(154, 156, 7),
+    RGBColor(193, 88, 160)
+];
+
 pub fn plot(stats: &Statistics, out_name: &str, fun_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let max_fitness = stats.fitness.iter().copied().fold(f64::NEG_INFINITY, f64::max);
@@ -31,7 +42,7 @@ pub fn plot(stats: &Statistics, out_name: &str, fun_name: &str) -> Result<(), Bo
     Ok(())
 }
 
-pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &Vec<RGBColor>, out_file_name: &str, plot_name: &str, log_optimum: f64) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max_fitness = f64::NEG_INFINITY;
     let mut min_fitness = f64::INFINITY;
@@ -67,13 +78,14 @@ pub fn plot_multiple(stats: &Vec<Statistics>, fun_names: &Vec<&str>, colors: &Ve
             .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], color));
     }
 
+    let opt_color = colors[stats.len()];
     chart
             .draw_series(LineSeries::new(
                 (0..stats[0].fitness.len()).map(|iter| (iter, log_optimum)),
-                CYAN,
+                opt_color,
             ))?
             .label("optimum")
-            .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], CYAN));
+            .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], opt_color));
 
     chart
         .configure_series_labels()
