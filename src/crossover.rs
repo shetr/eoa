@@ -18,7 +18,7 @@ impl<T : OptData> Crossover<T> for IdentityCrossover {
 pub struct OnePointCrossover {
 }
 
-type CrossoverFun<T : Clone> = fn([&Vec<T>; 2], [&mut Vec<T>; 2]) -> ();
+type CrossoverFun<T> = fn([&Vec<T>; 2], [&mut Vec<T>; 2]) -> ();
 
 fn one_point_crossover<T : Clone>(parents: [&Vec<T>; 2], offsprings: [&mut Vec<T>; 2]) {
     let split_index = rand::thread_rng().gen_range(0..parents[0].len());

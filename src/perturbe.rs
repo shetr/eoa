@@ -15,6 +15,7 @@ pub fn perturbe(bits: &[u8], prob: f64) -> Vec<u8> {
     res
 }
 
+#[derive(Clone)]
 pub struct BasicNaiveBitPerturbeMutOp {}
 
 impl PerturbeMutOp<NaiveBitVec> for BasicNaiveBitPerturbeMutOp {
@@ -24,6 +25,7 @@ impl PerturbeMutOp<NaiveBitVec> for BasicNaiveBitPerturbeMutOp {
     }
 }
 
+#[derive(Clone)]
 pub struct NormalPerturbeRealMutOp {
     normal: Normal<f64>
 }
@@ -42,6 +44,7 @@ impl PerturbeMutOp<FloatVec> for NormalPerturbeRealMutOp {
     }
 }
 
+#[derive(Clone)]
 pub struct NormalOneFiftPerturbeRealMutOp {
     normal: Normal<f64>
 }
@@ -65,6 +68,7 @@ impl PerturbeMutOp<FloatVec> for NormalOneFiftPerturbeRealMutOp {
     }
 }
 
+#[derive(Clone)]
 pub struct CauchyPerturbeRealMutOp {
     cauchy: Cauchy<f64>
 }

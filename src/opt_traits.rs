@@ -7,7 +7,7 @@ pub trait FitnessFunc<T: OptData> {
     fn eval(&mut self, data: &T) -> f64;
 }
 
-pub trait PerturbeMutOp<T: OptData> {
+pub trait PerturbeMutOp<T: OptData> : Clone {
     fn eval(&self, data: &mut T);
 
     fn update(&mut self, _iter_diff: f64, _dim: usize) {}
@@ -21,7 +21,7 @@ pub trait InitFunc<T : OptData> {
     fn init(&self) -> T;
 }
 
-pub trait InitPopulation<T : OptData> {
+pub trait InitPopulation<T : OptData> : InitFunc<T> + Clone {
     fn init(&self) -> Vec<T>;
 }
 

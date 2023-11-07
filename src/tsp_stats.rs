@@ -24,6 +24,8 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
 
         let cycle_crossover = TspCycleCrossover {};
         let order_crossover = TspOrderCrossover {};
+        
+        let init_population = InitTspPopulation { size: population_size, vert_count: vert_count };
 
         let mut avg_stats = vec![
             Statistics { fitness: vec![0.0f64; num_iters]},
@@ -32,8 +34,40 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
             Statistics { fitness: vec![0.0f64; num_iters]},
             Statistics { fitness: vec![0.0f64; num_iters]}];
 
-        for rep in 0..num_repetitions {
-            let init_population = InitTspPopulation { size: population_size, vert_count: vert_count };
+        //let mut search_funs = [
+        //    EvolutionarySearchFunCall {
+        //        fitness_func: &mut fitness,
+        //        init_population: &init_population,
+        //        selection: &selection,
+        //        crossover: &cycle_crossover,
+        //        perturbe_mut_op: &move_perturbation,
+        //        replacement_strategy: &replacement_strategy,
+        //        termination_cond: &termination_cond,
+        //        search_fun: local_search_evolutionary_api
+        //    },
+        //    EvolutionarySearchFunCall {
+        //        fitness_func: &mut fitness,
+        //        init_population: &init_population,
+        //        selection: &selection,
+        //        crossover: &cycle_crossover,
+        //        perturbe_mut_op: &swap_perturbation,
+        //        replacement_strategy: &replacement_strategy,
+        //        termination_cond: &termination_cond,
+        //        search_fun: local_search_evolutionary_api
+        //    },
+        //    EvolutionarySearchFunCall {
+        //        fitness_func: &mut fitness,
+        //        init_population: &init_population,
+        //        selection: &selection,
+        //        crossover: &cycle_crossover,
+        //        perturbe_mut_op: &move_perturbation,
+        //        replacement_strategy: &replacement_strategy,
+        //        termination_cond: &termination_cond,
+        //        search_fun: local_search_evolutionary_api
+        //    }
+        //];
+        //let stats1: Statistics = search_funs[0].search();
+        for _rep in 0..num_repetitions {
 
             let (_, stats1) =
                 local_search(&mut fitness, init_population.clone(), move_perturbation.clone(), &termination_cond);

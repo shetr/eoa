@@ -40,6 +40,29 @@ pub fn local_search<
     (Solution::<T> { value: curr_value, fitness: curr_fitness }, stats)
 }
 
+pub fn local_search_evolutionary_api<
+        T: OptData,
+        FitnessFuncT : FitnessFunc<T>,
+        InitPopulationT: InitPopulation<T>,
+        SelectionT: Selection<T>,
+        CrossoverT: Crossover<T>,
+        PerturbeMutOpT: PerturbeMutOp<T>,
+        ReplacementStrategyT: ReplacementStrategy<T>,
+        TerminationCondT: TerminationCond<T>
+    >(
+        fitness_func: &mut FitnessFuncT,
+        init_population: InitPopulationT,
+        _selection: &SelectionT,
+        _crossover: &CrossoverT,
+        perturbe_mut_op: PerturbeMutOpT,
+        _replacement_strategy: &ReplacementStrategyT,
+        termination_cond: &TerminationCondT
+    )
+    -> (Solution<T>, Statistics)
+{
+    local_search(fitness_func, init_population, perturbe_mut_op, termination_cond)
+}
+
 pub fn evaluate_population<T: OptData, FitnessFuncT : FitnessFunc<T>>(fitness_func: &mut FitnessFuncT, population: &Vec<T>, fitness: &mut Vec<f64>)
 {
     fitness.clear();
@@ -86,7 +109,7 @@ pub fn evolutionary_search<
     )
     -> (Solution<T>, Statistics)
 {
-    let mut population = init_population.init();
+    let mut population = InitPopulation::init(&init_population);
     let mut fitness = Vec::<f64>::with_capacity(population.len());
     let mut parents_indices = Vec::<usize>::new();
     let mut offsprings = Vec::<T>::new();
@@ -119,4 +142,62 @@ pub fn evolutionary_search<
         iter += 1;
     }
     (Solution::<T> { value: best_value, fitness: best_fitness }, stats)
+}
+
+pub type EvolutionarySearchFun<
+    T: OptData,
+    FitnessFuncT : FitnessFunc<T>,
+    InitPopulationT: InitPopulation<T>,
+    SelectionT: Selection<T>,
+    CrossoverT: Crossover<T>,
+    PerturbeMutOpT: PerturbeMutOp<T>,
+    ReplacementStrategyT: ReplacementStrategy<T>,
+    TerminationCondT: TerminationCond<T>
+    > =
+    fn(
+        fitness_func: &mut FitnessFuncT,
+        init_population: InitPopulationT,
+        selection: &SelectionT,
+        crossover: &CrossoverT,
+        perturbe_mut_op: PerturbeMutOpT,
+        replacement_strategy: &ReplacementStrategyT,
+        termination_cond: &TerminationCondT
+    )
+    -> (Solution<T>, Statistics);
+
+pub struct EvolutionarySearchFunCall<
+    'a,
+    T: OptData,
+    FitnessFuncT : FitnessFunc<T>,
+    InitPopulationT: InitPopulation<T>,
+    SelectionT: Selection<T>,
+    CrossoverT: Crossover<T>,
+    PerturbeMutOpT: PerturbeMutOp<T>,
+    ReplacementStrategyT: ReplacementStrategy<T>,
+    TerminationCondT: TerminationCond<T>
+    > {
+    pub fitness_func: &'a mut FitnessFuncT,
+    pub init_population: &'a InitPopulationT,
+    pub selection: &'a SelectionT,
+    pub crossover: &'a CrossoverT,
+    pub perturbe_mut_op: &'a PerturbeMutOpT,
+    pub replacement_strategy: &'a ReplacementStrategyT,
+    pub termination_cond: &'a TerminationCondT,
+    pub search_fun: EvolutionarySearchFun<T, FitnessFuncT, InitPopulationT, SelectionT, CrossoverT, PerturbeMutOpT, ReplacementStrategyT, TerminationCondT>
+}
+
+impl<
+'a,
+T: OptData,
+FitnessFuncT : FitnessFunc<T>,
+InitPopulationT: InitPopulation<T>,
+SelectionT: Selection<T>,
+CrossoverT: Crossover<T>,
+PerturbeMutOpT: PerturbeMutOp<T>,
+ReplacementStrategyT: ReplacementStrategy<T>,
+TerminationCondT: TerminationCond<T>
+> EvolutionarySearchFunCall<'a, T, FitnessFuncT, InitPopulationT, SelectionT, CrossoverT, PerturbeMutOpT, ReplacementStrategyT, TerminationCondT> {
+    pub fn search(&mut self) -> Statistics {
+        (self.search_fun)(self.fitness_func, self.init_population.clone(), self.selection, self.crossover, self.perturbe_mut_op.clone(), self.replacement_strategy, self.termination_cond).1
+    }
 }

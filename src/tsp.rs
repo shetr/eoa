@@ -1,6 +1,5 @@
 use std::mem::swap;
 
-use crate::init;
 use crate::opt_traits::*;
 use crate::opt_data::*;
 use crate::crossover::*;
