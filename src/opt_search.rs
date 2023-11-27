@@ -201,3 +201,58 @@ TerminationCondT: TerminationCond<T>
         (self.search_fun)(self.fitness_func, self.init_population.clone(), self.selection, self.crossover, self.perturbe_mut_op.clone(), self.replacement_strategy, self.termination_cond).1
     }
 }
+
+
+pub fn multi_obj_evolutionary_search<
+        T: OptData,
+        MultiObjFitnessFuncT : MultiObjFitnessFunc<T>,
+        InitPopulationT: InitPopulation<T>,
+        SelectionT: Selection<T>,
+        CrossoverT: Crossover<T>,
+        PerturbeMutOpT: PerturbeMutOp<T>,
+        ReplacementStrategyT: ReplacementStrategy<T>,
+        TerminationCondT: TerminationCond<T>
+    >(
+        fitness_func: &mut MultiObjFitnessFuncT,
+        init_population: InitPopulationT,
+        selection: &SelectionT,
+        crossover: &CrossoverT,
+        mut perturbe_mut_op: PerturbeMutOpT,
+        replacement_strategy: &ReplacementStrategyT,
+        termination_cond: &TerminationCondT
+    )
+{
+    //let mut population = InitPopulation::init(&init_population);
+    //let mut fitness = Vec::<Vec<f64>>::with_capacity(population.len());
+    //let mut parents_indices = Vec::<usize>::new();
+    //let mut offsprings = Vec::<T>::new();
+    //let mut offsprings_fitness = Vec::<f64>::new();
+    //evaluate_population(fitness_func, &population, &mut fitness);
+    //let mut iter: usize = 0;
+    //let mut diff = f64::INFINITY;
+    //// TODO: change to best in whole run, not just current iteration
+    //let mut best_index = find_best(&fitness);
+    //let mut best_value = population[best_index].clone();
+    //let mut best_fitness = fitness[best_index];
+    //let mut stats = Statistics { fitness: Vec::<f64>::new() };
+    //stats.fitness.push(fitness[best_index]);
+    //while !termination_cond.eval(iter, diff) {
+    //    selection.select(&fitness, &mut parents_indices);
+    //    crossover.crossover(&population, &parents_indices, &mut offsprings);
+    //    mutate(&mut offsprings, &perturbe_mut_op);
+    //    evaluate_population(fitness_func, &offsprings, &mut offsprings_fitness);
+    //    let prev_best_fitness = fitness[best_index];
+    //    replacement_strategy.replace(&mut population, &mut fitness, &offsprings, &offsprings_fitness);
+    //    best_index = find_best(&fitness);
+    //    let curr_best_fitness = fitness[best_index];
+    //    if curr_best_fitness < best_fitness {
+    //        best_fitness = curr_best_fitness;
+    //        best_value = population[best_index].clone();
+    //    }
+    //    diff = curr_best_fitness - prev_best_fitness;
+    //    perturbe_mut_op.update(diff, population[0].dim());
+    //    stats.fitness.push(best_fitness);
+    //    iter += 1;
+    //}
+    //(Solution::<T> { value: best_value, fitness: best_fitness }, stats)
+}

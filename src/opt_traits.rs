@@ -7,6 +7,10 @@ pub trait FitnessFunc<T: OptData> {
     fn eval(&mut self, data: &T) -> f64;
 }
 
+pub trait MultiObjFitnessFunc<T: OptData> {
+    fn eval(&mut self, data: &T, out: &mut [f64]);
+}
+
 pub trait PerturbeMutOp<T: OptData> : Clone {
     fn eval(&self, data: &mut T);
 

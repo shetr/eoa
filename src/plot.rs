@@ -8,9 +8,9 @@ pub const TAB_COLORS: [RGBColor; 8] = [
     RGBColor(219, 97, 0),
     RGBColor(16, 128, 16),
     RGBColor(116, 73, 156),
-    RGBColor(0, 157, 174),
     RGBColor(180, 12, 13),
     RGBColor(154, 156, 7),
+    RGBColor(0, 157, 174),
     RGBColor(193, 88, 160)
 ];
 
