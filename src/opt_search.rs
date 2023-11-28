@@ -202,6 +202,18 @@ TerminationCondT: TerminationCond<T>
     }
 }
 
+pub fn evaluate_population_multi_obj<T: OptData, FitnessFuncT : FitnessFunc<T>>(fitness_func: &mut FitnessFuncT, population: &Vec<T>, fitness: &mut Vec<f64>)
+{
+    fitness.clear();
+    for value in population {
+        fitness.push(fitness_func.eval(value));
+    }
+}
+
+pub fn is_better()
+{
+
+}
 
 pub fn multi_obj_evolutionary_search<
         T: OptData,
