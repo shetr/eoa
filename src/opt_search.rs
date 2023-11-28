@@ -1,6 +1,7 @@
 use crate::opt_traits::*;
 use crate::opt_data::*;
 
+// TODO: generalize evolutionary search enough so we can simulate local_search by calling with specific parameters, then remove this one
 pub fn local_search<
         T: OptData,
         FitnessFuncT : FitnessFunc<T>,
@@ -89,6 +90,7 @@ fn mutate<T: OptData, PerturbeMutOpT: PerturbeMutOp<T>>(population: &mut Vec<T>,
     }
 }
 
+// TODO: maybe put it into struct where parameters are stored at construction. That would also simplify generalization for local search
 pub fn evolutionary_search<
         T: OptData,
         FitnessFuncT : FitnessFunc<T>,
@@ -202,11 +204,18 @@ TerminationCondT: TerminationCond<T>
     }
 }
 
-pub fn evaluate_population_multi_obj<T: OptData, FitnessFuncT : FitnessFunc<T>>(fitness_func: &mut FitnessFuncT, population: &Vec<T>, fitness: &mut Vec<f64>)
+pub fn evaluate_population_multi_obj<T: OptData, MultiObjFitnessFuncT : MultiObjFitnessFunc<T>>(
+    fitness_func: &mut MultiObjFitnessFuncT,
+    population: &Vec<T>,
+    fitness: &mut Vec<Vec<f64>>,
+    front: &mut Vec<usize>,
+    crowding_dist: &mut Vec<usize>,
+    front_assignment: &mut Vec<Vec<usize>>
+)
 {
-    fitness.clear();
-    for value in population {
-        fitness.push(fitness_func.eval(value));
+    fitness.resize(population.len(), Vec::<f64>::new());
+    for i in 0..population.len() {
+        fitness_func.eval(&population[i], &mut fitness[i]);
     }
 }
 

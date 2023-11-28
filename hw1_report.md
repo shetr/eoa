@@ -20,6 +20,8 @@ Zde jsou vysledky mereni. Je videt ze local search konverguje vyrazne pomaleji n
 
 ## Vizualizace
 
+Evolucni algoritmus z predchozich mereni s move perturbacnim operatorem a cycle crossoverem.
+
 100 iteraci:
 
 ![opt](out/tsp/iter100_viz.svg)
@@ -37,3 +39,5 @@ Optimum:
 +1 3x local search
 
 +1 2x evolucni algoritmus
+
++1 vizualizace
