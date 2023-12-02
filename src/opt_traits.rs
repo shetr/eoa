@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 
 pub trait OptData : Clone {
     fn dim(&self) -> usize;
@@ -5,6 +7,10 @@ pub trait OptData : Clone {
 
 pub trait GeneralFitnessFunc<T: OptData, F> {
     fn eval_general(&mut self, data: &T, out: &mut F);
+
+    fn is_better(f1: &F, f2: &F) -> Ordering;
+
+    fn eval_population(&mut self, poulation: &mut Vec<T>, fitness: &mut Vec<F>);
 }
 
 pub trait FitnessFunc<T: OptData> {
@@ -14,6 +20,17 @@ pub trait FitnessFunc<T: OptData> {
 impl<T: OptData, FitnessFuncT : FitnessFunc<T>> GeneralFitnessFunc<T, f64> for FitnessFuncT {
     fn eval_general(&mut self, data: &T, out: &mut f64) {
         *out = self.eval(data);
+    }
+
+    fn is_better(f1: &f64, f2: &f64) -> Ordering {
+        f1.total_cmp(f2)
+    }
+
+    fn eval_population(&mut self, poulation: &mut Vec<T>, fitness: &mut Vec<f64>) {
+        fitness.resize(poulation.len(), 0.0);
+        for i in 0..poulation.len() {
+            self.eval_general(&poulation[i], &mut fitness[i]);
+        }
     }
 }
 
@@ -25,25 +42,38 @@ impl<T: OptData, MultiObjFitnessFuncT : MultiObjFitnessFunc<T>> GeneralFitnessFu
     fn eval_general(&mut self, data: &T, out: &mut Vec<f64>) {
         self.eval(data, out)
     }
+
+    fn is_better(f1: &Vec<f64>, f2: &Vec<f64>) -> Ordering {
+        let mut at_least_one_better = false;
+        for i in 0..f1.len() {
+            if f1[i] > f2[i] {
+                return Ordering::Greater;
+            } else if f1[i] < f2[i] {
+                at_least_one_better = true;
+            }
+        }
+        if at_least_one_better {
+            Ordering::Less
+        } else {
+            Ordering::Equal
+        }
+    }
+
+    fn eval_population(&mut self, poulation: &mut Vec<T>, fitness: &mut Vec<Vec<f64>>) {
+        fitness.resize(poulation.len(), Vec::<f64>::new());
+        for i in 0..poulation.len() {
+            self.eval_general(&poulation[i], &mut fitness[i]);
+        }
+    }
+}
+
+trait SingleObjectiveTransformer<T: OptData, F> {
+    fn transform(&self, poulation: &Vec<T>, fitness: &Vec<F>, single_obj: &mut Vec<f64>);
 }
 
 pub trait Constraints<T: OptData> {
-    fn has_constrains(&self) -> bool { false }
+    fn has_constrains() -> bool { false }
     fn is_feasible(&self, _data: &T) -> bool { true }
-}
-
-pub struct OptDataEntry<P, T: OptData> {
-    pub data: T,
-    pub props: P
-}
-
-pub trait FitnessEvaluator<P, T: OptData> {
-    fn eval(data: &mut Vec<T>, data_entries: &mut Vec<OptDataEntry<P, T>>);
-    fn is_better(e1: &OptDataEntry<P, T>, e2: &OptDataEntry<P, T>) -> bool;
-}
-
-pub trait ConstraintFilter<T: OptData> {
-    
 }
 
 pub trait PerturbeMutOp<T: OptData> : Clone {

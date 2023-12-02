@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::opt_traits::*;
 use crate::opt_data::*;
 
@@ -119,7 +121,6 @@ pub fn evolutionary_search<
     evaluate_population(fitness_func, &population, &mut fitness);
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
-    // TODO: change to best in whole run, not just current iteration
     let mut best_index = find_best(&fitness);
     let mut best_value = population[best_index].clone();
     let mut best_fitness = fitness[best_index];
@@ -204,24 +205,43 @@ TerminationCondT: TerminationCond<T>
     }
 }
 
-pub fn evaluate_population_multi_obj<T: OptData, MultiObjFitnessFuncT : MultiObjFitnessFunc<T>>(
-    fitness_func: &mut MultiObjFitnessFuncT,
-    population: &Vec<T>,
-    fitness: &mut Vec<Vec<f64>>,
-    front: &mut Vec<usize>,
-    crowding_dist: &mut Vec<usize>,
-    front_assignment: &mut Vec<Vec<usize>>
-)
-{
-    fitness.resize(population.len(), Vec::<f64>::new());
-    for i in 0..population.len() {
-        fitness_func.eval(&population[i], &mut fitness[i]);
+fn dominates(f1: &Vec<f64>, f2: &Vec<f64>) -> Ordering {
+    let mut at_least_one_better = false;
+    for i in 0..f1.len() {
+        if f1[i] > f2[i] {
+            return Ordering::Greater;
+        } else if f1[i] < f2[i] {
+            at_least_one_better = true;
+        }
+    }
+    if at_least_one_better {
+        Ordering::Less
+    } else {
+        Ordering::Equal
     }
 }
 
-pub fn is_better()
-{
+fn eval_fronts<T: OptData>(fitness: &Vec<Vec<f64>>, front_indices: &mut Vec<usize>, front: &mut Vec<usize>) {
+    for i in 0..front_indices.len() {
+        front_indices[i] = i;
+    }
+    front_indices.sort_by(|a, b| {
+        dominates(&fitness[*a], &fitness[*b])
+    });
+    front[0] = 0;
+    for i in 1..front_indices.len() {
+        let i_curr = front_indices[i];
+        let i_prev = front_indices[i - 1];
+        if dominates(&fitness[i_prev], &fitness[i_curr]) == Ordering::Less {
+            front[i_curr] = front[i_prev] + 1;
+        } else {
+            front[i_curr] = front[i_prev];
+        }
+    }
+}
 
+fn eval_crowding_dist<T: OptData>(fitness: &Vec<Vec<f64>>, front_indices: &mut Vec<usize>, front: &Vec<usize>, crowding_dist: &mut Vec<f64>) {
+    
 }
 
 pub fn multi_obj_evolutionary_search<
@@ -243,37 +263,40 @@ pub fn multi_obj_evolutionary_search<
         termination_cond: &TerminationCondT
     )
 {
-    //let mut population = InitPopulation::init(&init_population);
-    //let mut fitness = Vec::<Vec<f64>>::with_capacity(population.len());
-    //let mut parents_indices = Vec::<usize>::new();
-    //let mut offsprings = Vec::<T>::new();
-    //let mut offsprings_fitness = Vec::<f64>::new();
-    //evaluate_population(fitness_func, &population, &mut fitness);
-    //let mut iter: usize = 0;
-    //let mut diff = f64::INFINITY;
-    //// TODO: change to best in whole run, not just current iteration
-    //let mut best_index = find_best(&fitness);
-    //let mut best_value = population[best_index].clone();
-    //let mut best_fitness = fitness[best_index];
-    //let mut stats = Statistics { fitness: Vec::<f64>::new() };
-    //stats.fitness.push(fitness[best_index]);
-    //while !termination_cond.eval(iter, diff) {
-    //    selection.select(&fitness, &mut parents_indices);
-    //    crossover.crossover(&population, &parents_indices, &mut offsprings);
-    //    mutate(&mut offsprings, &perturbe_mut_op);
-    //    evaluate_population(fitness_func, &offsprings, &mut offsprings_fitness);
-    //    let prev_best_fitness = fitness[best_index];
-    //    replacement_strategy.replace(&mut population, &mut fitness, &offsprings, &offsprings_fitness);
-    //    best_index = find_best(&fitness);
-    //    let curr_best_fitness = fitness[best_index];
-    //    if curr_best_fitness < best_fitness {
-    //        best_fitness = curr_best_fitness;
-    //        best_value = population[best_index].clone();
-    //    }
-    //    diff = curr_best_fitness - prev_best_fitness;
-    //    perturbe_mut_op.update(diff, population[0].dim());
-    //    stats.fitness.push(best_fitness);
-    //    iter += 1;
-    //}
-    //(Solution::<T> { value: best_value, fitness: best_fitness }, stats)
+    let mut population = InitPopulation::init(&init_population);
+    let mut fitness = Vec::<Vec<f64>>::with_capacity(population.len());
+    let mut front_indices = Vec::<usize>::with_capacity(population.len());
+    let mut front = Vec::<usize>::with_capacity(population.len());
+    let mut crowding_dist = Vec::<f64>::with_capacity(population.len());
+    let mut parents_indices = Vec::<usize>::new();
+    let mut offsprings = Vec::<T>::new();
+    let mut offsprings_fitness = Vec::<f64>::new();
+    fitness_func.eval_population(&mut population, &mut fitness);
+    eval_fronts(&fitness, &mut front_indices, &mut front);
+    let mut iter: usize = 0;
+    let mut diff = f64::INFINITY;
+    let mut best_index = find_best(&fitness);
+    let mut best_value = population[best_index].clone();
+    let mut best_fitness = fitness[best_index];
+    let mut stats = Statistics { fitness: Vec::<f64>::new() };
+    stats.fitness.push(fitness[best_index]);
+    while !termination_cond.eval(iter, diff) {
+        selection.select(&fitness, &mut parents_indices);
+        crossover.crossover(&population, &parents_indices, &mut offsprings);
+        mutate(&mut offsprings, &perturbe_mut_op);
+        evaluate_population(fitness_func, &offsprings, &mut offsprings_fitness);
+        let prev_best_fitness = fitness[best_index];
+        replacement_strategy.replace(&mut population, &mut fitness, &offsprings, &offsprings_fitness);
+        best_index = find_best(&fitness);
+        let curr_best_fitness = fitness[best_index];
+        if curr_best_fitness < best_fitness {
+            best_fitness = curr_best_fitness;
+            best_value = population[best_index].clone();
+        }
+        diff = curr_best_fitness - prev_best_fitness;
+        perturbe_mut_op.update(diff, population[0].dim());
+        stats.fitness.push(best_fitness);
+        iter += 1;
+    }
+    (Solution::<T> { value: best_value, fitness: best_fitness }, stats)
 }
