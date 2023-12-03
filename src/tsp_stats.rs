@@ -28,11 +28,11 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
         let init_population = InitTspPopulation { size: population_size, vert_count: vert_count };
 
         let mut avg_stats = vec![
-            Statistics { fitness: vec![0.0f64; num_iters]},
-            Statistics { fitness: vec![0.0f64; num_iters]},
-            Statistics { fitness: vec![0.0f64; num_iters]},
-            Statistics { fitness: vec![0.0f64; num_iters]},
-            Statistics { fitness: vec![0.0f64; num_iters]}];
+            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            SingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
 
         //let mut search_funs = [
         //    EvolutionarySearchFunCall {

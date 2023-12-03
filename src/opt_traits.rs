@@ -126,3 +126,14 @@ pub trait Crossover<T : OptData> {
 pub trait ReplacementStrategy<T : OptData, FIn: Fitness, FOpt: Fitness> {
     fn replace(&self, population: &mut Vec<T>, fitness_in: &mut Vec<FIn>, fitness_opt: &mut Vec<FOpt>, offsprings_from: usize);
 }
+
+pub trait Solution<T: OptData, FIn: Fitness, FOpt: Fitness> : Clone {
+    fn from_population(population: &Vec<T>, fitness_in: &Vec<FIn>, fitness_opt: &Vec<FOpt>) -> Self;
+    fn diff(&self, other: &Self) -> f64;
+    fn is_better(&self, other: &Self) -> bool;
+}
+
+pub trait Statistics<T: OptData, FIn: Fitness, FOpt: Fitness> : Clone {
+    fn new() -> Self;
+    fn report_iter(&mut self, iter: usize, population: &Vec<T>, fitness_in: &Vec<FIn>, fitness_opt: &Vec<FOpt>);
+}

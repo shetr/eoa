@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::opt_traits::*;
 
 #[derive(Debug, Copy, Clone)]
@@ -65,12 +67,70 @@ impl VecOptData<u8> for NaiveBitVec {
     }
 }
 
-pub struct Solution<T: OptData> {
+fn find_best<F: Fitness>(fitness: &Vec<F>) -> usize
+{
+    let mut best_index = 0;
+    for i in 0..fitness.len() {
+        if F::opt_cmp(&fitness[i], &fitness[best_index]) == Ordering::Less {
+            best_index = i;
+        }
+    }
+    best_index
+}
+
+#[derive(Clone)]
+pub struct SingleObjSolution<T: OptData> {
     pub value: T,
     pub fitness: f64
 }
 
+impl<T: OptData> Solution<T, f64, f64> for SingleObjSolution<T> {
+    fn from_population(population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) -> Self {
+        let best_index = find_best(fitness_opt);
+        SingleObjSolution { value: population[best_index].clone(), fitness: fitness_opt[best_index] }
+    }
+
+    fn diff(&self, other: &Self) -> f64 {
+        self.fitness - other.fitness
+    }
+
+    fn is_better(&self, other: &Self) -> bool {
+        self.fitness < other.fitness
+    }
+}
+
 #[derive(Clone)]
-pub struct Statistics {
+pub struct SingleObjStatistics {
     pub fitness: Vec<f64>
 }
+
+impl<T: OptData> Statistics<T, f64, f64> for SingleObjStatistics {
+    fn new() -> Self {
+        SingleObjStatistics { fitness: Vec::<f64>::new() }
+    }
+
+    fn report_iter(&mut self, _iter: usize, _population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {
+        let best_index = find_best(fitness_opt);
+        self.fitness.push(fitness_opt[best_index]);
+    }
+}
+
+#[derive(Clone)]
+pub struct MultiObjSolution<T: OptData> {
+    pub opt_front: Vec<T>,
+    pub fitness: Vec<Vec<f64>>
+}
+
+//impl<T: OptData> Solution<T, Vec<f64>, NSGA2Fitness> for MultiObjSolution<T> {
+//    fn from_population(population: &mut Vec<T>, fitness_in: &mut Vec<Vec<f64>>, fitness_opt: &mut Vec<NSGA2Fitness>) -> Self {
+//        
+//    }
+//
+//    fn diff(&self, other: &Self) -> f64 {
+//        
+//    }
+//
+//    fn is_better(&self, other: &Self) -> bool {
+//        
+//    }
+//}

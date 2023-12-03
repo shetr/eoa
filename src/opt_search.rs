@@ -16,10 +16,10 @@ pub fn local_search<
         mut perturbe_mut_op: PerturbeMutOpT,
         termination_cond: &TerminationCondT
     )
-    -> (Solution<T>, Statistics)
+    -> (SingleObjSolution<T>, SingleObjStatistics)
 {
     let init_value = init_func.init();
-    let mut stats = Statistics { fitness: Vec::<f64>::new() };
+    let mut stats = SingleObjStatistics { fitness: Vec::<f64>::new() };
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
     let mut curr_value = init_value.clone();
@@ -40,7 +40,7 @@ pub fn local_search<
         stats.fitness.push(curr_fitness);
         iter += 1;
     }
-    (Solution::<T> { value: curr_value, fitness: curr_fitness }, stats)
+    (SingleObjSolution::<T> { value: curr_value, fitness: curr_fitness }, stats)
 }
 
 pub fn local_search_evolutionary_api<
@@ -61,7 +61,7 @@ pub fn local_search_evolutionary_api<
         _replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT
     )
-    -> (Solution<T>, Statistics)
+    -> (SingleObjSolution<T>, SingleObjStatistics)
 {
     local_search(fitness_func, init_population, perturbe_mut_op, termination_cond)
 }
@@ -74,7 +74,7 @@ pub fn evaluate_population<T: OptData, FitnessFuncT : FitnessFunc<T>>(fitness_fu
     }
 }
 
-pub fn find_best<F: Fitness>(fitness: &Vec<F>) -> usize
+fn find_best<F: Fitness>(fitness: &Vec<F>) -> usize
 {
     let mut best_index = 0;
     for i in 0..fitness.len() {
@@ -117,7 +117,7 @@ pub fn evolutionary_search<
         replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT
     )
-    -> (Solution<T>, Statistics)
+    -> (SingleObjSolution<T>, SingleObjStatistics)
 {
     let mut population = InitPopulation::init(&init_population);
     let mut fitness = Vec::<f64>::with_capacity(population.len());
@@ -132,7 +132,7 @@ pub fn evolutionary_search<
     let mut best_index = find_best(&fitness);
     let mut best_value = population[best_index].clone();
     let mut best_fitness = fitness[best_index];
-    let mut stats = Statistics { fitness: Vec::<f64>::new() };
+    let mut stats = SingleObjStatistics { fitness: Vec::<f64>::new() };
     stats.fitness.push(fitness[best_index]);
     while !termination_cond.eval(iter, diff) {
         selection.select(&fitness, &mut parents_indices);
@@ -156,7 +156,7 @@ pub fn evolutionary_search<
         stats.fitness.push(best_fitness);
         iter += 1;
     }
-    (Solution::<T> { value: best_value, fitness: best_fitness }, stats)
+    (SingleObjSolution::<T> { value: best_value, fitness: best_fitness }, stats)
 }
 
 
@@ -280,7 +280,9 @@ pub fn general_evolutionary_search<
         PerturbeMutOpT: PerturbeMutOp<T>,
         ReplacementStrategyT: ReplacementStrategy<T, FIn, FOpt>,
         TerminationCondT: TerminationCond<T>,
-        FitnessTransformerT: FitnessTransformer<T, FIn, FOpt>
+        FitnessTransformerT: FitnessTransformer<T, FIn, FOpt>,
+        SolutionT: Solution<T, FIn, FOpt>,
+        StatisticsT: Statistics<T, FIn, FOpt>,
     >(
         fitness_func: &mut FitnessFuncT,
         init_population: InitPopulationT,
@@ -289,8 +291,9 @@ pub fn general_evolutionary_search<
         mut perturbe_mut_op: PerturbeMutOpT,
         replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT,
-        mut fitness_transformer: &FitnessTransformerT
+        mut fitness_transformer: FitnessTransformerT
     )
+    -> (SolutionT, StatisticsT)
 {
     let mut population = InitPopulation::init(&init_population);
     let mut fitness = Vec::<FIn>::with_capacity(population.len());
@@ -303,32 +306,29 @@ pub fn general_evolutionary_search<
 
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
-    let mut best_index = find_best(&opt_fitness);
-    let mut best_value = population[best_index].clone();
-    let mut best_fitness = fitness[best_index];
-    let mut stats = Statistics { fitness: Vec::<f64>::new() };
-    stats.fitness.push(fitness[best_index]);
+    let mut prev_iter_solution = SolutionT::from_population(&population, &fitness, &opt_fitness);
+    let mut best_solution = prev_iter_solution.clone();
+    let mut stats = StatisticsT::new();
     while !termination_cond.eval(iter, diff) {
         selection.select(&opt_fitness, &mut parents_indices);
         crossover.crossover(&population, &parents_indices, &mut offsprings);
         mutate(&mut offsprings, &perturbe_mut_op);
         fitness_func.eval_population(&mut offsprings, &mut offsprings_fitness);
-        let prev_best_fitness = fitness[best_index];
         let offsprings_from = population.len();
         join_populations(&mut population, &mut fitness, &mut offsprings, &mut offsprings_fitness);
         fitness_transformer.transform(&population, &fitness, &mut opt_fitness);
         replacement_strategy.replace(&mut population, &mut fitness, &mut opt_fitness, offsprings_from);
         fitness_transformer.transform(&population, &fitness, &mut opt_fitness);
-        best_index = find_best(&opt_fitness);
-        let curr_best_fitness = fitness[best_index];
-        if FIn::opt_cmp(&curr_best_fitness, &best_fitness) == Ordering::Less {
-            best_fitness = curr_best_fitness;
-            best_value = population[best_index].clone();
+        
+        let curr_solution = SolutionT::from_population(&population, &fitness, &opt_fitness);
+        diff = curr_solution.diff(&prev_iter_solution);
+        if curr_solution.is_better(&best_solution) {
+            best_solution = curr_solution.clone();
         }
-        diff = FIn::diff(&curr_best_fitness, &prev_best_fitness);
+        prev_iter_solution = curr_solution;
         perturbe_mut_op.update(diff, population[0].dim());
-        stats.fitness.push(best_fitness);
+        stats.report_iter(iter, &population, &fitness, &opt_fitness);
         iter += 1;
     }
-    (Solution::<T> { value: best_value, fitness: best_fitness }, stats)
+    (best_solution, stats)
 }

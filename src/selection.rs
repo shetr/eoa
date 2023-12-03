@@ -68,7 +68,7 @@ impl<T : OptData, F: Fitness> Selection<T, F> for RankSelection {
         parents_indices.clear();
         let mut best_queue = LimitedBinaryHeap::<ParentEntry<F>>::new(self.select_count);
         for i in 0..fitness.len() {
-            best_queue.push(ParentEntry::<F> { fitness: fitness[i], index: i });
+            best_queue.push(ParentEntry::<F> { fitness: fitness[i].clone(), index: i });
         }
         for entry in best_queue.iter() {
             parents_indices.push(entry.index);

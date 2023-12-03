@@ -21,8 +21,8 @@ impl<T : OptData, FIn: Fitness, FOpt: Fitness> ReplacementStrategy<T, FIn, FOpt>
         for i in 0..offsprings_from {
             if rand::random::<f64>() < self.select_offspring_prob {
                 population[i] = population[i + offsprings_from].clone();
-                fitness_in[i] = fitness_in[i + offsprings_from];
-                fitness_opt[i] = fitness_opt[i + offsprings_from];
+                fitness_in[i] = fitness_in[i + offsprings_from].clone();
+                fitness_opt[i] = fitness_opt[i + offsprings_from].clone();
             }
         }
         population.truncate(offsprings_from);
@@ -39,7 +39,7 @@ impl<T : OptData, FIn: Fitness, FOpt: Fitness> ReplacementStrategy<T, FIn, FOpt>
         let population_size = population.len();
         let mut next_population = Vec::<(FIn, FOpt, T)>::with_capacity(population.len());
         for i in 0..population.len() {
-            next_population.push((fitness_in[i], fitness_opt[i], population[i].clone()));
+            next_population.push((fitness_in[i].clone(), fitness_opt[i].clone(), population[i].clone()));
         }
         population.clear();
         fitness_in.clear();
