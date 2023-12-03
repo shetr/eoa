@@ -221,27 +221,69 @@ fn dominates(f1: &Vec<f64>, f2: &Vec<f64>) -> Ordering {
     }
 }
 
-fn eval_fronts<T: OptData>(fitness: &Vec<Vec<f64>>, front_indices: &mut Vec<usize>, front: &mut Vec<usize>) {
+fn eval_fronts<T: OptData>(fitness: &Vec<Vec<f64>>, front_indices: &mut Vec<usize>, front: &mut Vec<usize>, fronts_counts: &mut Vec<usize>) {
     for i in 0..front_indices.len() {
         front_indices[i] = i;
     }
     front_indices.sort_by(|a, b| {
         dominates(&fitness[*a], &fitness[*b])
     });
+    fronts_counts.clear();
     front[0] = 0;
+    fronts_counts.push(1);
     for i in 1..front_indices.len() {
         let i_curr = front_indices[i];
         let i_prev = front_indices[i - 1];
         if dominates(&fitness[i_prev], &fitness[i_curr]) == Ordering::Less {
             front[i_curr] = front[i_prev] + 1;
+            fronts_counts.push(1);
         } else {
             front[i_curr] = front[i_prev];
+            fronts_counts[front[i_prev]] += 1;
         }
     }
 }
 
-fn eval_crowding_dist<T: OptData>(fitness: &Vec<Vec<f64>>, front_indices: &mut Vec<usize>, front: &Vec<usize>, crowding_dist: &mut Vec<f64>) {
-    
+fn eval_crowding_dist<T: OptData>(fitness: &Vec<Vec<f64>>, fronts_counts: &Vec<usize>, front_indices: &Vec<usize>, crowding_dist: &mut Vec<f64>) {
+    let dim = fitness[0].len();
+    let mut front_start = 0usize;
+    let mut f_size = Vec::<f64>::with_capacity(dim);
+    for m in 0..dim {
+        let mut f_min = f64::INFINITY;
+        let mut f_max = f64::NEG_INFINITY;
+        for i in 0..fitness.len() {
+            if fitness[i][m] < f_min {
+                f_min = fitness[i][m];
+            }
+            if fitness[i][m] > f_max {
+                f_max = fitness[i][m];
+            }
+        }
+        f_size.push(f_max - f_min);
+    }
+    for front in 0..fronts_counts.len() {
+        let front_end = front_start + fronts_counts[front];
+        for i in &front_indices[front_start..front_end] {
+            crowding_dist[*i] = 0.0;
+        }
+        for m in 0..dim {
+            front_indices[front_start..front_end].sort_by(|a, b| {
+                fitness[*a][m].total_cmp(&fitness[*b][m])
+            });
+            crowding_dist[front_indices[front_start]] = f64::INFINITY;
+            crowding_dist[front_indices[front_end]] = f64::INFINITY;
+            for i in &front_indices[(front_start + 1)..(front_end - 1)] {
+                let i_prev = front_indices[i - 1];
+                let i_curr = front_indices[*i];
+                let i_next = front_indices[i + 1];
+                crowding_dist[i_curr] += (fitness[i_prev][m] - fitness[i_next][m]).abs() / f_size[m];
+            }
+        }
+        front_indices[front_start..front_end].sort_by(|a, b| {
+            crowding_dist[*a].total_cmp(&crowding_dist[*b]).reverse()
+        });
+        front_start = front_end;
+    }
 }
 
 pub fn multi_obj_evolutionary_search<
@@ -267,12 +309,14 @@ pub fn multi_obj_evolutionary_search<
     let mut fitness = Vec::<Vec<f64>>::with_capacity(population.len());
     let mut front_indices = Vec::<usize>::with_capacity(population.len());
     let mut front = Vec::<usize>::with_capacity(population.len());
+    let mut fronts_counts = Vec::<usize>::new();
     let mut crowding_dist = Vec::<f64>::with_capacity(population.len());
     let mut parents_indices = Vec::<usize>::new();
     let mut offsprings = Vec::<T>::new();
     let mut offsprings_fitness = Vec::<f64>::new();
     fitness_func.eval_population(&mut population, &mut fitness);
-    eval_fronts(&fitness, &mut front_indices, &mut front);
+    eval_fronts(&fitness, &mut front_indices, &mut front, &mut fronts_counts);
+    eval_crowding_dist(&fitness, &fronts_counts, &front_indices, &mut crowding_dist);
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
     let mut best_index = find_best(&fitness);
