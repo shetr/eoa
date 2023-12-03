@@ -79,6 +79,31 @@ fn find_best<F: Fitness>(fitness: &Vec<F>) -> usize
 }
 
 #[derive(Clone)]
+pub struct EmptySolution {}
+
+impl<T: OptData, FIn: Fitness, FOpt: Fitness> Solution<T, FIn, FOpt> for EmptySolution {
+    fn from_population(_population: &Vec<T>, _fitness_in: &Vec<FIn>, _fitness_opt: &Vec<FOpt>) -> Self {
+        EmptySolution { }
+    }
+    fn diff(&self, _other: &Self) -> f64 {
+        f64::INFINITY
+    }
+    fn is_better(&self, _other: &Self) -> bool {
+        true
+    }
+}
+
+#[derive(Clone)]
+pub struct EmptyStatistics {}
+
+impl<T: OptData, FIn: Fitness, FOpt: Fitness> Statistics<T, FIn, FOpt> for EmptyStatistics {
+    fn new() -> Self {
+        EmptyStatistics {  }
+    }
+    fn report_iter(&mut self, _iter: usize, _population: &Vec<T>, _fitness_in: &Vec<FIn>, _fitness_opt: &Vec<FOpt>) {}
+} 
+
+#[derive(Clone)]
 pub struct SingleObjSolution<T: OptData> {
     pub value: T,
     pub fitness: f64
@@ -114,23 +139,3 @@ impl<T: OptData> Statistics<T, f64, f64> for SingleObjStatistics {
         self.fitness.push(fitness_opt[best_index]);
     }
 }
-
-#[derive(Clone)]
-pub struct MultiObjSolution<T: OptData> {
-    pub opt_front: Vec<T>,
-    pub fitness: Vec<Vec<f64>>
-}
-
-//impl<T: OptData> Solution<T, Vec<f64>, NSGA2Fitness> for MultiObjSolution<T> {
-//    fn from_population(population: &mut Vec<T>, fitness_in: &mut Vec<Vec<f64>>, fitness_opt: &mut Vec<NSGA2Fitness>) -> Self {
-//        
-//    }
-//
-//    fn diff(&self, other: &Self) -> f64 {
-//        
-//    }
-//
-//    fn is_better(&self, other: &Self) -> bool {
-//        
-//    }
-//}

@@ -89,12 +89,13 @@ impl<T: OptData, MultiObjFitnessFuncT : MultiObjFitnessFunc<T>> GeneralFitnessFu
 }
 
 pub trait FitnessTransformer<T: OptData, FIn: Fitness, FOut: Fitness> {
-    fn transform(&mut self, poulation: &Vec<T>, fitness_in: &Vec<FIn>, fitness_out: &mut Vec<FOut>);
+    fn transform(&mut self, pouplation: &Vec<T>, fitness_in: &Vec<FIn>, fitness_out: &mut Vec<FOut>);
 }
 
 pub trait Constraints<T: OptData> {
     fn has_constrains() -> bool { false }
     fn is_feasible(&self, _data: &T) -> bool { true }
+    fn violations(&self, _data: &T) -> usize { 0 }
 }
 
 pub trait PerturbeMutOp<T: OptData> : Clone {
