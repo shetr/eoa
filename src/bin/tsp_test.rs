@@ -1,6 +1,6 @@
 use eoa::*;
 
-fn test_tsp()
+fn _test_tsp()
 {
     const VERT_COUNT: usize = 5;
     let mut fitness = TspFitness { distances: DistanceHalfMatrix::from(VERT_COUNT, vec![

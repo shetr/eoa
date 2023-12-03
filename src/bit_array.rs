@@ -1,11 +1,13 @@
 use std::mem;
 
+#[allow(dead_code)]
 pub struct BitArray<const BLOCK_COUNT: usize>
 {
     bit_count: usize,
     blocks: [u64; BLOCK_COUNT]
 }
 
+#[allow(dead_code)]
 pub struct BitVec
 {
     bit_count: usize,
@@ -69,6 +71,7 @@ mod tests {
 
     #[test]
     fn zero() {
+        #[allow(unused)]
         let zero = BitArray::<1>::zero(1);
     }
 }

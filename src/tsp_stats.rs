@@ -1,5 +1,3 @@
-use plotters::style::*;
-
 use crate::*;
 
 pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, population_size: usize)
@@ -124,7 +122,7 @@ pub fn create_vizualization_graphs(num_iters: usize, population_size: usize)
     let opt_vert_permutation = load_opt_permutation(format!("data/{}.opt.tour", input_file).as_str());
     let vert_distances = vert_positions_to_distances(&vert_positions);
     let mut fitness = TspFitness { distances: vert_distances };
-    let opt_value = fitness.eval(&opt_vert_permutation);
+    let _opt_value = fitness.eval(&opt_vert_permutation);
     let vert_count = vert_positions.len();
     
     let selection = TournamentSelection { select_count: vert_count / 2, rounds_count: 8 };
@@ -137,7 +135,7 @@ pub fn create_vizualization_graphs(num_iters: usize, population_size: usize)
     
     let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
 
-    let (solution, stats) = evolutionary_search(
+    let (solution, _stats) = evolutionary_search(
         &mut fitness, 
         init_population.clone(),
         &selection,

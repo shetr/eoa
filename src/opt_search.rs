@@ -176,7 +176,7 @@ impl Fitness for NSGA2Fitness {
         }
     }
 
-    fn diff(curr: &Self, prev: &Self) -> f64 {
+    fn diff(_curr: &Self, _prev: &Self) -> f64 {
         f64::INFINITY
     }
 }
@@ -188,7 +188,7 @@ struct NSGA2FitnessTransformer {
 }
 
 impl<T: OptData> FitnessTransformer<T, Vec<f64>, NSGA2Fitness> for NSGA2FitnessTransformer {
-    fn transform(&mut self, poulation: &Vec<T>, fitness_in: &Vec<Vec<f64>>, fitness_out: &mut Vec<NSGA2Fitness>) {
+    fn transform(&mut self, _poulation: &Vec<T>, fitness_in: &Vec<Vec<f64>>, fitness_out: &mut Vec<NSGA2Fitness>) {
         fitness_out.resize(fitness_in.len(), NSGA2Fitness { front: 0, crowding_dist: 0.0});
         self.eval_fronts(fitness_in, fitness_out);
         self.eval_crowding_dist(fitness_in, fitness_out);

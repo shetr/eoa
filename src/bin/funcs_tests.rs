@@ -1,5 +1,5 @@
 use eoa::*;
-use rand_distr::{Normal, Distribution};
+//use rand_distr::{Normal, Distribution};
 
 fn test_real() -> Result<(), Box<dyn std::error::Error>>
 {
@@ -7,7 +7,7 @@ fn test_real() -> Result<(), Box<dyn std::error::Error>>
     let mut fitness = SphereFunc { o: vec![0.0; 2] };
     let perturbe_mut_op = NormalOneFiftPerturbeRealMutOp::new(1.0);
     let termination_cond = MaxIterTerminationCond { n_iters: 100 };
-    let bounds = [Bounds { lower: f64::NEG_INFINITY, upper: f64::INFINITY }; 2];
+    let _bounds = [Bounds { lower: f64::NEG_INFINITY, upper: f64::INFINITY }; 2];
     let init_value = data;
     let init_func = InitValue { value: FloatVec{ values: Vec::from(init_value) } };
     let (solution, stats) =
