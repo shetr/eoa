@@ -8,64 +8,67 @@ pub struct TournamentSelection {
     pub rounds_count: usize
 }
 
-impl<T : OptData> Selection<T> for TournamentSelection {
-    fn select(&self, fitness: &Vec<f64>, parents_indices: &mut Vec<usize>) {
+impl<T : OptData, F: Fitness> Selection<T, F> for TournamentSelection {
+    fn select(&self, fitness: &Vec<F>, parents_indices: &mut Vec<usize>) {
         parents_indices.clear();
         for _ in 0..self.select_count {
-            let mut best_index = 0usize;
-            let mut best_fitness = f64::INFINITY;
+            let mut opt_best_index: Option<usize> = None;
             for _ in 0..self.rounds_count {
                 let index = rand::thread_rng().gen_range(0..fitness.len());
-                if fitness[index] < best_fitness {
-                    best_index = index;
-                    best_fitness = fitness[index];
+                if let Some(best_index) = opt_best_index {
+                    if F::opt_cmp(&fitness[index], &fitness[best_index]) == Ordering::Less {
+                        opt_best_index = Some(best_index);
+                    }
+                } else {
+                    opt_best_index = Some(index);
                 }
+                
             }
-            parents_indices.push(best_index);
+            parents_indices.push(opt_best_index.unwrap_or(0));
         }
     }
 }
 
-struct ParentEntry {
-    pub fitness: f64,
+struct ParentEntry<F: Fitness> {
+    pub fitness: F,
     pub index: usize
 }
 
-impl Ord for ParentEntry {
+impl<F: Fitness> Ord for ParentEntry<F> {
     fn cmp(&self, other: &Self) -> Ordering {
-        let fitness_equal = self.fitness == other.fitness;
-        if fitness_equal {
-            if self.fitness < other.fitness { Ordering::Less } else { Ordering::Greater }
+        let fitness_cmp = F::opt_cmp(&self.fitness, &other.fitness);
+        if fitness_cmp != Ordering::Equal {
+            fitness_cmp
         } else {
             self.index.cmp(&other.index)
         }
     }
 }
 
-impl PartialOrd for ParentEntry {
+impl<F: Fitness> PartialOrd for ParentEntry<F> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl PartialEq for ParentEntry {
+impl<F: Fitness> PartialEq for ParentEntry<F> {
     fn eq(&self, other: &Self) -> bool {
-        self.fitness == other.fitness && self.index == other.index
+        F::opt_cmp(&self.fitness, &other.fitness) == Ordering::Equal && self.index.cmp(&other.index) == Ordering::Equal
     }
 }
 
-impl Eq for ParentEntry {}
+impl<F: Fitness> Eq for ParentEntry<F> {}
 
 pub struct RankSelection {
     pub select_count: usize
 }
 
-impl<T : OptData> Selection<T> for RankSelection {
-    fn select(&self, fitness: &Vec<f64>, parents_indices: &mut Vec<usize>) {
+impl<T : OptData, F: Fitness> Selection<T, F> for RankSelection {
+    fn select(&self, fitness: &Vec<F>, parents_indices: &mut Vec<usize>) {
         parents_indices.clear();
-        let mut best_queue = LimitedBinaryHeap::<ParentEntry>::new(self.select_count);
+        let mut best_queue = LimitedBinaryHeap::<ParentEntry<F>>::new(self.select_count);
         for i in 0..fitness.len() {
-            best_queue.push(ParentEntry { fitness: fitness[i], index: i });
+            best_queue.push(ParentEntry::<F> { fitness: fitness[i], index: i });
         }
         for entry in best_queue.iter() {
             parents_indices.push(entry.index);
@@ -77,8 +80,8 @@ pub struct RandomSelection {
     pub select_count: usize
 }
 
-impl<T : OptData> Selection<T> for RandomSelection {
-    fn select(&self, fitness: &Vec<f64>, parents_indices: &mut Vec<usize>) {
+impl<T : OptData, F: Fitness> Selection<T, F> for RandomSelection {
+    fn select(&self, fitness: &Vec<F>, parents_indices: &mut Vec<usize>) {
         parents_indices.clear();
         for _ in 0..self.select_count {
             parents_indices.push(rand::thread_rng().gen_range(0..fitness.len()));
@@ -90,7 +93,7 @@ pub struct RouletteWheelSelection {
     pub select_count: usize
 }
 
-impl<T : OptData> Selection<T> for RouletteWheelSelection {
+impl<T : OptData> Selection<T, f64> for RouletteWheelSelection {
     fn select(&self, fitness: &Vec<f64>, parents_indices: &mut Vec<usize>) {
         parents_indices.clear();
         let fitness_sum: f64 = fitness.iter().sum();

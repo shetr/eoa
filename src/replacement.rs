@@ -3,49 +3,52 @@ use crate::opt_traits::*;
 pub struct GenerationalReplacementStrategy {
 }
 
-impl<T : OptData> ReplacementStrategy<T> for GenerationalReplacementStrategy {
-    fn replace(&self, population: &mut Vec<T>, fitness: &mut Vec<f64>, offsprings: &Vec<T>, offsprings_fitness: &Vec<f64>) {
-        population.clear();
-        fitness.clear();
-        population.clone_from(offsprings);
-        fitness.clone_from(offsprings_fitness);
+impl<T : OptData, FIn: Fitness, FOpt: Fitness> ReplacementStrategy<T, FIn, FOpt> for GenerationalReplacementStrategy {
+    fn replace(&self, population: &mut Vec<T>, fitness_in: &mut Vec<FIn>, fitness_opt: &mut Vec<FOpt>, offsprings_from: usize) {
+        population.drain(0..offsprings_from);
+        fitness_in.drain(0..offsprings_from);
+        fitness_opt.drain(0..offsprings_from);
     }
 }
 
+// assumes equal size of previous population and the nuber of offsprings
 pub struct RandomReplacementStrategy {
     pub select_offspring_prob: f64
 }
 
-impl<T : OptData> ReplacementStrategy<T> for RandomReplacementStrategy {
-    fn replace(&self, population: &mut Vec<T>, fitness: &mut Vec<f64>, offsprings: &Vec<T>, offsprings_fitness: &Vec<f64>) {
-        for i in 0..population.len() {
+impl<T : OptData, FIn: Fitness, FOpt: Fitness> ReplacementStrategy<T, FIn, FOpt> for RandomReplacementStrategy {
+    fn replace(&self, population: &mut Vec<T>, fitness_in: &mut Vec<FIn>, fitness_opt: &mut Vec<FOpt>, offsprings_from: usize) {
+        for i in 0..offsprings_from {
             if rand::random::<f64>() < self.select_offspring_prob {
-                population[i] = offsprings[i].clone();
-                fitness[i] = offsprings_fitness[i];
+                population[i] = population[i + offsprings_from].clone();
+                fitness_in[i] = fitness_in[i + offsprings_from];
+                fitness_opt[i] = fitness_opt[i + offsprings_from];
             }
         }
+        population.truncate(offsprings_from);
+        fitness_in.truncate(offsprings_from);
+        fitness_opt.truncate(offsprings_from);
     }
 }
 
 pub struct TruncationReplacementStrategy {
 }
 
-impl<T : OptData> ReplacementStrategy<T> for TruncationReplacementStrategy {
-    fn replace(&self, population: &mut Vec<T>, fitness: &mut Vec<f64>, offsprings: &Vec<T>, offsprings_fitness: &Vec<f64>) {
+impl<T : OptData, FIn: Fitness, FOpt: Fitness> ReplacementStrategy<T, FIn, FOpt> for TruncationReplacementStrategy {
+    fn replace(&self, population: &mut Vec<T>, fitness_in: &mut Vec<FIn>, fitness_opt: &mut Vec<FOpt>, offsprings_from: usize) {
         let population_size = population.len();
-        let mut next_population = Vec::<(f64, T)>::with_capacity(population.len() + offsprings.len());
+        let mut next_population = Vec::<(FIn, FOpt, T)>::with_capacity(population.len());
         for i in 0..population.len() {
-            next_population.push((fitness[i], population[i].clone()));
-        }
-        for i in 0..offsprings.len() {
-            next_population.push((offsprings_fitness[i], offsprings[i].clone()));
+            next_population.push((fitness_in[i], fitness_opt[i], population[i].clone()));
         }
         population.clear();
-        fitness.clear();
-        next_population.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        fitness_in.clear();
+        fitness_opt.clear();
+        next_population.sort_by(|a, b| FOpt::opt_cmp(&a.1, &b.1));
         for i in 0..population_size {
-            fitness.push(next_population[i].0.clone());
-            population.push(next_population[i].1.clone());
+            fitness_in.push(next_population[i].0.clone());
+            fitness_opt.push(next_population[i].1.clone());
+            population.push(next_population[i].2.clone());
         }
     }
 }
