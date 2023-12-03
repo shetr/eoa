@@ -67,6 +67,16 @@ impl VecOptData<u8> for NaiveBitVec {
     }
 }
 
+pub trait ConstraintsCounted<T: OptData> {
+    fn constraints_fulfilled(&self, data: &T) -> Vec<bool>;
+}
+
+impl<T: OptData, ConstraintsCountedT: ConstraintsCounted<T>> Constraints<T> for ConstraintsCountedT {
+    fn has_constrains() -> bool { true }
+    fn is_feasible(&self, data: &T) -> bool { self.constraints_fulfilled(data).iter().all(|x| *x) }
+    fn violations(&self, data: &T) -> usize { self.constraints_fulfilled(data).iter().map(|x| if *x { 0 } else { 1 }).sum() }
+}
+
 fn find_best<F: Fitness>(fitness: &Vec<F>) -> usize
 {
     let mut best_index = 0;

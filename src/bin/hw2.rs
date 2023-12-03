@@ -14,4 +14,5 @@ struct Cli {
 fn main()
 {
     let args = Cli::parse();
+    create_g_funcs_comparison_graphs(args.num_rep, args.num_iters, args.pop_size);
 }

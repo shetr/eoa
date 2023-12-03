@@ -31,14 +31,15 @@ impl Fitness for StochasticRankFitness {
     }
 }
 
-struct StochasticRankFitnessTransformer<T: OptData, ConstraintsT : Constraints<T>> {
+#[derive(Clone)]
+pub struct StochasticRankFitnessTransformer<T: OptData, ConstraintsT : Constraints<T>> {
     prob: f64,
     constraints: ConstraintsT,
     _phantom: PhantomData<T>
 }
 
 impl<T: OptData, ConstraintsT : Constraints<T>> StochasticRankFitnessTransformer<T, ConstraintsT> {
-    fn new(prob: f64, constraints: ConstraintsT) -> Self {
+    pub fn new(prob: f64, constraints: ConstraintsT) -> Self {
         StochasticRankFitnessTransformer { prob: prob, constraints: constraints, _phantom: PhantomData::<T> {} }
     }
 }

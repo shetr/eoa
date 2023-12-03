@@ -23,7 +23,8 @@ impl Fitness for NSGA2Fitness {
     }
 }
 
-struct NSGA2FitnessTransformer {
+#[derive(Clone)]
+pub struct NSGA2FitnessTransformer {
     front_indices: Vec<usize>,
     fronts_counts: Vec<usize>,
     f_size: Vec<f64>
@@ -39,7 +40,7 @@ impl<T: OptData> FitnessTransformer<T, Vec<f64>, NSGA2Fitness> for NSGA2FitnessT
 
 impl NSGA2FitnessTransformer {
 
-    fn new() -> Self {
+    pub fn new() -> Self {
         NSGA2FitnessTransformer { front_indices: Vec::<usize>::new(), fronts_counts: Vec::<usize>::new(), f_size: Vec::<f64>::new()}
     }
 

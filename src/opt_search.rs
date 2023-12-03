@@ -174,7 +174,7 @@ pub fn general_evolutionary_search<
         mut perturbe_mut_op: PerturbeMutOpT,
         replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT,
-        mut fitness_transformer: FitnessTransformerT
+        fitness_transformer: &mut FitnessTransformerT
     )
     -> (SolutionT, StatisticsT)
 {

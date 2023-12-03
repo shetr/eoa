@@ -1,6 +1,8 @@
 mod bit_array;
 mod constrained;
 mod crossover;
+mod g_funcs;
+mod g_func_stats;
 mod funcs;
 mod init;
 mod opt_data;
@@ -20,6 +22,8 @@ mod utils;
 pub use bit_array::*;
 pub use constrained::*;
 pub use crossover::*;
+pub use g_funcs::*;
+pub use g_func_stats::*;
 pub use funcs::*;
 pub use init::*;
 pub use opt_data::*;
