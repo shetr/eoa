@@ -5,11 +5,12 @@ use crate::*;
 
 pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize, population_size: usize)
 {
-    let mut g_fitnesses: Vec<Rc<dyn GFunc>> = Vec::new();
-    g_fitnesses.push(Rc::new(G06 {}));
-    g_fitnesses.push(Rc::new(G08 {}));
-    g_fitnesses.push(Rc::new(G11 {}));
-    g_fitnesses.push(Rc::new(G24 {}));
+    let g_fitnesses: Vec<Rc<dyn GFunc>> = vec![
+        Rc::new(G06 {}),
+        Rc::new(G08 {}),
+        Rc::new(G11 {}),
+        Rc::new(G24 {})
+    ];
     let method_names = vec!["constrained", "constrained2"];
     let g_names = vec!["g06", "g08", "g11", "g24"];
     let g_means = vec![50.0, 5.0, 0.0, 1.5];
