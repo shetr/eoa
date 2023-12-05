@@ -45,6 +45,28 @@ impl PerturbeMutOp<FloatVec> for NormalPerturbeRealMutOp {
 }
 
 #[derive(Clone)]
+pub struct BoundedNormalPerturbeRealMutOp {
+    normal: Normal<f64>,
+    bounds: Vec<Bounds>
+}
+
+impl BoundedNormalPerturbeRealMutOp {
+    pub fn new(sigma: f64, bounds: &Vec<Bounds>) -> Self {
+        BoundedNormalPerturbeRealMutOp { normal: Normal::new(0.0, sigma).unwrap(), bounds: bounds.clone() }
+    }
+}
+
+impl PerturbeMutOp<FloatVec> for BoundedNormalPerturbeRealMutOp {
+    fn eval(&self, data: &mut FloatVec) {
+        for i in 0..data.values.len() {
+            data.values[i] = 
+                (data.values[i] + self.normal.sample(&mut rand::thread_rng()))
+                .clamp(self.bounds[i].lower, self.bounds[i].upper);
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct NormalOneFiftPerturbeRealMutOp {
     normal: Normal<f64>
 }

@@ -14,7 +14,7 @@ pub const TAB_COLORS: [RGBColor; 8] = [
     RGBColor(193, 88, 160)
 ];
 
-pub fn plot(stats: &SingleObjStatistics, out_name: &str, fun_name: &str) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot(stats: &BSFSingleObjStatistics, out_name: &str, fun_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let max_fitness = stats.fitness.iter().copied().fold(f64::NEG_INFINITY, f64::max);
     let min_fitness = stats.fitness.iter().copied().fold(f64::INFINITY, f64::min);
@@ -43,7 +43,7 @@ pub fn plot(stats: &SingleObjStatistics, out_name: &str, fun_name: &str) -> Resu
     Ok(())
 }
 
-pub fn plot_multiple(stats: &Vec<SingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max_fitness = f64::NEG_INFINITY;
     let mut min_fitness = f64::INFINITY;

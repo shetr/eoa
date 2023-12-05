@@ -77,7 +77,7 @@ pub struct TspFitness {
 }
 
 impl FitnessFunc<TspPermutation> for TspFitness {
-    fn eval(&mut self, data: &TspPermutation) -> f64 {
+    fn eval(&self, data: &TspPermutation) -> f64 {
         let mut total_len = 0f64;
         for i in 0..data.dim() {
             total_len += self.distances.get(data.vert_perm[(i + 1) % data.dim()], data.vert_perm[i]);

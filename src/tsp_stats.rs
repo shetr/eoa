@@ -13,7 +13,7 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
         let vert_count = vert_positions.len();
         
         let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
-        let selection = TournamentSelection { select_count: vert_count / 2, rounds_count: 8 };
+        let selection = TournamentSelection { select_count: population_size / 2, rounds_count: 8 };
         let replacement_strategy = TruncationReplacementStrategy {};
         
         let move_perturbation = TspMovePerturbation {};
@@ -26,11 +26,11 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
         let init_population = InitTspPopulation { size: population_size, vert_count: vert_count };
 
         let mut avg_stats = vec![
-            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
-            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
-            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
-            SingleObjStatistics { fitness: vec![0.0f64; num_iters]},
-            SingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
 
         //let mut search_funs = [
         //    EvolutionarySearchFunCall {

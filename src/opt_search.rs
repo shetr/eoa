@@ -16,10 +16,10 @@ pub fn local_search<
         mut perturbe_mut_op: PerturbeMutOpT,
         termination_cond: &TerminationCondT
     )
-    -> (SingleObjSolution<T>, SingleObjStatistics)
+    -> (BSFSingleObjSolution<T>, BSFSingleObjStatistics)
 {
     let init_value = init_func.init();
-    let mut stats = SingleObjStatistics { fitness: Vec::<f64>::new() };
+    let mut stats = BSFSingleObjStatistics { fitness: Vec::<f64>::new() };
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
     let mut curr_value = init_value.clone();
@@ -40,7 +40,7 @@ pub fn local_search<
         stats.fitness.push(curr_fitness);
         iter += 1;
     }
-    (SingleObjSolution::<T> { value: curr_value, fitness: curr_fitness }, stats)
+    (BSFSingleObjSolution::<T> { value: curr_value, fitness: curr_fitness }, stats)
 }
 
 pub fn local_search_evolutionary_api<
@@ -61,7 +61,7 @@ pub fn local_search_evolutionary_api<
         _replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT
     )
-    -> (SingleObjSolution<T>, SingleObjStatistics)
+    -> (BSFSingleObjSolution<T>, BSFSingleObjStatistics)
 {
     local_search(fitness_func, init_population, perturbe_mut_op, termination_cond)
 }
@@ -109,7 +109,7 @@ pub fn evolutionary_search<
         replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT
     )
-    -> (SingleObjSolution<T>, SingleObjStatistics)
+    -> (BSFSingleObjSolution<T>, BSFSingleObjStatistics)
 {
     let mut population = InitPopulation::init(&init_population);
     let mut fitness = Vec::<f64>::with_capacity(population.len());
@@ -124,7 +124,7 @@ pub fn evolutionary_search<
     let mut best_index = find_best(&fitness);
     let mut best_value = population[best_index].clone();
     let mut best_fitness = fitness[best_index];
-    let mut stats = SingleObjStatistics { fitness: Vec::<f64>::new() };
+    let mut stats = BSFSingleObjStatistics { fitness: Vec::<f64>::new() };
     stats.fitness.push(fitness[best_index]);
     while !termination_cond.eval(iter, diff) {
         selection.select(&fitness, &mut parents_indices);
@@ -148,7 +148,7 @@ pub fn evolutionary_search<
         stats.fitness.push(best_fitness);
         iter += 1;
     }
-    (SingleObjSolution::<T> { value: best_value, fitness: best_fitness }, stats)
+    (BSFSingleObjSolution::<T> { value: best_value, fitness: best_fitness }, stats)
 }
 
 

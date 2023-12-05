@@ -1,5 +1,6 @@
-//use eoa::*;
+use eoa::*;
 
 fn main()
 {
+    hw2();
 }

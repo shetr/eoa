@@ -67,14 +67,14 @@ impl VecOptData<u8> for NaiveBitVec {
     }
 }
 
-pub trait ConstraintsCounted<T: OptData> {
-    fn constraints_fulfilled(&self, data: &T) -> Vec<bool>;
+pub trait ConstraintsSumed<T: OptData> {
+    fn violations(&self, data: &T) -> Vec<f64>;
 }
 
-impl<T: OptData, ConstraintsCountedT: ConstraintsCounted<T>> Constraints<T> for ConstraintsCountedT {
+impl<T: OptData, ConstraintsCountedT: ConstraintsSumed<T>> Constraints<T> for ConstraintsCountedT {
     fn has_constrains() -> bool { true }
-    fn is_feasible(&self, data: &T) -> bool { self.constraints_fulfilled(data).iter().all(|x| *x) }
-    fn violations(&self, data: &T) -> usize { self.constraints_fulfilled(data).iter().map(|x| if *x { 0 } else { 1 }).sum() }
+    fn is_feasible(&self, data: &T) -> bool { self.violations(data).iter().all(|x| *x <= 0.0) }
+    fn violations_sum(&self, data: &T) -> f64 { self.violations(data).iter().sum() }
 }
 
 fn find_best<F: Fitness>(fitness: &Vec<F>) -> usize
@@ -114,15 +114,15 @@ impl<T: OptData, FIn: Fitness, FOpt: Fitness> Statistics<T, FIn, FOpt> for Empty
 } 
 
 #[derive(Clone)]
-pub struct SingleObjSolution<T: OptData> {
+pub struct BSFSingleObjSolution<T: OptData> {
     pub value: T,
     pub fitness: f64
 }
 
-impl<T: OptData> Solution<T, f64, f64> for SingleObjSolution<T> {
+impl<T: OptData> Solution<T, f64, f64> for BSFSingleObjSolution<T> {
     fn from_population(population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) -> Self {
         let best_index = find_best(fitness_opt);
-        SingleObjSolution { value: population[best_index].clone(), fitness: fitness_opt[best_index] }
+        BSFSingleObjSolution { value: population[best_index].clone(), fitness: fitness_opt[best_index] }
     }
 
     fn diff(&self, other: &Self) -> f64 {
@@ -135,13 +135,35 @@ impl<T: OptData> Solution<T, f64, f64> for SingleObjSolution<T> {
 }
 
 #[derive(Clone)]
-pub struct SingleObjStatistics {
+pub struct BSFSingleObjStatistics {
     pub fitness: Vec<f64>
 }
 
-impl<T: OptData> Statistics<T, f64, f64> for SingleObjStatistics {
+impl<T: OptData> Statistics<T, f64, f64> for BSFSingleObjStatistics {
     fn new() -> Self {
-        SingleObjStatistics { fitness: Vec::<f64>::new() }
+        BSFSingleObjStatistics { fitness: Vec::<f64>::new() }
+    }
+
+    fn report_iter(&mut self, _iter: usize, _population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {
+        let best_index = find_best(fitness_opt);
+        let mut curr_fitness = fitness_opt[best_index];
+        if let Some(last) = self.fitness.last() {
+            if *last < curr_fitness {
+                curr_fitness = *last;
+            }
+        }
+        self.fitness.push(curr_fitness);
+    }
+}
+
+#[derive(Clone)]
+pub struct IterSingleObjStatistics {
+    pub fitness: Vec<f64>
+}
+
+impl<T: OptData> Statistics<T, f64, f64> for IterSingleObjStatistics {
+    fn new() -> Self {
+        IterSingleObjStatistics { fitness: Vec::<f64>::new() }
     }
 
     fn report_iter(&mut self, _iter: usize, _population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {

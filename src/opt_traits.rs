@@ -49,17 +49,17 @@ impl Fitness for Vec<f64> {
 }
 
 pub trait GeneralFitnessFunc<T: OptData, F: Fitness> {
-    fn eval_general(&mut self, data: &T, out: &mut F);
+    fn eval_general(&self, data: &T, out: &mut F);
 
     fn eval_population(&mut self, poulation: &mut Vec<T>, fitness: &mut Vec<F>);
 }
 
 pub trait FitnessFunc<T: OptData> {
-    fn eval(&mut self, data: &T) -> f64;
+    fn eval(&self, data: &T) -> f64;
 }
 
 impl<T: OptData, FitnessFuncT : FitnessFunc<T>> GeneralFitnessFunc<T, f64> for FitnessFuncT {
-    fn eval_general(&mut self, data: &T, out: &mut f64) {
+    fn eval_general(&self, data: &T, out: &mut f64) {
         *out = self.eval(data);
     }
 
@@ -72,11 +72,11 @@ impl<T: OptData, FitnessFuncT : FitnessFunc<T>> GeneralFitnessFunc<T, f64> for F
 }
 
 pub trait MultiObjFitnessFunc<T: OptData> : GeneralFitnessFunc<T, Vec<f64>> {
-    fn eval(&mut self, data: &T, out: &mut Vec<f64>);
+    fn eval(&self, data: &T, out: &mut Vec<f64>);
 }
 
 impl<T: OptData, MultiObjFitnessFuncT : MultiObjFitnessFunc<T>> GeneralFitnessFunc<T, Vec<f64>> for MultiObjFitnessFuncT {
-    fn eval_general(&mut self, data: &T, out: &mut Vec<f64>) {
+    fn eval_general(&self, data: &T, out: &mut Vec<f64>) {
         self.eval(data, out)
     }
 
@@ -95,7 +95,7 @@ pub trait FitnessTransformer<T: OptData, FIn: Fitness, FOut: Fitness> {
 pub trait Constraints<T: OptData> {
     fn has_constrains() -> bool { false }
     fn is_feasible(&self, _data: &T) -> bool { true }
-    fn violations(&self, _data: &T) -> usize { 0 }
+    fn violations_sum(&self, _data: &T) -> f64 { 0.0 }
 }
 
 pub trait PerturbeMutOp<T: OptData> : Clone {

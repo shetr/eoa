@@ -35,8 +35,7 @@ pub struct TruncationReplacementStrategy {
 }
 
 impl<T : OptData, FIn: Fitness, FOpt: Fitness> ReplacementStrategy<T, FIn, FOpt> for TruncationReplacementStrategy {
-    fn replace(&self, population: &mut Vec<T>, fitness_in: &mut Vec<FIn>, fitness_opt: &mut Vec<FOpt>, _offsprings_from: usize) {
-        let population_size = population.len();
+    fn replace(&self, population: &mut Vec<T>, fitness_in: &mut Vec<FIn>, fitness_opt: &mut Vec<FOpt>, offsprings_from: usize) {
         let mut next_population = Vec::<(FIn, FOpt, T)>::with_capacity(population.len());
         for i in 0..population.len() {
             next_population.push((fitness_in[i].clone(), fitness_opt[i].clone(), population[i].clone()));
@@ -45,7 +44,7 @@ impl<T : OptData, FIn: Fitness, FOpt: Fitness> ReplacementStrategy<T, FIn, FOpt>
         fitness_in.clear();
         fitness_opt.clear();
         next_population.sort_by(|a, b| FOpt::opt_cmp(&a.1, &b.1));
-        for i in 0..population_size {
+        for i in 0..offsprings_from {
             fitness_in.push(next_population[i].0.clone());
             fitness_opt.push(next_population[i].1.clone());
             population.push(next_population[i].2.clone());

@@ -1,3 +1,4 @@
+mod bins;
 mod bit_array;
 mod constrained;
 mod crossover;
@@ -19,6 +20,7 @@ mod tsp_utils;
 mod tsp;
 mod utils;
 
+pub use bins::*;
 pub use bit_array::*;
 pub use constrained::*;
 pub use crossover::*;

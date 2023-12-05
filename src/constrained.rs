@@ -1,19 +1,17 @@
 use std::{cmp::Ordering, marker::PhantomData};
 
-use plotters::element::PointCollection;
-
 use crate::*;
 
 #[derive(Clone)]
 pub struct StochasticRankFitness {
     pub fitness: f64,
-    pub violations: usize,
+    pub violations: f64,
     pub prob: f64
 }
 
 impl Fitness for StochasticRankFitness {
     fn opt_cmp(f1: &Self, f2: &Self) -> Ordering {
-        let both_feasible = f1.violations == 0 && f2.violations == 0;
+        let both_feasible = f1.violations <= 0.0 && f2.violations <= 0.0;
         let fitness_cmp = f1.fitness.total_cmp(&f2.fitness);
         if both_feasible {
             fitness_cmp
@@ -21,7 +19,7 @@ impl Fitness for StochasticRankFitness {
             if rand::random::<f64>() < f1.prob {
                 fitness_cmp
             } else {
-                f1.violations.cmp(&f2.violations)
+                f1.violations.total_cmp(&f2.violations)
             }
         }
     }
@@ -47,10 +45,10 @@ impl<T: OptData, ConstraintsT : Constraints<T>> StochasticRankFitnessTransformer
 impl<T: OptData, ConstraintsT : Constraints<T>> FitnessTransformer<T, f64, StochasticRankFitness> for StochasticRankFitnessTransformer<T, ConstraintsT> {
     
     fn transform(&mut self, pouplation: &Vec<T>, fitness_in: &Vec<f64>, fitness_out: &mut Vec<StochasticRankFitness>) {
-        fitness_out.resize(fitness_in.len(), StochasticRankFitness { fitness: 0.0, violations: 0, prob: self.prob});
+        fitness_out.resize(fitness_in.len(), StochasticRankFitness { fitness: 0.0, violations: 0.0, prob: self.prob});
         for i in 0..pouplation.len() {
             fitness_out[i].fitness = fitness_in[i];
-            fitness_out[i].violations = self.constraints.violations(&pouplation[i]);
+            fitness_out[i].violations = self.constraints.violations_sum(&pouplation[i]);
         }
     }
 }
@@ -58,7 +56,8 @@ impl<T: OptData, ConstraintsT : Constraints<T>> FitnessTransformer<T, f64, Stoch
 #[derive(Clone)]
 pub struct StochasticRankSolution<T: OptData> {
     pub data: T,
-    pub fitness: f64
+    pub fitness: f64,
+    pub violations: f64
 }
 
 impl<T: OptData> Solution<T, f64, StochasticRankFitness> for StochasticRankSolution<T> {
@@ -73,7 +72,7 @@ impl<T: OptData> Solution<T, f64, StochasticRankFitness> for StochasticRankSolut
                 }
             }
         }
-        StochasticRankSolution { data: population[best_index].clone(), fitness: fitness_in[best_index] }
+        StochasticRankSolution { data: population[best_index].clone(), fitness: fitness_in[best_index], violations: fitness_opt[best_index].violations }
     }
 
     fn diff(&self, _other: &Self) -> f64 {

@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use crate::opt_traits::*;
 use crate::opt_data::*;
 use crate::utils::*;
@@ -102,20 +104,20 @@ pub struct LabsFunc { }
 pub struct NaiveBitRealFunc<RealFunc: FitnessFunc<FloatVec>> {
     pub real_func: RealFunc,
     pub bounds: Vec<Bounds>,
-    temp_data: FloatVec
+    temp_data: RefCell<FloatVec>
 }
 
 impl<RealFunc: FitnessFunc<FloatVec>> NaiveBitRealFunc<RealFunc> {
     pub fn new(real_func: RealFunc, bounds: Vec<Bounds>) -> Self {
         let len = bounds.len();
-        NaiveBitRealFunc { real_func: real_func, bounds: bounds, temp_data: FloatVec { values: vec![0.0; len] } }
+        NaiveBitRealFunc { real_func: real_func, bounds: bounds, temp_data: RefCell::new(FloatVec { values: vec![0.0; len] }) }
     }
 }
 
 impl<RealFunc: FitnessFunc<FloatVec>> FitnessFunc<NaiveBitVec> for NaiveBitRealFunc<RealFunc> {
-    fn eval(&mut self, data: &NaiveBitVec) -> f64 {
-        bin_to_real_mut(&data.bits, &self.bounds, &mut self.temp_data.values);
-        self.real_func.eval(&self.temp_data)
+    fn eval(&self, data: &NaiveBitVec) -> f64 {
+        bin_to_real_mut(&data.bits, &self.bounds, &mut self.temp_data.borrow_mut().values);
+        self.real_func.eval(&self.temp_data.borrow())
     }
 }
 
@@ -142,55 +144,55 @@ pub struct GriewankFunc {}
 pub struct SchwefelFunc {}
 
 impl FitnessFunc<NaiveBitVec> for OneMaxFunc {
-    fn eval(&mut self, data: &NaiveBitVec) -> f64 {
+    fn eval(&self, data: &NaiveBitVec) -> f64 {
         naive_one_max(&data.bits) as f64
     }
 }
 
 impl FitnessFunc<NaiveBitVec> for LabsFunc {
-    fn eval(&mut self, data: &NaiveBitVec) -> f64 {
+    fn eval(&self, data: &NaiveBitVec) -> f64 {
         naive_labs(&data.bits) as f64
     }
 }
 
 impl FitnessFunc<FloatVec> for SphereFunc {
-    fn eval(&mut self, data: &FloatVec) -> f64 {
+    fn eval(&self, data: &FloatVec) -> f64 {
         sphere(&data.values, &self.o)
     }
 }
 
 impl FitnessFunc<FloatVec> for RosenbrockFunc {
-    fn eval(&mut self, data: &FloatVec) -> f64 {
+    fn eval(&self, data: &FloatVec) -> f64 {
         rosenbrock(&data.values)
     }
 }
 
 impl FitnessFunc<FloatVec> for LinearFunc {
-    fn eval(&mut self, data: &FloatVec) -> f64 {
+    fn eval(&self, data: &FloatVec) -> f64 {
         linear(&data.values, self.a, &self.b)
     }
 }
 
 impl FitnessFunc<FloatVec> for StepFunc {
-    fn eval(&mut self, data: &FloatVec) -> f64 {
+    fn eval(&self, data: &FloatVec) -> f64 {
         step(&data.values, self.a, &self.b)
     }
 }
 
 impl FitnessFunc<FloatVec> for RastriginFunc {
-    fn eval(&mut self, data: &FloatVec) -> f64 {
+    fn eval(&self, data: &FloatVec) -> f64 {
         rastrigin(&data.values)
     }
 }
 
 impl FitnessFunc<FloatVec> for GriewankFunc {
-    fn eval(&mut self, data: &FloatVec) -> f64 {
+    fn eval(&self, data: &FloatVec) -> f64 {
         griewank(&data.values)
     }
 }
 
 impl FitnessFunc<FloatVec> for SchwefelFunc {
-    fn eval(&mut self, data: &FloatVec) -> f64 {
+    fn eval(&self, data: &FloatVec) -> f64 {
         schwefel(&data.values)
     }
 }
