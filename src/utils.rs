@@ -488,4 +488,23 @@ mod tests {
         check_bin_to_real(&BITS34, &bounds, &[1.3333333333333333, 3.0, 4.666666666666666, 6.333333333333334, 8.0, 9.666666666666668]);
     }
 
+    #[test]
+    fn test_limited_binary_heap() {
+        let mut heap = LimitedBinaryHeap::<i32>::new(5);
+        let values = vec![4, 9, 2, 8, 6, 3, 5, 1, 0, 7];
+        let expected = vec![0, 1, 2, 3, 4];
+        for v in values {
+            heap.push(v);
+        }
+        let mut res = Vec::<i32>::new();
+        for v in heap.iter() {
+            res.push(*v);
+        }
+        res.sort();
+        assert_eq!(res.len(), expected.len());
+        for i in 0..res.len() {
+            assert_eq!(res[i], expected[i]);
+        }
+    }
+
 }

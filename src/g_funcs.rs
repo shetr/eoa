@@ -106,7 +106,7 @@ impl GFunc for G08 {
     }
     fn bounds(&self) -> Vec<Bounds> {
         vec![
-            Bounds { lower: 0.0, upper: 10.0 },
+            Bounds { lower: 0.00001, upper: 10.0 },
             Bounds { lower: 0.0, upper: 10.0 }
         ]
     }

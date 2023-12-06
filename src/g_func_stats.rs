@@ -85,7 +85,7 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
                 for fitness in &stats2.solutions[i].fitness {
                     best_fitness = best_fitness.min(fitness[0]);
                 }
-                avg_stats[0].fitness[i] += best_fitness;
+                avg_stats[1].fitness[i] += best_fitness;
             }
 
         }

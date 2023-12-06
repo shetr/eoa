@@ -53,7 +53,7 @@ impl NSGA2FitnessTransformer {
             Vec::<f64>::opt_cmp(&fitness[*a], &fitness[*b])
         });
         self.fronts_counts.clear();
-        nsga2_fitness[0].front = 0;
+        nsga2_fitness[self.front_indices[0]].front = 0;
         self.fronts_counts.push(1);
         for i in 1..self.front_indices.len() {
             let i_curr = self.front_indices[i];
@@ -95,14 +95,14 @@ impl NSGA2FitnessTransformer {
                     fitness[*a][m].total_cmp(&fitness[*b][m])
                 });
                 nsga2_fitness[self.front_indices[front_start]].crowding_dist = f64::INFINITY;
-                nsga2_fitness[self.front_indices[front_end]].crowding_dist = f64::INFINITY;
+                nsga2_fitness[self.front_indices[front_end - 1]].crowding_dist = f64::INFINITY;
                 if self.fronts_counts[front] < 3 {
                     continue;
                 }
-                for i in &self.front_indices[(front_start + 1)..(front_end - 1)] {
-                    let i_prev = self.front_indices[*i - 1];
-                    let i_curr = self.front_indices[*i];
-                    let i_next = self.front_indices[*i + 1];
+                for i in (front_start + 1)..(front_end - 1) {
+                    let i_prev = self.front_indices[i - 1];
+                    let i_curr = self.front_indices[i];
+                    let i_next = self.front_indices[i + 1];
                     nsga2_fitness[i_curr].crowding_dist += (fitness[i_prev][m] - fitness[i_next][m]).abs() / self.f_size[m];
                 }
             }
