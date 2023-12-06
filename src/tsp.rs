@@ -189,85 +189,89 @@ impl PerturbeMutOp<TspPermutation> for TspReversePerturbation {
     }
 }
 
-fn cycle_crossover(parents: [&Vec<usize>; 2], offsprings: [&mut Vec<usize>; 2]) {
-    for i in 0..parents[0].len() {
-        for o in 0..2 {
-            offsprings[o].push(parents[o][i].clone());
+pub struct TspCycleCrossover {
+}
+
+impl CrossoverFun<usize> for TspCycleCrossover {
+    fn crossover_fun(&self, parents: [&Vec<usize>; 2], offsprings: [&mut Vec<usize>; 2]) {
+        for i in 0..parents[0].len() {
+            for o in 0..2 {
+                offsprings[o].push(parents[o][i].clone());
+            }
         }
-    }
-    let start_index = rand::thread_rng().gen_range(0..parents[0].len());
-    let mut current_index = start_index;
-    if offsprings[1][current_index] == offsprings[0][current_index] {
-        return;
-    }
-    loop {
-        let next_vert = offsprings[1][current_index];
-        let prev_index = current_index;
-        let mut index_found = false;
-        for i in 0..offsprings[0].len() {
-            if offsprings[0][i] == next_vert {
-                current_index = i;
-                index_found = true;
+        let start_index = rand::thread_rng().gen_range(0..parents[0].len());
+        let mut current_index = start_index;
+        if offsprings[1][current_index] == offsprings[0][current_index] {
+            return;
+        }
+        loop {
+            let next_vert = offsprings[1][current_index];
+            let prev_index = current_index;
+            let mut index_found = false;
+            for i in 0..offsprings[0].len() {
+                if offsprings[0][i] == next_vert {
+                    current_index = i;
+                    index_found = true;
+                    break;
+                }
+            }
+            let temp = offsprings[0][prev_index];
+            offsprings[0][prev_index] = offsprings[1][prev_index];
+            offsprings[1][prev_index] = temp;
+            if !index_found {
                 break;
             }
         }
-        let temp = offsprings[0][prev_index];
-        offsprings[0][prev_index] = offsprings[1][prev_index];
-        offsprings[1][prev_index] = temp;
-        if !index_found {
-            break;
-        }
     }
-}
-
-fn order_crossover(parents: [&Vec<usize>; 2], offsprings: [&mut Vec<usize>; 2]) {
-    for i in 0..parents[0].len() {
-        for o in 0..2 {
-            offsprings[o].push(parents[o][i].clone());
-        }
-    }
-    let from = rand::thread_rng().gen_range(0..parents[0].len());
-    let to = rand::thread_rng().gen_range(from..parents[0].len());
-    for o in 0..2 {
-        let p1 = o;
-        let p2 = 1 - p1 as usize;
-        for i in from..to {
-            offsprings[o][i] = parents[p1][i];
-        }
-        let mut p2_index = 0;
-        for i in (0..from).chain(to..parents[0].len()) {
-            let mut inside_p1 = true;
-            while inside_p1 {
-                inside_p1 = false;
-                for j in from..to {
-                    if parents[p1][j] == parents[p2][p2_index] {
-                        inside_p1 = true;
-                        p2_index += 1;
-                        break;
-                    }
-                }
-            }
-            offsprings[o][i] = parents[p2][p2_index];
-            p2_index += 1;
-        }
-    }
-}
-
-pub struct TspCycleCrossover {
 }
 
 impl Crossover<TspPermutation> for TspCycleCrossover {
     fn crossover(&self, population: &Vec<TspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<TspPermutation>) {
-        crossover_vec_data(population, parents_indices, offsprings, cycle_crossover);
+        crossover_vec_data(population, parents_indices, offsprings, self);
     }
 }
 
 pub struct TspOrderCrossover {
 }
 
+impl CrossoverFun<usize> for TspOrderCrossover {
+    fn crossover_fun(&self, parents: [&Vec<usize>; 2], offsprings: [&mut Vec<usize>; 2]) {
+        for i in 0..parents[0].len() {
+            for o in 0..2 {
+                offsprings[o].push(parents[o][i].clone());
+            }
+        }
+        let from = rand::thread_rng().gen_range(0..parents[0].len());
+        let to = rand::thread_rng().gen_range(from..parents[0].len());
+        for o in 0..2 {
+            let p1 = o;
+            let p2 = 1 - p1 as usize;
+            for i in from..to {
+                offsprings[o][i] = parents[p1][i];
+            }
+            let mut p2_index = 0;
+            for i in (0..from).chain(to..parents[0].len()) {
+                let mut inside_p1 = true;
+                while inside_p1 {
+                    inside_p1 = false;
+                    for j in from..to {
+                        if parents[p1][j] == parents[p2][p2_index] {
+                            inside_p1 = true;
+                            p2_index += 1;
+                            break;
+                        }
+                    }
+                }
+                offsprings[o][i] = parents[p2][p2_index];
+                p2_index += 1;
+            }
+        }
+    }
+}
+
 impl Crossover<TspPermutation> for TspOrderCrossover {
     fn crossover(&self, population: &Vec<TspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<TspPermutation>) {
-        crossover_vec_data(population, parents_indices, offsprings, order_crossover);
+        crossover_vec_data(population, parents_indices, offsprings, self);
     }
 }
 

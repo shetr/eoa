@@ -91,6 +91,33 @@ impl PerturbeMutOp<FloatVec> for NormalOneFiftPerturbeRealMutOp {
 }
 
 #[derive(Clone)]
+pub struct BoundedNormalOneFiftPerturbeRealMutOp {
+    normal: Normal<f64>,
+    bounds: Vec<Bounds>
+}
+
+impl BoundedNormalOneFiftPerturbeRealMutOp {
+    pub fn new(sigma: f64, bounds: &Vec<Bounds>) -> Self {
+        BoundedNormalOneFiftPerturbeRealMutOp { normal: Normal::new(0.0, sigma).unwrap(), bounds: bounds.clone() }
+    }
+}
+
+impl PerturbeMutOp<FloatVec> for BoundedNormalOneFiftPerturbeRealMutOp {
+    fn eval(&self, data: &mut FloatVec) {
+        for i in 0..data.values.len() {
+            data.values[i] = 
+                (data.values[i] + self.normal.sample(&mut rand::thread_rng()))
+                .clamp(self.bounds[i].lower, self.bounds[i].upper);
+        }
+    }
+
+    fn update(&mut self, iter_diff: f64, dim: usize) {
+        let sigma = self.normal.std_dev() * (if iter_diff < 0.0 { 1.0 } else { 0.0 } - 0.2f64).exp().powf(1.0 / (dim as f64));
+        self.normal = Normal::new(0.0, sigma).unwrap();
+    }
+}
+
+#[derive(Clone)]
 pub struct CauchyPerturbeRealMutOp {
     cauchy: Cauchy<f64>
 }
