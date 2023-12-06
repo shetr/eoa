@@ -83,15 +83,17 @@ impl GFunc for G06 {
 
 impl FitnessFunc<FloatVec> for G06 {
     fn eval(&self, data: &FloatVec) -> f64 {
-        (data.values[0] - 10.0).powi(3) + (data.values[1] - 20.0).powi(3)
+        let x = &data.values;
+        (x[0] - 10.0).powi(3) + (x[1] - 20.0).powi(3)
     }
 }
 
 impl ConstraintsSumed<FloatVec> for G06 {
     fn violations(&self, data: &FloatVec) -> Vec<f64> {
+        let x = &data.values;
         vec![
-            0.0f64.max(-(data.values[0] - 5.0).powi(2) - (data.values[1] - 5.0).powi(2) + 100.0),
-            0.0f64.max((data.values[0] - 6.0).powi(2) + (data.values[1] - 5.0).powi(2) - 82.81)
+            0.0f64.max(-(x[0] - 5.0).powi(2) - (x[1] - 5.0).powi(2) + 100.0),
+            0.0f64.max((x[0] - 6.0).powi(2) + (x[1] - 5.0).powi(2) - 82.81)
         ]
     }
 }
@@ -112,15 +114,17 @@ impl GFunc for G08 {
 
 impl FitnessFunc<FloatVec> for G08 {
     fn eval(&self, data: &FloatVec) -> f64 {
-        - (2.0 * PI * data.values[0]).sin().powi(3) * (2.0 * PI * data.values[1]).sin() / (data.values[0].powi(3) * (data.values[0] + data.values[1]))
+        let x = &data.values;
+        - (2.0 * PI * x[0]).sin().powi(3) * (2.0 * PI * x[1]).sin() / (x[0].powi(3) * (x[0] + x[1]))
     }
 }
 
 impl ConstraintsSumed<FloatVec> for G08 {
     fn violations(&self, data: &FloatVec) -> Vec<f64> {
+        let x = &data.values;
         vec![
-            0.0f64.max(data.values[0].powi(2) - data.values[1] + 1.0),
-            0.0f64.max(1.0 - data.values[0] + (data.values[1] - 4.0).powi(2))
+            0.0f64.max(x[0].powi(2) - x[1] + 1.0),
+            0.0f64.max(1.0 - x[0] + (x[1] - 4.0).powi(2))
         ]
     }
 }
@@ -141,14 +145,16 @@ impl GFunc for G11 {
 
 impl FitnessFunc<FloatVec> for G11 {
     fn eval(&self, data: &FloatVec) -> f64 {
-        data.values[0].powi(2) + (data.values[1] - 1.0).powi(2)
+        let x = &data.values;
+        x[0].powi(2) + (x[1] - 1.0).powi(2)
     }
 }
 
 impl ConstraintsSumed<FloatVec> for G11 {
     fn violations(&self, data: &FloatVec) -> Vec<f64> {
+        let x = &data.values;
         vec![
-            0.0f64.max((data.values[1] - data.values[0].powi(2)).abs() - EPSILON)
+            0.0f64.max((x[1] - x[0].powi(2)).abs() - EPSILON)
         ]
     }
 }
@@ -169,15 +175,17 @@ impl GFunc for G24 {
 
 impl FitnessFunc<FloatVec> for G24 {
     fn eval(&self, data: &FloatVec) -> f64 {
-        -data.values[0] - data.values[1]
+        let x = &data.values;
+        -x[0] - x[1]
     }
 }
 
 impl ConstraintsSumed<FloatVec> for G24 {
     fn violations(&self, data: &FloatVec) -> Vec<f64> {
+        let x = &data.values;
         vec![
-            0.0f64.max(-2.0*data.values[0].powi(4) + 8.0*data.values[0].powi(3) - 8.0*data.values[0].powi(2) + data.values[1] - 2.0),
-            0.0f64.max(-4.0*data.values[0].powi(4) +32.0*data.values[0].powi(3) -88.0*data.values[0].powi(2) + 96.0*data.values[0] + data.values[1] - 36.0)
+            0.0f64.max(-2.0*x[0].powi(4) + 8.0*x[0].powi(3) - 8.0*x[0].powi(2) + x[1] - 2.0),
+            0.0f64.max(-4.0*x[0].powi(4) +32.0*x[0].powi(3) -88.0*x[0].powi(2) + 96.0*x[0] + x[1] - 36.0)
         ]
     }
 }
@@ -204,7 +212,7 @@ impl GFunc for G04 {
 impl FitnessFunc<FloatVec> for G04 {
     fn eval(&self, data: &FloatVec) -> f64 {
         let x = &data.values;
-        let (x1, x2, x3, x4, x5) = (x[0], x[1], x[2], x[3], x[4]);
+        let (x1, x3, x5) = (x[0], x[2], x[4]);
         5.3578547 * x3.powi(2) + 0.8356891 * x1 * x5 + 37.293239 * x1 - 40792.141
     }
 }
@@ -243,7 +251,7 @@ impl GFunc for G05 {
 impl FitnessFunc<FloatVec> for G05 {
     fn eval(&self, data: &FloatVec) -> f64 {
         let x = &data.values;
-        let (x1, x2, x3, x4) = (x[0], x[1], x[2], x[3]);
+        let (x1, x2) = (x[0], x[1]);
         3.0 * x1 + 0.000001 * x1.powi(3) + 2.0 * x2 + (0.000002/3.0) * x2.powi(3)
     }
 }
@@ -266,11 +274,25 @@ pub struct G09 {}
 
 impl GFunc for G09 {
     fn optimum(&self) -> FloatVec {
-        FloatVec { values: vec![blah] }
+        FloatVec { values: vec![
+            2.33049935147405174,
+            1.95137236847114592,
+            -0.477541399510615805,
+            4.36572624923625874,
+            -0.624486959100388983,
+            1.03813099410962173,
+            1.5942266780671519
+        ] }
     }
     fn bounds(&self) -> Vec<Bounds> {
         vec![
-            Bounds { lower: , upper:  },
+            Bounds { lower: -10.0, upper: 10.0 },
+            Bounds { lower: -10.0, upper: 10.0 },
+            Bounds { lower: -10.0, upper: 10.0 },
+            Bounds { lower: -10.0, upper: 10.0 },
+            Bounds { lower: -10.0, upper: 10.0 },
+            Bounds { lower: -10.0, upper: 10.0 },
+            Bounds { lower: -10.0, upper: 10.0 }
         ]
     }
 }
@@ -289,7 +311,10 @@ impl ConstraintsSumed<FloatVec> for G09 {
         let x = &data.values;
         let (x1, x2, x3, x4, x5, x6, x7) = (x[0], x[1], x[2], x[3], x[4], x[5], x[6]);
         vec![
-            0.0f64.max(),
+            0.0f64.max(-127.0 + 2.0 * x1.powi(2) + 3.0 * x2.powi(4) + x3 + 4.0 * x4.powi(2) + 5.0 * x5),
+            0.0f64.max(-282.0 + 7.0 * x1 + 3.0 * x2 + 10.0 * x3.powi(2) + x4 - x5),
+            0.0f64.max(-196.0 + 23.0 * x1 + x2.powi(2) + 6.0 * x6.powi(2) - 8.0 * x7),
+            0.0f64.max(4.0 * x1.powi(2) + x2.powi(2) - 3.0 * x1 * x2 + 2.0 * x3.powi(2) + 5.0 * x6 - 11.0 * x7),
         ]
     }
 }
@@ -298,11 +323,25 @@ pub struct G21 {}
 
 impl GFunc for G21 {
     fn optimum(&self) -> FloatVec {
-        FloatVec { values: vec![blah] }
+        FloatVec { values: vec![
+            193.724510070034967,
+            5.56944131553368433e-27,
+            17.3191887294084914,
+            100.047897801386839,
+            6.68445185362377892,
+            5.99168428444264833,
+            6.21451648886070451
+        ] }
     }
     fn bounds(&self) -> Vec<Bounds> {
         vec![
-            Bounds { lower: , upper:  },
+            Bounds { lower: 0.0, upper: 1000.0 },
+            Bounds { lower: 0.0, upper: 40.0 },
+            Bounds { lower: 0.0, upper: 40.0 },
+            Bounds { lower: 100.0, upper: 300.0 },
+            Bounds { lower: 6.3, upper: 6.7 },
+            Bounds { lower: 5.9, upper: 6.4 },
+            Bounds { lower: 4.5, upper: 6.25 }
         ]
     }
 }
@@ -310,15 +349,21 @@ impl GFunc for G21 {
 impl FitnessFunc<FloatVec> for G21 {
     fn eval(&self, data: &FloatVec) -> f64 {
         let x = &data.values;
-        
+        x[0]
     }
 }
 
 impl ConstraintsSumed<FloatVec> for G21 {
     fn violations(&self, data: &FloatVec) -> Vec<f64> {
         let x = &data.values;
+        let (x1, x2, x3, x4, x5, x6, x7) = (x[0], x[1], x[2], x[3], x[4], x[5], x[6]);
         vec![
-            0.0f64.max(),
+            0.0f64.max(-x1 + 35.0 * x2.powf(0.6) + 35.0 * x3.powf(0.6)),
+            0.0f64.max((-300.0 * x3 + 7500.0 * x5 - 7500.0 * x6 - 25.0 * x4 * x5 + 25.0 * x4 * x6 + x3 * x4).abs() - EPSILON),
+            0.0f64.max((100.0 * x2 + 155.365 * x4 + 2500.0 * x7 - x2 * x4 - 25.0 * x4 * x7 - 15536.5).abs() - EPSILON),
+            0.0f64.max((-x5 + (-x4 + 900.0).ln()).abs() - EPSILON),
+            0.0f64.max((-x6 + (x4 + 300.0).ln()).abs() - EPSILON),
+            0.0f64.max((-x7 + (-2.0 *x4 + 700.0).ln()).abs() - EPSILON),
         ]
     }
 }
