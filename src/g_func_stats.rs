@@ -33,15 +33,14 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         let opt_value = g_fitness.eval(&optimum);
         let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
         // TODO: maybe replace with rank selection
-        let selection = TournamentSelection { select_count: population_size / 2, rounds_count: 8 };
+        let selection = RankSelection { select_count: population_size / 2 };
         let replacement_strategy = TruncationReplacementStrategy {};
         // TODO: try BoundedNormalOneFiftPerturbeRealMutOp
         let perturbation = BoundedNormalPerturbeRealMutOp::new(
             0.1 * val_range,
             &bounds
         );
-        // TODO: try ArithmetricCrossover
-        let crossover = OnePointCrossover {};
+        let crossover = ArithmetricCrossover {};
         let mut constrained_transformer = StochasticRankFitnessTransformer::new(
             0.45, 
             g_fitness.clone()

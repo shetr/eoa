@@ -24,17 +24,20 @@ impl Fitness for f64 {
 impl Fitness for Vec<f64> {
     fn opt_cmp(f1: &Vec<f64>, f2: &Vec<f64>) -> Ordering {
         let mut at_least_one_better = false;
+        let mut at_least_one_worse = false;
         for i in 0..f1.len() {
             if f1[i] > f2[i] {
-                return Ordering::Greater;
+                at_least_one_worse = true;
             } else if f1[i] < f2[i] {
                 at_least_one_better = true;
             }
         }
-        if at_least_one_better {
-            Ordering::Less
-        } else {
+        if at_least_one_better == at_least_one_worse {
             Ordering::Equal
+        } else if at_least_one_better {
+            Ordering::Less
+        } else { // if at_least_one_worse
+            Ordering::Greater
         }
     }
 
