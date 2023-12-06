@@ -29,7 +29,8 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         mean /= bounds.len() as f64;
         val_range /= bounds.len() as f64;
 
-        let opt_value = g_fitness.optimum();
+        let optimum = g_fitness.optimum();
+        let opt_value = g_fitness.eval(&optimum);
         let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
         // TODO: maybe replace with rank selection
         let selection = TournamentSelection { select_count: population_size / 2, rounds_count: 8 };
