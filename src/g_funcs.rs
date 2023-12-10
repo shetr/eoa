@@ -22,6 +22,9 @@ impl ConstraintsSumed<FloatVec> for GFuncDyn {
 }
 
 impl GFunc for GFuncDyn {
+    fn vec_size(&self) -> usize {
+        self.func.vec_size()
+    }
     fn optimum(&self) -> FloatVec {
         self.func.optimum()
     }
@@ -31,6 +34,7 @@ impl GFunc for GFuncDyn {
 }
 
 pub trait GFunc : FitnessFunc<FloatVec> + ConstraintsSumed<FloatVec> {
+    fn vec_size(&self) -> usize;
     fn optimum(&self) -> FloatVec;
     fn bounds(&self) -> Vec<Bounds>;
 }
@@ -70,6 +74,9 @@ impl MultiObjFitnessFunc<FloatVec> for MultiGFunc {
 pub struct G06 {}
 
 impl GFunc for G06 {
+    fn vec_size(&self) -> usize {
+        2
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![14.09500000000000064, 0.8429607892154795668] }
     }
@@ -101,6 +108,9 @@ impl ConstraintsSumed<FloatVec> for G06 {
 pub struct G08 {}
 
 impl GFunc for G08 {
+    fn vec_size(&self) -> usize {
+        2
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![1.22797135260752599, 4.24537336612274885] }
     }
@@ -132,6 +142,9 @@ impl ConstraintsSumed<FloatVec> for G08 {
 pub struct G11 {}
 
 impl GFunc for G11 {
+    fn vec_size(&self) -> usize {
+        2
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![-0.707036070037170616, 0.500000004333606807] }
     }
@@ -162,6 +175,9 @@ impl ConstraintsSumed<FloatVec> for G11 {
 pub struct G24 {}
 
 impl GFunc for G24 {
+    fn vec_size(&self) -> usize {
+        2
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![2.32952019747762, 3.17849307411774] }
     }
@@ -195,6 +211,9 @@ impl ConstraintsSumed<FloatVec> for G24 {
 pub struct G04 {}
 
 impl GFunc for G04 {
+    fn vec_size(&self) -> usize {
+        5
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![78.0, 33.0, 29.9952560256815985, 45.0, 36.7758129057882073] }
     }
@@ -235,6 +254,9 @@ impl ConstraintsSumed<FloatVec> for G04 {
 pub struct G05 {}
 
 impl GFunc for G05 {
+    fn vec_size(&self) -> usize {
+        4
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![679.945148297028709, 1026.06697600004691, 0.118876369094410433, -0.39623348521517826] }
     }
@@ -273,6 +295,9 @@ impl ConstraintsSumed<FloatVec> for G05 {
 pub struct G09 {}
 
 impl GFunc for G09 {
+    fn vec_size(&self) -> usize {
+        7
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![
             2.33049935147405174,
@@ -322,6 +347,9 @@ impl ConstraintsSumed<FloatVec> for G09 {
 pub struct G21 {}
 
 impl GFunc for G21 {
+    fn vec_size(&self) -> usize {
+        7
+    }
     fn optimum(&self) -> FloatVec {
         FloatVec { values: vec![
             193.724510070034967,

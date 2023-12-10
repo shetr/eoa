@@ -87,13 +87,19 @@ fn process_avg_stats(avg_stats: &mut Vec<BSFSingleObjStatistics>, opt_value: f64
 pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize, population_size: usize)
 {
     let g_fitnesses: Vec<Rc<dyn GFunc>> = vec![
+        // basic problems
         Rc::new(G06 {}),
         Rc::new(G08 {}),
         Rc::new(G11 {}),
-        Rc::new(G24 {})
+        Rc::new(G24 {}),
+        // harder problems
+        Rc::new(G04 {}),
+        Rc::new(G05 {}),
+        Rc::new(G09 {}),
+        Rc::new(G21 {}),
     ];
     let method_names = vec!["Stochastic Ranking", "NSGA-II 2-args", "NSGA-II n-args"];
-    let g_names = vec!["g06", "g08", "g11", "g24"];
+    let g_names = vec!["g06", "g08", "g11", "g24", "h_g04", "h_g05", "h_g09", "h_g21"];
     create_dir_all("out/g_funcs").unwrap();
     for g_index in 0..g_fitnesses.len() {
         let g_name = g_names[g_index];
@@ -128,7 +134,7 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         let mut multi_obj_transformer = NSGA2FitnessTransformer::new();
 
         let init_population = InitRandomFloatVecPopulation {
-            size: population_size ,vec_size: 2, mean: mean, std_dev: 0.3 * val_range, bounds: bounds.clone()
+            size: population_size ,vec_size: g_fitness.vec_size(), mean: mean, std_dev: 0.3 * val_range, bounds: bounds.clone()
         };
 
         let mut avg_fitness_stats = vec![
