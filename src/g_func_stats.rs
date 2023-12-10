@@ -98,7 +98,7 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         Rc::new(G09 {}),
         Rc::new(G21 {}),
     ];
-    let method_names = vec!["Stochastic Ranking", "NSGA-II 2-args", "NSGA-II n-args"];
+    let method_names = vec!["Stochastic Ranking", "NSGA-II 2-vals", "NSGA-II n-vals"];
     let g_names = vec!["g06", "g08", "g11", "g24", "h_g04", "h_g05", "h_g09", "h_g21"];
     create_dir_all("out/g_funcs").unwrap();
     for g_index in 0..g_fitnesses.len() {
