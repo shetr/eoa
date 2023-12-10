@@ -65,6 +65,25 @@ impl<T: OptData> Statistics<T, Vec<f64>, NSGA2Fitness> for GFuncMultiObjStatisti
     }
 }
 
+fn process_avg_stats(avg_stats: &mut Vec<BSFSingleObjStatistics>, opt_value: f64, num_iters: usize, num_repetitions: usize) -> f64
+{
+    let mut fitness_min = opt_value;
+    for s in 0..avg_stats.len() {
+        for i in 0..num_iters {
+            avg_stats[s].fitness[i] /= num_repetitions as f64;
+            fitness_min = fitness_min.min(avg_stats[s].fitness[i]);
+        }
+    }
+    let log_opt_value = (opt_value - fitness_min + 1.0).log10();
+    // log scale
+    for s in 0..avg_stats.len() {
+        for i in 0..num_iters {
+            avg_stats[s].fitness[i] = (avg_stats[s].fitness[i] - fitness_min + 1.0).log10();
+        }
+    }
+    log_opt_value
+}
+
 pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize, population_size: usize)
 {
     let g_fitnesses: Vec<Rc<dyn GFunc>> = vec![
@@ -111,9 +130,12 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
             size: population_size ,vec_size: 2, mean: mean, std_dev: 0.3 * val_range, bounds: bounds.clone()
         };
 
-        let mut avg_stats = vec![
+        let mut avg_fitness_stats = vec![
             BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
             BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
+        let mut avg_constraints_stats = vec![
+                BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+                BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
 
         for _rep in 0..num_repetitions {
             let (_, stats1) : (EmptySolution, StochasticRankStatistics<FloatVec>) = general_evolutionary_search(
@@ -137,32 +159,23 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
                 &mut multi_obj_transformer);
             
             for i in 0..num_iters {
-                avg_stats[0].fitness[i] += stats1.solutions[i].fitness;
+                avg_fitness_stats[0].fitness[i] += stats1.solutions[i].fitness;
+                avg_constraints_stats[0].fitness[i] += stats1.solutions[i].violations;
             }
             for i in 0..num_iters {
-                avg_stats[1].fitness[i] += stats2.solutions[i].fitness[0];
+                avg_fitness_stats[1].fitness[i] += stats2.solutions[i].fitness[0];
+                avg_constraints_stats[1].fitness[i] += stats2.solutions[i].fitness[1];
+            }
 
-                //avg_stats[1].fitness[i] = avg_stats[0].fitness[i];
-                //avg_stats[0].fitness[i] = avg_stats[1].fitness[i];
-            }
-
         }
-        let mut fitness_min = opt_value;
-        for s in 0..avg_stats.len() {
-            for i in 0..num_iters {
-                avg_stats[s].fitness[i] /= num_repetitions as f64;
-                fitness_min = fitness_min.min(avg_stats[s].fitness[i]);
-            }
-        }
-        let log_opt_value = (opt_value - fitness_min + 1.0).log10();
-        // log scale
-        for s in 0..avg_stats.len() {
-            for i in 0..num_iters {
-                avg_stats[s].fitness[i] = (avg_stats[s].fitness[i] - fitness_min + 1.0).log10();
-            }
-            //plot(&avg_stats[s], format!("out/tsp/{}_{}.svg", method_names[s], input_file).as_str(), method_names[s]).unwrap();
-        }
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/g_funcs/{}.svg", g_name).as_str(), g_name, log_opt_value).unwrap();
+        let log_opt_value = process_avg_stats(&mut avg_fitness_stats, opt_value, num_iters, num_repetitions);
+        let log_1 = process_avg_stats(&mut avg_constraints_stats, 0.0, num_iters, num_repetitions);
+        let fitness_plot_name = format!("{}_fitness", g_name);
+        let fitness_plot_filename = format!("out/g_funcs/{}.svg", fitness_plot_name);
+        let constraints_plot_name = format!("{}_constraints", g_name);
+        let constraints_plot_filename = format!("out/g_funcs/{}.svg", constraints_plot_name);
+        plot_multiple(&avg_fitness_stats, &method_names, &TAB_COLORS, fitness_plot_filename.as_str(), fitness_plot_name.as_str(), log_opt_value).unwrap();
+        plot_multiple(&avg_constraints_stats, &method_names, &TAB_COLORS, constraints_plot_filename.as_str(), constraints_plot_name.as_str(), log_1).unwrap();
         
     }
     
