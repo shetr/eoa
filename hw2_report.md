@@ -27,6 +27,8 @@ Na ose x jsou opět vyznačeny iterace jako v předchozím úkolu. Zde to avšak
 
 V měřeních jsou porovnány 3 metody: Stochastic Ranking, NSGA-II s 2 hodnotami (fitness + součet omezení), NSGA-II s více vícero hodnotami (fitness + každé omezení zvlášť). Porovnání bylo vyhodnoceno jak pro základní požadované funkce g06, g08, g11 a g24, tak i pro složitější bonusové funkce g04, g05, g09 a g21.
 
+Řešení reportovaná na grafech
+
 ## Funkce g06, g08, g11 a g24
 
 ![att48](out/g_funcs/g06_fitness.svg)

@@ -200,8 +200,8 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         let fitness_plot_filename = format!("out/g_funcs/{}.svg", fitness_plot_name);
         let constraints_plot_name = format!("{}_constraints", g_name);
         let constraints_plot_filename = format!("out/g_funcs/{}.svg", constraints_plot_name);
-        plot_multiple(&avg_fitness_stats, &method_names, &TAB_COLORS, fitness_plot_filename.as_str(), fitness_plot_name.as_str(), log_opt_value).unwrap();
-        plot_multiple(&avg_constraints_stats, &method_names, &TAB_COLORS, constraints_plot_filename.as_str(), constraints_plot_name.as_str(), log_1).unwrap();
+        plot_multiple(&avg_fitness_stats, &method_names, &TAB_COLORS, fitness_plot_filename.as_str(), fitness_plot_name.as_str(), log_opt_value, "Log avg. fitness").unwrap();
+        plot_multiple(&avg_constraints_stats, &method_names, &TAB_COLORS, constraints_plot_filename.as_str(), constraints_plot_name.as_str(), log_1, "Log avg. constraints sum").unwrap();
         
     }
     

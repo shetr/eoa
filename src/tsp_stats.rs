@@ -110,7 +110,7 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
             }
             //plot(&avg_stats[s], format!("out/tsp/{}_{}.svg", method_names[s], input_file).as_str(), method_names[s]).unwrap();
         }
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/tsp/{}.svg", input_file).as_str(), input_file, opt_value.log10()).unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/tsp/{}.svg", input_file).as_str(), input_file, opt_value.log10(), "Log avg. fitness").unwrap();
         
     }
 }

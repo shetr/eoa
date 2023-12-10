@@ -43,7 +43,7 @@ pub fn plot(stats: &BSFSingleObjStatistics, out_name: &str, fun_name: &str) -> R
     Ok(())
 }
 
-pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64, y_desc: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max_fitness = f64::NEG_INFINITY;
     let mut min_fitness = f64::INFINITY;
@@ -54,18 +54,24 @@ pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>,
     min_fitness = min_fitness.min(log_optimum);
     let range = max_fitness - min_fitness;
     min_fitness -= 0.1 * range;
+    if max_fitness == min_fitness {
+        max_fitness = min_fitness + 1.0;
+    }
     let root = SVGBackend::new(out_file_name, (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption(plot_name, ("sans-serif", 50).into_font())
         .margin(5)
-        .x_label_area_size(30)
-        .y_label_area_size(60)
+        .set_label_area_size(LabelAreaPosition::Left, 40)
+        .set_label_area_size(LabelAreaPosition::Right, 40)
+        .set_label_area_size(LabelAreaPosition::Bottom, 40)
         .build_cartesian_2d(0..stats[0].fitness.len(), min_fitness..max_fitness)?;
 
     chart.configure_mesh()
         .x_desc("Iterations")
-        .y_desc("Log avg. fitness")
+        .y_desc(y_desc)
+        .disable_x_mesh()
+        .disable_y_mesh()
         .draw()?;
 
     for i in 0..stats.len() {
