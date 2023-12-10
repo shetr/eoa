@@ -92,13 +92,14 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         Rc::new(G11 {}),
         Rc::new(G24 {})
     ];
-    let method_names = vec!["Stochastic Ranking", "NSGA-II 2-args"];
+    let method_names = vec!["Stochastic Ranking", "NSGA-II 2-args", "NSGA-II n-args"];
     let g_names = vec!["g06", "g08", "g11", "g24"];
     create_dir_all("out/g_funcs").unwrap();
     for g_index in 0..g_fitnesses.len() {
         let g_name = g_names[g_index];
         let mut g_fitness = GFuncDyn { func: g_fitnesses[g_index].clone() };
         let mut g_bi_fitness = BiGFunc { g_func: g_fitnesses[g_index].clone() };
+        let mut g_multi_fitness = MultiGFunc { g_func: g_fitnesses[g_index].clone() };
         let bounds = g_fitness.bounds();
         let mut mean = 0.0;
         let mut val_range = 0.0;
@@ -132,10 +133,14 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
 
         let mut avg_fitness_stats = vec![
             BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
-            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}
+        ];
         let mut avg_constraints_stats = vec![
-                BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
-                BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
+            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}
+        ];
 
         for _rep in 0..num_repetitions {
             let (_, stats1) : (EmptySolution, StochasticRankStatistics<FloatVec>) = general_evolutionary_search(
@@ -157,14 +162,29 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
                 &replacement_strategy,
                 &termination_cond,
                 &mut multi_obj_transformer);
+
+            let (_, stats3) : (EmptySolution, GFuncMultiObjStatistics<FloatVec>) = general_evolutionary_search(
+                &mut g_multi_fitness, 
+                init_population.clone(),
+                &selection,
+                &crossover,
+                perturbation.clone(), 
+                &replacement_strategy,
+                &termination_cond,
+                &mut multi_obj_transformer);
             
             for i in 0..num_iters {
+                // stats1
                 avg_fitness_stats[0].fitness[i] += stats1.solutions[i].fitness;
                 avg_constraints_stats[0].fitness[i] += stats1.solutions[i].violations;
-            }
-            for i in 0..num_iters {
+                // stats2
                 avg_fitness_stats[1].fitness[i] += stats2.solutions[i].fitness[0];
                 avg_constraints_stats[1].fitness[i] += stats2.solutions[i].fitness[1];
+                // stats3
+                avg_fitness_stats[2].fitness[i] += stats3.solutions[i].fitness[0];
+                for j in 1..stats3.solutions[i].fitness.len() {
+                    avg_constraints_stats[2].fitness[i] += stats3.solutions[i].fitness[j];
+                }
             }
 
         }
