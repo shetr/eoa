@@ -54,7 +54,7 @@ fn test_evolutionary_search() -> Result<(), Box<dyn std::error::Error>>
     let mut fitness = SphereFunc { o: vec![0.0; VEC_SIZE] };
     let perturbe_mut_op = NormalOneFiftPerturbeRealMutOp::new(1.0);
     let termination_cond = MaxIterTerminationCond { n_iters: 100 };
-    let init_population = InitRandomFloatVecPopulation { size: 10, vec_size: VEC_SIZE, mean: 0.0, std_dev: 10.0 };
+    let init_population = InitRandomFloatVecPopulation { size: 10, vec_size: VEC_SIZE, mean: 0.0, std_dev: 10.0, bounds: Vec::<Bounds>::new() };
     let selection = TournamentSelection { select_count: VEC_SIZE / 2, rounds_count: 4 };
     let crossover = OnePointCrossover {};
     let replacement_strategy = TruncationReplacementStrategy {};

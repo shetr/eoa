@@ -1,6 +1,6 @@
 use rand_distr::{Normal, Distribution};
 
-use crate::{opt_traits::*, FloatVec, NaiveBitVec};
+use crate::*;
 
 pub struct InitValue<T : OptData> {
     pub value: T
@@ -34,15 +34,20 @@ pub struct InitRandomFloatVecPopulation {
     pub size: usize,
     pub vec_size: usize,
     pub mean: f64,
-    pub std_dev: f64
+    pub std_dev: f64,
+    pub bounds: Vec<Bounds>
 }
 
 impl InitRandomFloatVecPopulation {
     fn rand_data(&self) -> Vec<f64>  {
         let normal = Normal::new(self.mean, self.std_dev).unwrap();
         let mut data = Vec::<f64>::with_capacity(self.vec_size);
-        for _ in 0..self.vec_size {
-            data.push(normal.sample(&mut rand::thread_rng()));
+        for i in 0..self.vec_size {
+            let mut value = normal.sample(&mut rand::thread_rng());
+            if self.bounds.len() == self.vec_size {
+                value = value.clamp(self.bounds[i].lower, self.bounds[i].upper);
+            }
+            data.push(value);
         }
         data
     }

@@ -122,6 +122,31 @@ pub struct MultiObjSolution<T: OptData> {
     pub fitness: Vec<Vec<f64>>
 }
 
+impl<T: OptData> MultiObjSolution<T> {
+
+    fn _join_with(&mut self, other: &Self) {
+        self.opt_front.append(&mut other.opt_front.clone());
+        self.fitness.append(&mut other.fitness.clone());
+        
+        let mut interleaved = Vec::<(Vec<f64>, T)>::with_capacity(self.opt_front.len());
+        for i in 0..self.opt_front.len() {
+            interleaved.push((self.fitness[i].clone(), self.opt_front[i].clone()));
+        }
+        self.opt_front.clear();
+        self.fitness.clear();
+        interleaved.sort_by(|a, b| Vec::<f64>::opt_cmp(&a.0, &b.0));
+        self.fitness.push(interleaved[0].0.clone());
+        self.opt_front.push(interleaved[0].1.clone());
+        for i in 1..interleaved.len() {
+            if Vec::<f64>::opt_cmp(&interleaved[i].0, &interleaved[i - 1].0) != Ordering::Equal {
+                break;
+            }
+            self.fitness.push(interleaved[i].0.clone());
+            self.opt_front.push(interleaved[i].1.clone());
+        }
+    }
+}
+
 impl<T: OptData> Solution<T, Vec<f64>, NSGA2Fitness> for MultiObjSolution<T> {
     fn from_population(population: &Vec<T>, fitness_in: &Vec<Vec<f64>>, _fitness_opt: &Vec<NSGA2Fitness>) -> Self {
         let mut indices = Vec::<usize>::new();
@@ -144,11 +169,12 @@ impl<T: OptData> Solution<T, Vec<f64>, NSGA2Fitness> for MultiObjSolution<T> {
     }
 
     fn diff(&self, _other: &Self) -> f64 {
+        // TODO: implement later
         f64::INFINITY
     }
 
-    fn is_better(&self, _other: &Self) -> bool {
-        true
+    fn is_better(&self, other: &Self) -> bool {
+        self.diff(other) > 0.0
     }
 }
 
@@ -164,6 +190,9 @@ impl<T: OptData> Statistics<T, Vec<f64>, NSGA2Fitness> for MultiObjStatistics<T>
 
     fn report_iter(&mut self, _iter: usize, population: &Vec<T>, fitness_in: &Vec<Vec<f64>>, fitness_opt: &Vec<NSGA2Fitness>) {
         let solution = MultiObjSolution::from_population(population, fitness_in, fitness_opt);
+        //if let Some(last) = self.solutions.last() {
+        //    solution.join_with(last);
+        //}
         self.solutions.push(solution);
     }
 }

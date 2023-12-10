@@ -2,6 +2,68 @@ use std::{fs::create_dir_all, rc::Rc};
 
 use crate::*;
 
+#[derive(Clone)]
+pub struct GFuncMultiObjSolution<T: OptData> {
+    pub value: T,
+    pub fitness: Vec<f64>
+}
+
+impl<T: OptData> Solution<T, Vec<f64>, NSGA2Fitness> for GFuncMultiObjSolution<T> {
+    fn from_population(population: &Vec<T>, fitness_in: &Vec<Vec<f64>>, _fitness_opt: &Vec<NSGA2Fitness>) -> Self {
+        let mut best_index = 0usize;
+        for i in 1..population.len() {
+            let mut i_violations = 0.0;
+            let mut best_violations = 0.0;
+            for j in 1.. fitness_in[i].len() {
+                i_violations += fitness_in[i][j];
+                best_violations += fitness_in[best_index][j];
+            }
+            if i_violations < best_violations {
+                best_index = i;
+            } else if i_violations == best_violations {
+                if fitness_in[i][0] < fitness_in[best_index][0] {
+                    best_index = i;
+                }
+            }
+        }
+        GFuncMultiObjSolution { value: population[best_index].clone(), fitness: fitness_in[best_index].clone() }
+    }
+
+    fn diff(&self, other: &Self) -> f64 {
+        self.fitness[0] - other.fitness[0]
+    }
+
+    fn is_better(&self, other: &Self) -> bool {
+        let mut i_violations = 0.0;
+        let mut best_violations = 0.0;
+        for j in 1.. self.fitness.len() {
+            i_violations += self.fitness[j];
+            best_violations += other.fitness[j];
+        }
+        i_violations < best_violations || (i_violations == best_violations && self.fitness[0] < other.fitness[0])
+    }
+}
+
+#[derive(Clone)]
+pub struct GFuncMultiObjStatistics<T: OptData> {
+    pub solutions: Vec<GFuncMultiObjSolution<T>>
+}
+
+impl<T: OptData> Statistics<T, Vec<f64>, NSGA2Fitness> for GFuncMultiObjStatistics<T> {
+    fn new() -> Self {
+        GFuncMultiObjStatistics { solutions: Vec::<GFuncMultiObjSolution<T>>::new() }
+    }
+
+    fn report_iter(&mut self, _iter: usize, population: &Vec<T>, fitness_in: &Vec<Vec<f64>>, fitness_opt: &Vec<NSGA2Fitness>) {
+        let mut solution = GFuncMultiObjSolution::from_population(population, fitness_in, fitness_opt);
+        if let Some(last) = self.solutions.last() {
+            if last.is_better(&solution) {
+                solution = last.clone();
+            }
+        }
+        self.solutions.push(solution);
+    }
+}
 
 pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize, population_size: usize)
 {
@@ -11,7 +73,7 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         Rc::new(G11 {}),
         Rc::new(G24 {})
     ];
-    let method_names = vec!["constrained", "constrained2"];
+    let method_names = vec!["Stochastic Ranking", "NSGA-II 2-args"];
     let g_names = vec!["g06", "g08", "g11", "g24"];
     create_dir_all("out/g_funcs").unwrap();
     for g_index in 0..g_fitnesses.len() {
@@ -32,10 +94,8 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         let optimum = g_fitness.optimum();
         let opt_value = g_fitness.eval(&optimum);
         let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
-        // TODO: maybe replace with rank selection
         let selection = RankSelection { select_count: population_size / 2 };
         let replacement_strategy = TruncationReplacementStrategy {};
-        // TODO: try BoundedNormalOneFiftPerturbeRealMutOp
         let perturbation = BoundedNormalPerturbeRealMutOp::new(
             0.1 * val_range,
             &bounds
@@ -48,7 +108,7 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
         let mut multi_obj_transformer = NSGA2FitnessTransformer::new();
 
         let init_population = InitRandomFloatVecPopulation {
-            size: population_size ,vec_size: 2, mean: mean, std_dev: 0.3 * val_range
+            size: population_size ,vec_size: 2, mean: mean, std_dev: 0.3 * val_range, bounds: bounds.clone()
         };
 
         let mut avg_stats = vec![
@@ -66,7 +126,7 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
                 &termination_cond,
                 &mut constrained_transformer);
 
-            let (_, stats2) : (EmptySolution, MultiObjStatistics<FloatVec>) = general_evolutionary_search(
+            let (_, stats2) : (EmptySolution, GFuncMultiObjStatistics<FloatVec>) = general_evolutionary_search(
                 &mut g_bi_fitness, 
                 init_population.clone(),
                 &selection,
@@ -80,11 +140,10 @@ pub fn create_g_funcs_comparison_graphs(num_repetitions: usize, num_iters: usize
                 avg_stats[0].fitness[i] += stats1.solutions[i].fitness;
             }
             for i in 0..num_iters {
-                let mut best_fitness = f64::INFINITY;
-                for fitness in &stats2.solutions[i].fitness {
-                    best_fitness = best_fitness.min(fitness[0]);
-                }
-                avg_stats[1].fitness[i] += best_fitness;
+                avg_stats[1].fitness[i] += stats2.solutions[i].fitness[0];
+
+                //avg_stats[1].fitness[i] = avg_stats[0].fitness[i];
+                //avg_stats[0].fitness[i] = avg_stats[1].fitness[i];
             }
 
         }

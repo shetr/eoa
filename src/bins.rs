@@ -7,7 +7,7 @@ struct Cli {
     num_rep: usize,
     #[arg(short = 'i', long, default_value_t = 3000)]
     num_iters: usize,
-    #[arg(short = 'p', long, default_value_t = 50)]
+    #[arg(short = 'p', long, default_value_t = 64)]
     pop_size: usize
 }
 

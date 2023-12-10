@@ -75,12 +75,12 @@ impl<T: OptData> Solution<T, f64, StochasticRankFitness> for StochasticRankSolut
         StochasticRankSolution { data: population[best_index].clone(), fitness: fitness_in[best_index], violations: fitness_opt[best_index].violations }
     }
 
-    fn diff(&self, _other: &Self) -> f64 {
-        f64::INFINITY
+    fn diff(&self, other: &Self) -> f64 {
+        self.fitness - other.fitness 
     }
 
-    fn is_better(&self, _other: &Self) -> bool {
-        true
+    fn is_better(&self, other: &Self) -> bool {
+        self.violations < other.violations || (self.violations == other.violations && self.fitness < other.fitness)
     }
 }
 
@@ -95,7 +95,12 @@ impl<T: OptData> Statistics<T, f64, StochasticRankFitness> for StochasticRankSta
     }
 
     fn report_iter(&mut self, _iter: usize, population: &Vec<T>, fitness_in: &Vec<f64>, fitness_opt: &Vec<StochasticRankFitness>) {
-        let solution = StochasticRankSolution::from_population(population, fitness_in, fitness_opt);
+        let mut solution = StochasticRankSolution::from_population(population, fitness_in, fitness_opt);
+        if let Some(last) = self.solutions.last() {
+            if last.is_better(&solution) {
+                solution = last.clone();
+            }
+        }
         self.solutions.push(solution);
     }
 }
