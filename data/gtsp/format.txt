@@ -1,9 +1,8 @@
 The file consists of three parts - header, definition of groups (regions), complete distance matrix.
 
-Header has four rows:
+Header has 3 rows:
   - N: <number of nodes>
   - M: <number of groups>
-  - Symmetric: <"true" or "false">, true ... symmetric problem, false ... asymmetric problem.
   - Best-known: <length of the best known solution>
 
 Group definition contains M rows, one row for each group. 
