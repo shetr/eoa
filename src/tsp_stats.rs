@@ -5,8 +5,8 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
     let input_files = ["att48", "berlin52", "eil76"];
     let method_names = vec!["loc_move", "loc_swap", "loc_rev", "evo_cycle", "evo_order"];
     for input_file in input_files {
-        let vert_positions = load_vert_positions(format!("data/{}.tsp", input_file).as_str());
-        let opt_vert_permutation = load_opt_permutation(format!("data/{}.opt.tour", input_file).as_str());
+        let vert_positions = load_vert_positions(format!("data/tsp/{}.tsp", input_file).as_str());
+        let opt_vert_permutation = load_opt_permutation(format!("data/tsp/{}.opt.tour", input_file).as_str());
         let vert_distances = vert_positions_to_distances(&vert_positions);
         let mut fitness = TspFitness { distances: vert_distances };
         let opt_value = fitness.eval(&opt_vert_permutation);
@@ -118,8 +118,8 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
 pub fn create_vizualization_graphs(num_iters: usize, population_size: usize)
 {
     let input_file  = "berlin52";
-    let vert_positions = load_vert_positions(format!("data/{}.tsp", input_file).as_str());
-    let opt_vert_permutation = load_opt_permutation(format!("data/{}.opt.tour", input_file).as_str());
+    let vert_positions = load_vert_positions(format!("data/tsp/{}.tsp", input_file).as_str());
+    let opt_vert_permutation = load_opt_permutation(format!("data/tsp/{}.opt.tour", input_file).as_str());
     let vert_distances = vert_positions_to_distances(&vert_positions);
     let mut fitness = TspFitness { distances: vert_distances };
     let _opt_value = fitness.eval(&opt_vert_permutation);
