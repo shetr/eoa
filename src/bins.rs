@@ -23,3 +23,9 @@ pub fn hw2()
     let args = Cli::parse();
     create_g_funcs_comparison_graphs(args.num_rep, args.num_iters, args.pop_size);
 }
+
+pub fn sem()
+{
+    let _args = Cli::parse();
+
+}
