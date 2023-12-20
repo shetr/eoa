@@ -32,6 +32,7 @@ impl VecOptData<usize> for TspPermutation {
     }
 }
 
+#[derive(Clone)]
 pub struct DistanceHalfMatrix {
     vert_count: usize,
     distances: Vec<f64>
