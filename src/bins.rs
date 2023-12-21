@@ -27,6 +27,5 @@ pub fn hw2()
 pub fn sem()
 {
     let _args = Cli::parse();
-    let problem = load_gtsp_problem("data/gtsp/a.txt");
-    print!("{}", problem.vert_count);
+    gtsp_basic_stats();
 }

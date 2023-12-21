@@ -1,3 +1,4 @@
+use crate::GroupVertPos;
 use crate::opt_data::*;
 use crate::tsp::*;
 
@@ -117,7 +118,6 @@ pub fn plot_tsp_viz(positions: &Vec<[f64; 2]>, perm: &TspPermutation, out_file_n
         }
     }
 
-
     let root = SVGBackend::new(out_file_name, (640, 480)).into_drawing_area();
 
     root.fill(&WHITE)?;
@@ -134,6 +134,42 @@ pub fn plot_tsp_viz(positions: &Vec<[f64; 2]>, perm: &TspPermutation, out_file_n
     chart.draw_series(std::iter::once(PathElement::new(vertices, RED)))?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
+    root.present()?;
+    Ok(())
+}
+
+
+pub fn plot_points(positions: &Vec<GroupVertPos>, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
+{
+    let mut max = [f64::NEG_INFINITY; 2];
+    let mut min = [f64::INFINITY; 2];
+    for i in 0..positions.len() {
+        for d in 0..2 {
+            max[d] = max[d].max(positions[i].pos[d]);
+            min[d] = min[d].min(positions[i].pos[d]);
+        }
+    }
+
+    for d in 0..2 {
+        let diameter = max[d] - min[d];
+        max[d] += 0.1 * diameter;
+        min[d] -= 0.1 * diameter;
+    }
+
+    let root = SVGBackend::new(out_file_name, (640, 480)).into_drawing_area();
+
+    root.fill(&WHITE)?;
+
+    let mut chart = ChartBuilder::on(&root)
+        .caption(plot_name, ("sans-serif", 50))
+        .build_cartesian_2d(min[0]..max[0], min[1]..max[1])?;
+
+    chart.draw_series(
+        positions
+            .iter()
+            .map(|vert| Circle::new((vert.pos[0], vert.pos[1]), 2, RED.filled())),
+    )?;
+
     root.present()?;
     Ok(())
 }

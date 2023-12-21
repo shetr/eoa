@@ -50,6 +50,10 @@ impl DistanceHalfMatrix {
         DistanceHalfMatrix { vert_count: vert_count, distances: distances.clone() }
     }
 
+    pub fn get_vert_count(&self) -> usize {
+        self.vert_count
+    }
+
     pub fn get(&self, v1: usize, v2: usize) -> f64 {
         self.distances[self.get_index(v1, v2)]
     }
