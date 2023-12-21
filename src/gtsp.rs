@@ -6,6 +6,7 @@ use crate::*;
 #[derive(Clone)]
 pub struct GtspProblem {
     pub vert_count: usize,
+    pub best_known: f64,
     pub groups: Vec<Vec<usize>>,
     pub distances: DistanceHalfMatrix
 }
@@ -130,6 +131,12 @@ impl PerturbeMutOp<GtspPermutation> for GtspReverseGroupPerturbation {
 pub struct GtspRandGroupVertPerturbation {
     // recommended to set to 1/number of groups
     pub change_prob: f64
+}
+
+impl GtspRandGroupVertPerturbation {
+    pub fn new(groups_count: usize) -> Self {
+        GtspRandGroupVertPerturbation { change_prob: 1.0 / (groups_count as f64) }
+    }
 }
 
 impl PerturbeMutOp<GtspPermutation> for GtspRandGroupVertPerturbation {

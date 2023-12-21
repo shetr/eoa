@@ -149,6 +149,22 @@ impl<T: OptData, PerturbeMutOpT : PerturbeMutOp<T>> NoClonePerturbeMutOp<T> for 
 }
 
 #[derive(Clone)]
+pub struct ProbPerturbeMutOp<T: OptData> {
+    pub prob: f64,
+    pub op: Rc<dyn NoClonePerturbeMutOp<T>>
+}
+
+#[derive(Clone)]
 pub struct CombinePerturbeMutOps<T: OptData> {
-    pub mut_ops: Vec<Rc<dyn NoClonePerturbeMutOp<T>>>
+    pub mut_ops: Vec<ProbPerturbeMutOp<T>>
+}
+
+impl<T: OptData> PerturbeMutOp<T> for CombinePerturbeMutOps<T> {
+    fn eval(&self, data: &mut T) {
+        for mut_op in &self.mut_ops {
+            if rand::random::<f64>() < mut_op.prob {
+                mut_op.op.eval_no_clone(data);
+            }
+        }
+    }
 }
