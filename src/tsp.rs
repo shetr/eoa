@@ -136,21 +136,25 @@ impl InitFunc<TspPermutation> for InitTspPopulation {
 pub struct TspMovePerturbation {
 }
 
+pub fn tsp_move_perturbation<V: Copy>(perm: &mut Vec<V>) {
+    let move_from = rand::thread_rng().gen_range(0..perm.len());
+    let move_to = rand::thread_rng().gen_range(0..perm.len());
+    let vert_to_move = perm[move_from];
+    if move_to >= move_from {
+        for i in move_from..move_to {
+            perm[i] = perm[i + 1];
+        }
+    } else {
+        for i in (move_to..move_from).rev() {
+            perm[i + 1] = perm[i];
+        }
+    }
+    perm[move_to] = vert_to_move;
+}
+
 impl PerturbeMutOp<TspPermutation> for TspMovePerturbation {
     fn eval(&self, data: &mut TspPermutation) {
-        let move_from = rand::thread_rng().gen_range(0..data.dim());
-        let move_to = rand::thread_rng().gen_range(0..data.dim());
-        let vert_to_move = data.vert_perm[move_from];
-        if move_to >= move_from {
-            for i in move_from..move_to {
-                data.vert_perm[i] = data.vert_perm[i + 1];
-            }
-        } else {
-            for i in (move_to..move_from).rev() {
-                data.vert_perm[i + 1] = data.vert_perm[i];
-            }
-        }
-        data.vert_perm[move_to] = vert_to_move;
+        tsp_move_perturbation(&mut data.vert_perm);
     }
 }
 
@@ -158,13 +162,17 @@ impl PerturbeMutOp<TspPermutation> for TspMovePerturbation {
 pub struct TspSwapPerturbation {
 }
 
+pub fn tsp_swap_perturbation<V: Copy>(perm: &mut Vec<V>) {
+    let pos1 = rand::thread_rng().gen_range(0..perm.len());
+    let pos2 = rand::thread_rng().gen_range(0..perm.len());
+    let temp = perm[pos1];
+    perm[pos1] = perm[pos2];
+    perm[pos2] = temp;
+}
+
 impl PerturbeMutOp<TspPermutation> for TspSwapPerturbation {
     fn eval(&self, data: &mut TspPermutation) {
-        let pos1 = rand::thread_rng().gen_range(0..data.dim());
-        let pos2 = rand::thread_rng().gen_range(0..data.dim());
-        let temp = data.vert_perm[pos1];
-        data.vert_perm[pos1] = data.vert_perm[pos2];
-        data.vert_perm[pos2] = temp;
+        tsp_swap_perturbation(&mut data.vert_perm);
     }
 }
 
@@ -172,21 +180,25 @@ impl PerturbeMutOp<TspPermutation> for TspSwapPerturbation {
 pub struct TspReversePerturbation {
 }
 
+pub fn tsp_reverse_perturbation<V: Copy>(perm: &mut Vec<V>) {
+    let from = rand::thread_rng().gen_range(0..perm.len());
+    let mut to = rand::thread_rng().gen_range(0..perm.len());
+    if to < from {
+        to += perm.len();
+    }
+    let range_len = to - from;
+    for offset in 0..(range_len / 2) {
+        let pos1 = (from + offset) % perm.len();
+        let pos2 = (to - offset) % perm.len();
+        let temp = perm[pos1];
+        perm[pos1] = perm[pos2];
+        perm[pos2] = temp;
+    }
+}
+
 impl PerturbeMutOp<TspPermutation> for TspReversePerturbation {
     fn eval(&self, data: &mut TspPermutation) {
-        let from = rand::thread_rng().gen_range(0..data.dim());
-        let mut to = rand::thread_rng().gen_range(0..data.dim());
-        if to < from {
-            to += data.dim();
-        }
-        let range_len = to - from;
-        for offset in 0..(range_len / 2) {
-            let pos1 = (from + offset) % data.dim();
-            let pos2 = (to - offset) % data.dim();
-            let temp = data.vert_perm[pos1];
-            data.vert_perm[pos1] = data.vert_perm[pos2];
-            data.vert_perm[pos2] = temp;
-        }
+        tsp_reverse_perturbation(&mut data.vert_perm);
     }
 }
 

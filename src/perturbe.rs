@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use rand_distr::{Cauchy, Normal, Distribution};
 
 use crate::opt_traits::*;
@@ -134,4 +136,19 @@ impl PerturbeMutOp<FloatVec> for CauchyPerturbeRealMutOp {
             *value = *value + self.cauchy.sample(&mut rand::thread_rng());
         }
     }
+}
+
+pub trait NoClonePerturbeMutOp<T: OptData> {
+    fn eval_no_clone(&self, data: &mut T);
+}
+
+impl<T: OptData, PerturbeMutOpT : PerturbeMutOp<T>> NoClonePerturbeMutOp<T> for PerturbeMutOpT {
+    fn eval_no_clone(&self, data: &mut T) {
+        self.eval(data)
+    }
+}
+
+#[derive(Clone)]
+pub struct CombinePerturbeMutOps<T: OptData> {
+    pub mut_ops: Vec<Rc<dyn NoClonePerturbeMutOp<T>>>
 }

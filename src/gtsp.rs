@@ -95,3 +95,49 @@ impl InitFunc<GtspPermutation> for InitRandomGtspPopulation {
         self.gen_perm(&mut place_used)
     }
 }
+
+#[derive(Clone)]
+pub struct GtspMoveGroupPerturbation {
+}
+
+impl PerturbeMutOp<GtspPermutation> for GtspMoveGroupPerturbation {
+    fn eval(&self, data: &mut GtspPermutation) {
+        tsp_move_perturbation(&mut data.perm);
+    }
+}
+
+#[derive(Clone)]
+pub struct GtspSwapGroupPerturbation {
+}
+
+impl PerturbeMutOp<GtspPermutation> for GtspSwapGroupPerturbation {
+    fn eval(&self, data: &mut GtspPermutation) {
+        tsp_swap_perturbation(&mut data.perm);
+    }
+}
+
+#[derive(Clone)]
+pub struct GtspReverseGroupPerturbation {
+}
+
+impl PerturbeMutOp<GtspPermutation> for GtspReverseGroupPerturbation {
+    fn eval(&self, data: &mut GtspPermutation) {
+        tsp_reverse_perturbation(&mut data.perm);
+    }
+}
+
+#[derive(Clone)]
+pub struct GtspRandGroupVertPerturbation {
+    // recommended to set to 1/number of groups
+    pub change_prob: f64
+}
+
+impl PerturbeMutOp<GtspPermutation> for GtspRandGroupVertPerturbation {
+    fn eval(&self, data: &mut GtspPermutation) {
+        for i in 0..data.perm.len() {
+            if rand::random::<f64>() < self.change_prob {
+                data.perm[i].vert = rand::thread_rng().gen_range(0..data.spec.groups[i].len());
+            }
+        }
+    }
+}
