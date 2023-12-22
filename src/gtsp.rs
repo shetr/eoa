@@ -174,3 +174,47 @@ pub fn crossover_gtsp_data<CrossoverFunT : CrossoverFun<GroupVert>>
         offsprings.push(offspring2);
     }
 }
+
+pub fn gtsp_one_point_city_crossover(parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
+    let split_index = rand::thread_rng().gen_range(0..parents[0].len());
+    let mut group_indices = vec![[0usize;2]; parents[0].len()];
+    for i in 0..parents[0].len() {
+        for p in 0..2 {
+            group_indices[parents[p][i].group][p] = i;
+        }
+    }
+    for i in 0..parents[0].len() {
+        for o in 0..2 {
+            offsprings[o].push(parents[o][i].clone());
+            let g = parents[o][i].group;
+            let vert_parent = if g < split_index { o } else { 1 - o } as usize;
+            let g_index = group_indices[g][vert_parent];
+            offsprings[o][i].vert = parents[vert_parent][g_index].vert;
+        }
+    }
+}
+
+struct GtspCrossover {
+    pub cycle_prob: f64,
+    pub order_prob: f64
+}
+
+impl CrossoverFun<GroupVert> for GtspCrossover {
+    fn crossover_fun(&self, parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
+        let r = rand::random::<f64>();
+        if r <= self.cycle_prob {
+            tsp_cycle_crossover(parents, offsprings);
+        } else {
+            for p in 0..2 {
+                *offsprings[p] = parents[p].clone();
+            }
+        }
+        //tsp_order_crossover(parents, offsprings);
+    }
+}
+
+impl Crossover<GtspPermutation> for GtspCrossover {
+    fn crossover(&self, population: &Vec<GtspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<GtspPermutation>) {
+        crossover_gtsp_data(population, parents_indices, offsprings, self);
+    }
+}
