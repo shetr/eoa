@@ -3,6 +3,7 @@ use crate::*;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufRead;
+use std::io::Write;
 use rand::Rng;
 
 pub fn load_gtsp_problem(file_path: &str) -> GtspProblem {
@@ -39,6 +40,57 @@ pub fn load_gtsp_problem(file_path: &str) -> GtspProblem {
     }
 
     problem
+}
+
+pub fn save_gtsp_problem(file_path: &str, problem: &GtspProblem)
+{
+    let mut file = File::create(file_path).expect("unable to create a file.");
+    file.write(format!("{}\n", problem.vert_count).as_bytes()).unwrap();
+    file.write(format!("{}\n", problem.groups.len()).as_bytes()).unwrap();
+    file.write(format!("{}\n", problem.best_known).as_bytes()).unwrap();
+    for g in 0..problem.groups.len() {
+        let line: String = problem.groups[g].iter().map(|v| v.to_string())
+            .fold(problem.groups[g].len().to_string(), |acc, s| String::from(acc) + " " + &s);
+        file.write(format!("{}\n", line).as_bytes()).unwrap();
+    }
+    for v1 in 0..problem.vert_count {
+        let mut line = String::from("");
+        for v2 in 0..problem.vert_count {
+            line += &problem.distances.get(v1, v2).to_string();
+        }
+        file.write(format!("{}\n", line).as_bytes()).unwrap();
+    }
+}
+
+pub fn load_gtsp_positions(file_path: &str) -> Vec<GroupVertPos>
+{
+    let file = File::open(file_path).expect("file wasn't found.");
+    let reader = BufReader::new(file);
+
+    reader
+        .lines()
+        .map(|line| {
+            let line_nums : Vec<String> = line.unwrap().split_whitespace().map(|num| String::from(num)).collect();
+            if line_nums.len() != 3 {
+                panic!("incorect format of vertex positons");
+            }
+            GroupVertPos {
+                group: line_nums[0].parse().unwrap(),
+                pos: [
+                    line_nums[1].parse::<f64>().unwrap(),
+                    line_nums[2].parse::<f64>().unwrap()
+                ]
+            }
+        })
+        .collect()
+}
+
+pub fn save_gtsp_positions(file_path: &str, positions: &Vec<GroupVertPos>)
+{
+    let mut file = File::create(file_path).expect("unable to create a file.");
+    for v in positions {
+        file.write(format!("{} {} {}\n", v.group, v.pos[0], v.pos[1]).as_bytes()).unwrap();
+    }
 }
 
 pub fn are_distances_euclidean(distances: &DistanceHalfMatrix) -> bool {
@@ -205,6 +257,12 @@ pub fn gen_euclidean_gtsp_problem(vert_count: usize, group_count: usize) -> (Gts
         // assing current result
         for g in 0..group_count {
             prev_groups[g] = problem.groups[g].clone();
+        }
+    }
+    // assign groups to positons
+    for g in 0..group_count {
+        for v in &problem.groups[g] {
+            positions[*v].group = g;
         }
     }
     // return result

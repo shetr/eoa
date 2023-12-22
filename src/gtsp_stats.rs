@@ -15,3 +15,13 @@ pub fn gtsp_basic_stats() {
         break;
     }
 }
+
+pub fn gtsp_gen_problem() {
+    let (problem, positions) = gen_euclidean_gtsp_problem(24, 5);
+    println!("vert count: {}", problem.vert_count);
+    println!("group count: {}", problem.groups.len());
+    println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
+    println!("metric:     {}", are_distances_a_metric(&problem.distances));
+    let colors = uniform_colors(problem.groups.len(), 0.25, 0.75);
+    plot_points(&positions, &colors, "out/points.svg", "gen points").unwrap();
+}
