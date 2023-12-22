@@ -28,5 +28,5 @@ pub fn sem()
 {
     // TODO: try seeding random generators
     let _args = Cli::parse();
-    gtsp_gen_problem();
+    gtsp_basic_stats_gen_instance();
 }

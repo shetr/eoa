@@ -56,6 +56,9 @@ pub fn save_gtsp_problem(file_path: &str, problem: &GtspProblem)
     for v1 in 0..problem.vert_count {
         let mut line = String::from("");
         for v2 in 0..problem.vert_count {
+            if v2 > 0 {
+                line += " ";
+            }
             line += &problem.distances.get(v1, v2).to_string();
         }
         file.write(format!("{}\n", line).as_bytes()).unwrap();

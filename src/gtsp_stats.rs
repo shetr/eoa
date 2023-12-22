@@ -16,6 +16,17 @@ pub fn gtsp_basic_stats() {
     }
 }
 
+pub fn gtsp_basic_stats_gen_instance() {
+    let problem = load_gtsp_problem("data/gtsp/gen1.txt");
+    let positions = load_gtsp_positions("data/gtsp/gen1_pos.txt");
+    println!("vert count: {}", problem.vert_count);
+    println!("group count: {}", problem.groups.len());
+    println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
+    println!("metric:     {}", are_distances_a_metric(&problem.distances));
+    let colors = uniform_colors(problem.groups.len(), 0.25, 0.75);
+    plot_points(&positions, &colors, "out/points.svg", "gen points").unwrap();
+}
+
 pub fn gtsp_gen_problem() {
     let (problem, positions) = gen_euclidean_gtsp_problem(24, 5);
     println!("vert count: {}", problem.vert_count);
@@ -24,4 +35,6 @@ pub fn gtsp_gen_problem() {
     println!("metric:     {}", are_distances_a_metric(&problem.distances));
     let colors = uniform_colors(problem.groups.len(), 0.25, 0.75);
     plot_points(&positions, &colors, "out/points.svg", "gen points").unwrap();
+    save_gtsp_problem("data/gtsp/gen1.txt", &problem);
+    save_gtsp_positions("data/gtsp/gen1_pos.txt", &positions);
 }
