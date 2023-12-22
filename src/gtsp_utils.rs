@@ -49,7 +49,7 @@ pub fn save_gtsp_problem(file_path: &str, problem: &GtspProblem)
     file.write(format!("{}\n", problem.groups.len()).as_bytes()).unwrap();
     file.write(format!("{}\n", problem.best_known).as_bytes()).unwrap();
     for g in 0..problem.groups.len() {
-        let line: String = problem.groups[g].iter().map(|v| v.to_string())
+        let line: String = problem.groups[g].iter().map(|v| (v + 1).to_string())
             .fold(problem.groups[g].len().to_string(), |acc, s| String::from(acc) + " " + &s);
         file.write(format!("{}\n", line).as_bytes()).unwrap();
     }

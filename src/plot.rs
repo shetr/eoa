@@ -1,4 +1,5 @@
 use crate::GroupVertPos;
+use crate::GtspPermutation;
 use crate::opt_data::*;
 use crate::tsp::*;
 
@@ -139,7 +140,7 @@ pub fn plot_tsp_viz(positions: &Vec<[f64; 2]>, perm: &TspPermutation, out_file_n
 }
 
 
-pub fn plot_points(positions: &Vec<GroupVertPos>, group_colors: &Vec<RGBColor>, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_gtsp_points(positions: &Vec<GroupVertPos>, group_colors: &Vec<RGBColor>, point_size: i32, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max = [f64::NEG_INFINITY; 2];
     let mut min = [f64::INFINITY; 2];
@@ -167,7 +168,51 @@ pub fn plot_points(positions: &Vec<GroupVertPos>, group_colors: &Vec<RGBColor>, 
     chart.draw_series(
         positions
             .iter()
-            .map(|vert| Circle::new((vert.pos[0], vert.pos[1]), 2, group_colors[vert.group].filled())),
+            .map(|vert| Circle::new((vert.pos[0], vert.pos[1]), point_size, group_colors[vert.group].filled())),
+    )?;
+
+    root.present()?;
+    Ok(())
+}
+
+pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutation, group_colors: &Vec<RGBColor>, point_size: i32, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
+{
+    let mut max = [f64::NEG_INFINITY; 2];
+    let mut min = [f64::INFINITY; 2];
+    for i in 0..positions.len() {
+        for d in 0..2 {
+            max[d] = max[d].max(positions[i].pos[d]);
+            min[d] = min[d].min(positions[i].pos[d]);
+        }
+    }
+
+    for d in 0..2 {
+        let diameter = max[d] - min[d];
+        max[d] += 0.1 * diameter;
+        min[d] -= 0.1 * diameter;
+    }
+
+    let root = SVGBackend::new(out_file_name, (640, 480)).into_drawing_area();
+
+    root.fill(&WHITE)?;
+
+    let mut chart = ChartBuilder::on(&root)
+        .caption(plot_name, ("sans-serif", 50))
+        .build_cartesian_2d(min[0]..max[0], min[1]..max[1])?;
+
+    let mut vertices: Vec<(f64, f64)> = (0..solution.perm.len()).map(|i| {
+        let v = solution.spec.groups[solution.perm[i].group][solution.perm[i].vert];
+        (positions[v].pos[0], positions[v].pos[1])
+    }).collect();
+    let v0 = solution.spec.groups[solution.perm[0].group][solution.perm[0].vert];
+    vertices.push((positions[v0].pos[0], positions[v0].pos[1]));
+
+    chart.draw_series(std::iter::once(PathElement::new(vertices, BLACK)))?;
+
+    chart.draw_series(
+        positions
+            .iter()
+            .map(|vert| Circle::new((vert.pos[0], vert.pos[1]), point_size, group_colors[vert.group].filled())),
     )?;
 
     root.present()?;
