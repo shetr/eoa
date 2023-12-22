@@ -19,6 +19,12 @@ pub struct GroupVert {
     pub vert: usize
 }
 
+impl PartialEq for GroupVert {
+    fn eq(&self, other: &Self) -> bool {
+        self.group == other.group && self.vert == other.vert
+    }
+}
+
 #[derive(Clone)]
 pub struct GtspPermutation {
     pub spec: Rc<GtspProblem>,
@@ -146,5 +152,25 @@ impl PerturbeMutOp<GtspPermutation> for GtspRandGroupVertPerturbation {
                 data.perm[i].vert = rand::thread_rng().gen_range(0..data.spec.groups[i].len());
             }
         }
+    }
+}
+
+pub fn crossover_gtsp_data<CrossoverFunT : CrossoverFun<GroupVert>>
+    (population: &Vec<GtspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<GtspPermutation>, crossover_fun: &CrossoverFunT)
+{
+    offsprings.clear();
+    for i in (0..parents_indices.len()).step_by(2) {
+        if i + 1 >= parents_indices.len() {
+            continue;
+        }
+        let parent1 = population.get(parents_indices[i]).unwrap();
+        let parent2 = population.get(parents_indices[i + 1]).unwrap();
+        let mut offspring1 = GtspPermutation { spec: parent1.spec.clone(), perm: Vec::<GroupVert>::with_capacity(parent1.perm.len()) };
+        let mut offspring2 = GtspPermutation { spec: parent2.spec.clone(), perm: Vec::<GroupVert>::with_capacity(parent2.perm.len()) };
+        let curr_parents = [&parent1.perm, &parent2.perm];
+        let curr_offsprings = [&mut offspring1.perm, &mut offspring2.perm];
+        crossover_fun.crossover_fun(curr_parents, curr_offsprings);
+        offsprings.push(offspring1);
+        offsprings.push(offspring2);
     }
 }

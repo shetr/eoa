@@ -12,7 +12,7 @@ pub fn gtsp_basic_stats() {
         println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
         println!("metric:     {}", are_distances_a_metric(&problem.distances));
         let positions = gtsp_force_directed_positions(&problem);
-        let colors = uniform_colors(problem.groups.len(), 0.25, 0.75);
+        let colors = uniform_colors(problem.groups.len());
         plot_gtsp_points(&positions, &colors, 4, "out/points.svg", problem_name).unwrap();
         break;
     }
@@ -25,7 +25,7 @@ pub fn gtsp_basic_stats_gen_instance() {
     println!("group count: {}", problem.groups.len());
     println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
     println!("metric:     {}", are_distances_a_metric(&problem.distances));
-    let colors = uniform_colors(problem.groups.len(), 0.25, 0.75);
+    let colors = uniform_colors(problem.groups.len());
     let mut perm = GtspPermutation {
         spec: Rc::new(problem.clone()),
         perm: Vec::new()
@@ -42,7 +42,7 @@ pub fn gtsp_gen_problem() {
     println!("group count: {}", problem.groups.len());
     println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
     println!("metric:     {}", are_distances_a_metric(&problem.distances));
-    let colors = uniform_colors(problem.groups.len(), 0.25, 0.75);
+    let colors = uniform_colors(problem.groups.len());
     plot_gtsp_points(&positions, &colors, 4, "out/points.svg", "gen points").unwrap();
     save_gtsp_problem("data/gtsp/gen1.txt", &problem);
     save_gtsp_positions("data/gtsp/gen1_pos.txt", &positions);

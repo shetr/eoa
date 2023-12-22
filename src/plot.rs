@@ -219,22 +219,15 @@ pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutat
     Ok(())
 }
 
-pub fn uniform_colors(colors_count: usize, min: f64, max: f64) -> Vec<RGBColor> {
-    let dim_count = (colors_count as f64).powf(1.0 / 3.0).ceil() as usize;
-    let mut colors = Vec::<RGBColor>::with_capacity(dim_count);
-    let size = max - min;
-    for ri in 0..dim_count {
-        for gi in 0..dim_count {
-            for bi in 0..dim_count {
-                colors.push(
-                    RGBColor(
-                        ((min + size * (ri as f64) / ((dim_count - 1) as f64)) * 255.0) as u8,
-                        ((min + size * (gi as f64) / ((dim_count - 1) as f64)) * 255.0) as u8,
-                        ((min + size * (bi as f64) / ((dim_count - 1) as f64)) * 255.0) as u8
-                    )
-                );
-            }
-        }
+fn hsl_to_rgb(color: HSLColor) -> RGBColor {
+    let (r, g, b) = color.rgb();
+    RGBColor(r, g, b)
+}
+
+pub fn uniform_colors(colors_count: usize) -> Vec<RGBColor> {
+    let mut colors = Vec::<RGBColor>::with_capacity(colors_count);
+    for i in 0..colors_count {
+        colors.push(hsl_to_rgb(HSLColor((i as f64) / (colors_count as f64), 0.9, 0.5)));
     }
     colors
 }
