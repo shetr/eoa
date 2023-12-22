@@ -26,6 +26,7 @@ pub fn hw2()
 
 pub fn sem()
 {
+    // TODO: try seeding random generators
     let _args = Cli::parse();
     gtsp_basic_stats();
 }

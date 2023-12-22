@@ -56,6 +56,20 @@ impl<T: Ord> LimitedBinaryHeap<T> {
 
 }
 
+pub fn distance(p1: [f64; 2], p2: [f64; 2]) -> f64 {
+    squared_distance(p1, p2).sqrt()
+}
+
+pub fn squared_distance(p1: [f64; 2], p2: [f64; 2]) -> f64 {
+    let mut dist = 0.0;
+    for d in 0..2 {
+        let diff = p1[d] - p2[d];
+        dist += diff * diff;
+    }
+    dist
+}
+
+
 #[cfg(test)]
 mod tests {
 

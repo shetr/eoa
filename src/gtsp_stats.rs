@@ -10,7 +10,8 @@ pub fn gtsp_basic_stats() {
         println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
         println!("metric:     {}", are_distances_a_metric(&problem.distances));
         let positions = gtsp_force_directed_positions(&problem);
-        plot_points(&positions, "out/points.svg", problem_name).unwrap();
+        let colors = uniform_colors(problem.groups.len(), 0.25, 0.75);
+        plot_points(&positions, &colors, "out/points.svg", problem_name).unwrap();
         break;
     }
 }

@@ -139,7 +139,7 @@ pub fn plot_tsp_viz(positions: &Vec<[f64; 2]>, perm: &TspPermutation, out_file_n
 }
 
 
-pub fn plot_points(positions: &Vec<GroupVertPos>, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_points(positions: &Vec<GroupVertPos>, group_colors: &Vec<RGBColor>, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max = [f64::NEG_INFINITY; 2];
     let mut min = [f64::INFINITY; 2];
@@ -167,9 +167,44 @@ pub fn plot_points(positions: &Vec<GroupVertPos>, out_file_name: &str, plot_name
     chart.draw_series(
         positions
             .iter()
-            .map(|vert| Circle::new((vert.pos[0], vert.pos[1]), 2, RED.filled())),
+            .map(|vert| Circle::new((vert.pos[0], vert.pos[1]), 2, group_colors[vert.group].filled())),
     )?;
 
     root.present()?;
     Ok(())
+}
+
+pub fn uniform_colors(colors_count: usize, min: f64, max: f64) -> Vec<RGBColor> {
+    let dim_count = (colors_count as f64).powf(1.0 / 3.0).ceil() as usize;
+    let mut colors = Vec::<RGBColor>::with_capacity(dim_count);
+    let size = max - min;
+    for ri in 0..dim_count {
+        for gi in 0..dim_count {
+            for bi in 0..dim_count {
+                colors.push(
+                    RGBColor(
+                        ((min + size * (ri as f64) / ((dim_count - 1) as f64)) * 255.0) as u8,
+                        ((min + size * (gi as f64) / ((dim_count - 1) as f64)) * 255.0) as u8,
+                        ((min + size * (bi as f64) / ((dim_count - 1) as f64)) * 255.0) as u8
+                    )
+                );
+            }
+        }
+    }
+    colors
+}
+
+pub fn rand_colors(colors_count: usize, min: f64, max: f64) -> Vec<RGBColor> {
+    let mut colors = Vec::<RGBColor>::with_capacity(colors_count);
+    let size = max - min;
+    for _ in 0..colors_count {
+        colors.push(
+            RGBColor(
+                ((min + size * rand::random::<f64>()) * 255.0) as u8,
+                ((min + size * rand::random::<f64>()) * 255.0) as u8,
+                ((min + size * rand::random::<f64>()) * 255.0) as u8
+            )
+        );
+    }
+    colors
 }
