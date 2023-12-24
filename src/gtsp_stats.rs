@@ -90,7 +90,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
         for _rep in 0..num_repetitions {
 
             // local searches
-            let (_, stats1) = evolutionary_search(
+            let (_, stats1) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                = evolutionary_search(
                 &mut fitness, 
                 local_init_population.clone(),
                 &local_selection,
@@ -99,7 +100,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
                 &local_replacement_strategy,
                 &local_termination_cond);
 
-            let (_, stats2) = evolutionary_search(
+            let (_, stats2) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                 = evolutionary_search(
                 &mut fitness, 
                 local_init_population.clone(),
                 &local_selection,
@@ -108,7 +110,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
                 &local_replacement_strategy,
                 &local_termination_cond);
 
-            let (_, stats3) = evolutionary_search(
+            let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                 = evolutionary_search(
                 &mut fitness, 
                 local_init_population.clone(),
                 &local_selection,
@@ -119,7 +122,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
             
             // evolutionary searches
 
-            let (_sol, stats4) = evolutionary_search(
+            let (_, stats4) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                 = evolutionary_search(
                 &mut fitness, 
                 evo_init_population.clone(),
                 &evo_selection,
@@ -128,7 +132,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
                 &evo_replacement_strategy,
                 &evo_termination_cond);
 
-            let (_, stats5) = evolutionary_search(
+            let (_, stats5) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                 = evolutionary_search(
                 &mut fitness, 
                 evo_init_population.clone(),
                 &evo_selection,
@@ -136,8 +141,6 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
                 move_perturbation.clone(), 
                 &evo_replacement_strategy,
                 &evo_termination_cond);
-
-            //println!("{} {}", input_file, _sol.fitness.to_string());
 
             let curr_stats = vec![stats1, stats2, stats3, stats4, stats5];
             for s in 0..avg_stats.len() {
@@ -172,7 +175,8 @@ pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
 
     let order_crossover = GtspOrderCrossover::new();
 
-    let (sol, _) = evolutionary_search(
+    let (sol, _) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+         = evolutionary_search(
         &mut fitness, 
         evo_init_population.clone(),
         &evo_selection,
@@ -185,3 +189,19 @@ pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
     plot_gtsp_solution(&positions, &sol.value, &colors, 4, "out/gtsp/gen1_viz.svg", "gen1").unwrap();
     
 }
+
+// TODO:
+// hledani optimalnich parametru
+// pravdepodobnosti u local searche u perturbacnich operatoru
+// - 4 varianty: move, swap, rev a vsechny dohromady
+// pravdepodobnosti u evolucnich algoritmu - perturbacni operatory a crossover
+// - uvidim podle toho jak dopadne u local searche
+// - nejspis udelat pro obecny perturbacni operator a obecny crossover operator, celkem tedy 7 pravděpodobností
+// grafy porovnani pro zakladni nastaveni parametru - mam
+// - vyresit ruzne iterace u local searche a evolucniho alg.
+// grafy porovnani pro optimalni nalezene parametry
+// - porovnani optimalinho local searche, optimalniho evolucniho algoritmu, specializovaneho algoritmu nastaveneho jako evolucni alg
+// - specializovany udelat pomoci heuristiky, potom predano jako init do evolucniho algoritmu
+// vizualizace heuristickeho reseni pouziteho v specializovanem algoritmu, staci jeden priklad pro kazdy dataset (idealne, ale 1 dataset by taky stacil)
+// vizualizace behu jednoho vybraneho algoritmu - ukazat ten nejlepsi, idealne na slozitejsim problemu (pokud pujde snadno zobrazit)
+

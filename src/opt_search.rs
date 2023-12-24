@@ -99,7 +99,8 @@ pub fn evolutionary_search<
         CrossoverT: Crossover<T>,
         PerturbeMutOpT: PerturbeMutOp<T>,
         ReplacementStrategyT: ReplacementStrategy<T, f64, f64>,
-        TerminationCondT: TerminationCond<T>
+        TerminationCondT: TerminationCond<T>,
+        StatisticsT: Statistics<T, f64, f64>
     >(
         fitness_func: &mut FitnessFuncT,
         init_population: InitPopulationT,
@@ -109,7 +110,7 @@ pub fn evolutionary_search<
         replacement_strategy: &ReplacementStrategyT,
         termination_cond: &TerminationCondT
     )
-    -> (BSFSingleObjSolution<T>, BSFSingleObjStatistics)
+    -> (BSFSingleObjSolution<T>, StatisticsT)
 {
     let mut population = InitPopulation::init(&init_population);
     let mut fitness = Vec::<f64>::with_capacity(population.len());
@@ -124,8 +125,7 @@ pub fn evolutionary_search<
     let mut best_index = find_best(&fitness);
     let mut best_value = population[best_index].clone();
     let mut best_fitness = fitness[best_index];
-    let mut stats = BSFSingleObjStatistics { fitness: Vec::<f64>::new() };
-    stats.fitness.push(fitness[best_index]);
+    let mut stats = StatisticsT::new();
     while !termination_cond.eval(iter, diff) {
         selection.select(&fitness, &mut parents_indices);
         crossover.crossover(&population, &parents_indices, &mut offsprings);
@@ -145,7 +145,7 @@ pub fn evolutionary_search<
         }
         diff = curr_best_fitness - prev_best_fitness;
         perturbe_mut_op.update(diff, population[0].dim());
-        stats.fitness.push(best_fitness);
+        stats.report_iter(iter, &population, &fitness, &fitness2);
         iter += 1;
     }
     (BSFSingleObjSolution::<T> { value: best_value, fitness: best_fitness }, stats)

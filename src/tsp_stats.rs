@@ -135,7 +135,9 @@ pub fn create_vizualization_graphs(num_iters: usize, population_size: usize)
     
     let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
 
-    let (solution, _stats) = evolutionary_search(
+    let (solution, _stats)
+        : (BSFSingleObjSolution<TspPermutation>, BSFSingleObjStatistics) =
+        evolutionary_search(
         &mut fitness, 
         init_population.clone(),
         &selection,
