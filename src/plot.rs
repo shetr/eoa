@@ -232,6 +232,8 @@ pub fn uniform_colors(colors_count: usize) -> Vec<RGBColor> {
     colors
 }
 
+// TODO: Generate better distribute colors based on the distance matrix
+
 pub fn rand_colors(colors_count: usize, min: f64, max: f64) -> Vec<RGBColor> {
     let mut colors = Vec::<RGBColor>::with_capacity(colors_count);
     let size = max - min;

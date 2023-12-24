@@ -3,6 +3,17 @@ use crate::utils::*;
 use rand::Rng;
 use std::cmp::Ordering;
 
+pub struct IdentitySelection {}
+
+impl<T : OptData, F: Fitness> Selection<T, F> for IdentitySelection {
+    fn select(&self, fitness: &Vec<F>, parents_indices: &mut Vec<usize>) {
+        parents_indices.clear();
+        for i in 0..fitness.len() {
+            parents_indices.push(i);
+        }
+    }
+}
+
 pub struct TournamentSelection {
     pub select_count: usize,
     pub rounds_count: usize

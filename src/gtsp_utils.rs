@@ -168,6 +168,7 @@ pub fn gtsp_force_directed_positions(problem: &GtspProblem) -> Vec<GroupVertPos>
             }
         }
     }
+    // TODO: implement force-directed layout, attracting forces are based on distance matrix and group idex, repeling force by distance in vizualization
     let max_iter = 100;
     let mut iter = 0;
     while iter < max_iter {

@@ -54,6 +54,12 @@ impl FitnessFunc<GtspPermutation> for GtspFitness {
     }
 }
 
+impl TerminationCond<GtspPermutation> for MaxIterTerminationCond {
+    fn eval(&self, iter: usize, _: f64) -> bool {
+        return iter >= self.n_iters;
+    }
+}
+
 #[derive(Clone)]
 pub struct InitRandomGtspPopulation {
     pub spec: Rc<GtspProblem>,
@@ -149,7 +155,8 @@ impl PerturbeMutOp<GtspPermutation> for GtspRandGroupVertPerturbation {
     fn eval(&self, data: &mut GtspPermutation) {
         for i in 0..data.perm.len() {
             if rand::random::<f64>() < self.change_prob {
-                data.perm[i].vert = rand::thread_rng().gen_range(0..data.spec.groups[i].len());
+                let group = data.perm[i].group;
+                data.perm[i].vert = rand::thread_rng().gen_range(0..data.spec.groups[group].len());
             }
         }
     }
@@ -195,7 +202,7 @@ pub fn gtsp_one_point_city_crossover(parents: [&Vec<GroupVert>; 2], offsprings: 
 }
 
 // Sum of the probabilities should be <= 1
-struct GtspCycleCrossover {
+pub struct GtspCycleCrossover {
     pub city_prob: f64,
     pub cycle_prob: f64
 }
@@ -226,7 +233,7 @@ impl Crossover<GtspPermutation> for GtspCycleCrossover {
 }
 
 // Sum of the probabilities should be <= 1
-struct GtspOrderCrossover {
+pub struct GtspOrderCrossover {
     pub city_prob: f64,
     pub order_prob: f64
 }
@@ -257,7 +264,7 @@ impl Crossover<GtspPermutation> for GtspOrderCrossover {
 }
 
 // Sum of the probabilities should be <= 1
-struct GtspGeneralCrossover {
+pub struct GtspGeneralCrossover {
     pub city_prob: f64,
     pub cycle_prob: f64,
     pub order_prob: f64
@@ -285,3 +292,5 @@ impl Crossover<GtspPermutation> for GtspGeneralCrossover {
         crossover_gtsp_data(population, parents_indices, offsprings, self);
     }
 }
+
+// TODO: implement heuristic intial guess solution finder
