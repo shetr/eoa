@@ -51,7 +51,7 @@ pub fn gtsp_gen_problem() {
 
 pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize, population_size: usize) {
     create_dir_all("out/gtsp").unwrap();
-    let method_names = vec!["evo move cycle", "evo move order"];
+    let method_names = vec!["local move", "local swap", "local rev", "evo move cycle", "evo move order"];
     let input_files = vec!["gen1", "a", "b", "c", "d", "e", "f"];
 
     for input_file in input_files {
@@ -59,21 +59,26 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
         let mut fitness = GtspFitness {};
         let opt_value = problem.best_known;
 
-        let init_population = InitRandomGtspPopulation { spec: problem.clone(), size: population_size };
-        
-        let termination_cond = MaxIterTerminationCond { n_iters: num_iters };
-        let selection = RankSelection { select_count: population_size / 2 };
-        let replacement_strategy = TruncationReplacementStrategy {};
+        let local_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
+        let local_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+        let local_selection = IdentitySelection {};
+        let local_replacement_strategy = GenerationalReplacementStrategy {};
+        let local_crossover = IdentityCrossover {};
+
+        let evo_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: population_size };
+        let evo_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+        let evo_selection = RankSelection { select_count: population_size / 2 };
+        let evo_replacement_strategy = TruncationReplacementStrategy {};
 
         let move_perturbation = CombinePerturbeMutOps { mut_ops: vec![
             ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
             ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspMoveGroupPerturbation {})}
         ]};
-        let _swap_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+        let swap_perturbation = CombinePerturbeMutOps { mut_ops: vec![
             ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
             ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspSwapGroupPerturbation {})}
         ]};
-        let _rev_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+        let rev_perturbation = CombinePerturbeMutOps { mut_ops: vec![
             ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
             ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspReverseGroupPerturbation {})}
         ]};
@@ -82,34 +87,61 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
         let order_crossover = GtspOrderCrossover::new();
         
 
-        let mut avg_stats = vec![
-            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
-            BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}
-        ];
+        let mut avg_stats = vec![BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}; 5];
 
         for _rep in 0..num_repetitions {
 
-            let (_sol, stats1) = evolutionary_search(
+            // local searches
+            let (_, stats1) = evolutionary_search(
                 &mut fitness, 
-                init_population.clone(),
-                &selection,
-                &cycle_crossover,
+                local_init_population.clone(),
+                &local_selection,
+                &local_crossover,
                 move_perturbation.clone(), 
-                &replacement_strategy,
-                &termination_cond);
-
-            //println!("{} {}", input_file, _sol.fitness.to_string());
+                &local_replacement_strategy,
+                &local_termination_cond);
 
             let (_, stats2) = evolutionary_search(
                 &mut fitness, 
-                init_population.clone(),
-                &selection,
+                local_init_population.clone(),
+                &local_selection,
+                &local_crossover,
+                swap_perturbation.clone(), 
+                &local_replacement_strategy,
+                &local_termination_cond);
+
+            let (_, stats3) = evolutionary_search(
+                &mut fitness, 
+                local_init_population.clone(),
+                &local_selection,
+                &local_crossover,
+                rev_perturbation.clone(), 
+                &local_replacement_strategy,
+                &local_termination_cond);
+            
+            // evolutionary searches
+
+            let (_sol, stats4) = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &cycle_crossover,
+                move_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond);
+
+            let (_, stats5) = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
                 &order_crossover,
                 move_perturbation.clone(), 
-                &replacement_strategy,
-                &termination_cond);
+                &evo_replacement_strategy,
+                &evo_termination_cond);
 
-            let curr_stats = vec![stats1, stats2];
+            //println!("{} {}", input_file, _sol.fitness.to_string());
+
+            let curr_stats = vec![stats1, stats2, stats3, stats4, stats5];
             for s in 0..avg_stats.len() {
                 for i in 0..num_iters {
                     avg_stats[s].fitness[i] += curr_stats[s].fitness[i];

@@ -183,7 +183,7 @@ pub fn gen_euclidean_gtsp_problem(vert_count: usize, group_count: usize) -> (Gts
     assert!(group_count < vert_count);
     let mut problem = GtspProblem {
         vert_count,
-        best_known: 0.0,
+        best_known: 1.0,
         groups: vec![Vec::<usize>::new(); group_count],
         distances: DistanceHalfMatrix::new(vert_count)
     };
