@@ -194,26 +194,93 @@ pub fn gtsp_one_point_city_crossover(parents: [&Vec<GroupVert>; 2], offsprings: 
     }
 }
 
-struct GtspCrossover {
-    pub cycle_prob: f64,
-    pub order_prob: f64
+// Sum of the probabilities should be <= 1
+struct GtspCycleCrossover {
+    pub city_prob: f64,
+    pub cycle_prob: f64
 }
 
-impl CrossoverFun<GroupVert> for GtspCrossover {
+impl GtspCycleCrossover {
+    pub fn new() -> Self { GtspCycleCrossover { city_prob: 0.5, cycle_prob: 0.5 }}
+}
+
+impl CrossoverFun<GroupVert> for GtspCycleCrossover {
     fn crossover_fun(&self, parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
         let r = rand::random::<f64>();
-        if r <= self.cycle_prob {
+        if r <= self.city_prob {
+            gtsp_one_point_city_crossover(parents, offsprings);
+        } else if (r - self.city_prob) <= self.cycle_prob {
             tsp_cycle_crossover(parents, offsprings);
         } else {
             for p in 0..2 {
                 *offsprings[p] = parents[p].clone();
             }
         }
-        //tsp_order_crossover(parents, offsprings);
     }
 }
 
-impl Crossover<GtspPermutation> for GtspCrossover {
+impl Crossover<GtspPermutation> for GtspCycleCrossover {
+    fn crossover(&self, population: &Vec<GtspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<GtspPermutation>) {
+        crossover_gtsp_data(population, parents_indices, offsprings, self);
+    }
+}
+
+// Sum of the probabilities should be <= 1
+struct GtspOrderCrossover {
+    pub city_prob: f64,
+    pub order_prob: f64
+}
+
+impl GtspOrderCrossover {
+    pub fn new() -> Self { GtspOrderCrossover { city_prob: 0.5, order_prob: 0.5 }}
+}
+
+impl CrossoverFun<GroupVert> for GtspOrderCrossover {
+    fn crossover_fun(&self, parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
+        let r = rand::random::<f64>();
+        if r <= self.city_prob {
+            gtsp_one_point_city_crossover(parents, offsprings);
+        } else if (r - self.city_prob) <= self.order_prob {
+            tsp_order_crossover(parents, offsprings);
+        } else {
+            for p in 0..2 {
+                *offsprings[p] = parents[p].clone();
+            }
+        }
+    }
+}
+
+impl Crossover<GtspPermutation> for GtspOrderCrossover {
+    fn crossover(&self, population: &Vec<GtspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<GtspPermutation>) {
+        crossover_gtsp_data(population, parents_indices, offsprings, self);
+    }
+}
+
+// Sum of the probabilities should be <= 1
+struct GtspGeneralCrossover {
+    pub city_prob: f64,
+    pub cycle_prob: f64,
+    pub order_prob: f64
+}
+
+impl CrossoverFun<GroupVert> for GtspGeneralCrossover {
+    fn crossover_fun(&self, parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
+        let r = rand::random::<f64>();
+        if r <= self.city_prob {
+            gtsp_one_point_city_crossover(parents, offsprings);
+        } else if (r - self.city_prob) <= self.cycle_prob {
+            tsp_cycle_crossover(parents, offsprings);
+        } else if (r - self.city_prob - self.cycle_prob) <= self.order_prob {
+            tsp_order_crossover(parents, offsprings);
+        } else {
+            for p in 0..2 {
+                *offsprings[p] = parents[p].clone();
+            }
+        }
+    }
+}
+
+impl Crossover<GtspPermutation> for GtspGeneralCrossover {
     fn crossover(&self, population: &Vec<GtspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<GtspPermutation>) {
         crossover_gtsp_data(population, parents_indices, offsprings, self);
     }
