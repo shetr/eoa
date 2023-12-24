@@ -206,7 +206,17 @@ impl PerturbeMutOp<TspPermutation> for TspReversePerturbation {
     }
 }
 
-pub fn tsp_cycle_crossover<V: Copy + PartialEq>(parents: [&Vec<V>; 2], offsprings: [&mut Vec<V>; 2]) {
+pub trait SameVertex {
+    fn is_same(&self, other: &Self) -> bool;
+}
+
+impl SameVertex for usize {
+    fn is_same(&self, other: &Self) -> bool {
+        self == other
+    }
+}
+
+pub fn tsp_cycle_crossover<V: Copy + SameVertex>(parents: [&Vec<V>; 2], offsprings: [&mut Vec<V>; 2]) {
     for i in 0..parents[0].len() {
         for o in 0..2 {
             offsprings[o].push(parents[o][i].clone());
@@ -214,7 +224,7 @@ pub fn tsp_cycle_crossover<V: Copy + PartialEq>(parents: [&Vec<V>; 2], offspring
     }
     let start_index = rand::thread_rng().gen_range(0..parents[0].len());
     let mut current_index = start_index;
-    if offsprings[1][current_index] == offsprings[0][current_index] {
+    if offsprings[1][current_index].is_same(&offsprings[0][current_index]) {
         return;
     }
     loop {
@@ -222,7 +232,7 @@ pub fn tsp_cycle_crossover<V: Copy + PartialEq>(parents: [&Vec<V>; 2], offspring
         let prev_index = current_index;
         let mut index_found = false;
         for i in 0..offsprings[0].len() {
-            if offsprings[0][i] == next_vert {
+            if offsprings[0][i].is_same(&next_vert) {
                 current_index = i;
                 index_found = true;
                 break;
@@ -252,7 +262,7 @@ impl Crossover<TspPermutation> for TspCycleCrossover {
     }
 }
 
-pub fn tsp_order_crossover<V: Copy + PartialEq>(parents: [&Vec<V>; 2], offsprings: [&mut Vec<V>; 2]) {
+pub fn tsp_order_crossover<V: Copy + SameVertex>(parents: [&Vec<V>; 2], offsprings: [&mut Vec<V>; 2]) {
     for i in 0..parents[0].len() {
         for o in 0..2 {
             offsprings[o].push(parents[o][i].clone());
@@ -272,7 +282,7 @@ pub fn tsp_order_crossover<V: Copy + PartialEq>(parents: [&Vec<V>; 2], offspring
             while inside_p1 {
                 inside_p1 = false;
                 for j in from..to {
-                    if parents[p1][j] == parents[p2][p2_index] {
+                    if parents[p1][j].is_same(&parents[p2][p2_index]) {
                         inside_p1 = true;
                         p2_index += 1;
                         break;

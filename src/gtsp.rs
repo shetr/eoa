@@ -19,9 +19,9 @@ pub struct GroupVert {
     pub vert: usize
 }
 
-impl PartialEq for GroupVert {
-    fn eq(&self, other: &Self) -> bool {
-        self.group == other.group && self.vert == other.vert
+impl SameVertex for GroupVert {
+    fn is_same(&self, other: &Self) -> bool {
+        self.group == other.group
     }
 }
 
