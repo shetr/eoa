@@ -1,3 +1,5 @@
+use std::fs::create_dir_all;
+
 use crate::*;
 use clap::Parser;
 
@@ -26,8 +28,10 @@ pub fn hw2()
 
 pub fn sem()
 {
+    create_dir_all("out/gtsp").unwrap();
     // TODO: try seeding random generators
     let args = Cli::parse();
     //gtsp_basic_stats_gen_instance();
-    gtsp_basic_stats_default_params(args.num_rep, args.num_iters, args.pop_size);
+    //gtsp_basic_stats_default_params(args.num_rep, args.num_iters, args.pop_size);
+    gtsp_viz_gen_solution(args.num_iters, args.pop_size);
 }

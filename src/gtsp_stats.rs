@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use std::fs::create_dir_all;
 
 use crate::*;
 
@@ -50,7 +49,6 @@ pub fn gtsp_gen_problem() {
 }
 
 pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize, population_size: usize) {
-    create_dir_all("out/gtsp").unwrap();
     let method_names = vec!["local move", "local swap", "local rev", "evo move cycle", "evo move order"];
     let input_files = vec!["gen1", "a", "b", "c", "d", "e", "f"];
 
@@ -160,4 +158,38 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
         plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/{}.svg", input_file).as_str(), input_file, opt_value.log10(), "Log avg. fitness").unwrap();
         
     }
+}
+
+pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
+{
+    let input_file = "gen1";
+
+    let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
+    let positions = load_gtsp_positions(format!("data/gtsp/{}_pos.txt", input_file).as_str());
+    let mut fitness = GtspFitness {};
+
+    let evo_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: population_size };
+    let evo_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+    let evo_selection = RankSelection { select_count: population_size / 2 };
+    let evo_replacement_strategy = TruncationReplacementStrategy {};
+
+    let move_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+        ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+        ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspMoveGroupPerturbation {})}
+    ]};
+
+    let order_crossover = GtspOrderCrossover::new();
+
+    let (sol, _) = evolutionary_search(
+        &mut fitness, 
+        evo_init_population.clone(),
+        &evo_selection,
+        &order_crossover,
+        move_perturbation.clone(), 
+        &evo_replacement_strategy,
+        &evo_termination_cond);
+    
+    let colors = uniform_colors(problem.groups.len());
+    plot_gtsp_solution(&positions, &sol.value, &colors, 4, "out/gtsp/gen1_viz.svg", "gen1").unwrap();
+    
 }
