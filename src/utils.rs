@@ -69,6 +69,25 @@ pub fn squared_distance(p1: [f64; 2], p2: [f64; 2]) -> f64 {
     dist
 }
 
+pub fn process_avg_stats(avg_stats: &mut Vec<BSFSingleObjStatistics>, opt_value: f64, num_iters: usize, num_repetitions: usize) -> f64
+{
+    let mut fitness_min = opt_value;
+    for s in 0..avg_stats.len() {
+        for i in 0..num_iters {
+            avg_stats[s].fitness[i] /= num_repetitions as f64;
+            fitness_min = fitness_min.min(avg_stats[s].fitness[i]);
+        }
+    }
+    let log_opt_value = (opt_value - fitness_min + 1.0).log10();
+    // log scale
+    for s in 0..avg_stats.len() {
+        for i in 0..num_iters {
+            avg_stats[s].fitness[i] = (avg_stats[s].fitness[i] - fitness_min + 1.0).log10();
+        }
+    }
+    log_opt_value
+}
+
 
 #[cfg(test)]
 mod tests {

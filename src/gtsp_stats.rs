@@ -146,16 +146,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
                 }
             }
         }
-
-        for s in 0..avg_stats.len() {
-            for i in 0..num_iters {
-                avg_stats[s].fitness[i] /= num_repetitions as f64;
-                // maybe log scale
-                avg_stats[s].fitness[i] = avg_stats[s].fitness[i].log10();
-            }
-            //plot(&avg_stats[s], format!("out/tsp/{}_{}.svg", method_names[s], input_file).as_str(), method_names[s]).unwrap();
-        }
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/{}.svg", input_file).as_str(), input_file, opt_value.log10(), "Log avg. fitness").unwrap();
+        let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness").unwrap();
         
     }
 }
