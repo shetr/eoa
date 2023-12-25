@@ -543,7 +543,7 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
         let opt_value = problem.best_known;
 
         let local_heuristic_init_population = InitHeuristicGtspPopulation { spec: problem.clone(), size: 1 };
-        let evo_heuristic_init_population = InitHeuristicGtspPopulation { spec: problem.clone(), size: 1 };
+        let evo_heuristic_init_population = InitHeuristicGtspPopulation { spec: problem.clone(), size: population_size };
 
         let local_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
         let local_termination_cond = MaxIterTerminationCond { n_iters: num_iters * population_size };
@@ -598,7 +598,6 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
                 &local_termination_cond);
             
             // evolutionary searches
-
             let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                  = evolutionary_search(
                 &mut fitness, 

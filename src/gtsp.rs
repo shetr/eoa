@@ -389,8 +389,12 @@ impl InitHeuristicGtspPopulation {
 
 impl InitPopulation<GtspPermutation> for InitHeuristicGtspPopulation {
     fn init(&self) -> Vec<GtspPermutation> {
-        let mut population = Vec::<GtspPermutation>::with_capacity(self.size);
-        for _ in 0..self.size {
+        let heuristic_count = if self.size > 3 { self.size / 4 } else { self.size };
+        let rand_count = self.size - heuristic_count;
+        let init_rand_population = InitRandomGtspPopulation { spec: self.spec.clone(), size: rand_count};
+        let mut population = opt_traits::InitPopulation::init(&init_rand_population);
+        population.reserve(heuristic_count);
+        for _ in 0..heuristic_count {
             population.push(self.gen_perm());
         }
         population
