@@ -77,7 +77,7 @@ impl<T: OptData, ConstraintsCountedT: ConstraintsSumed<T>> Constraints<T> for Co
     fn violations_sum(&self, data: &T) -> f64 { self.violations(data).iter().sum() }
 }
 
-fn find_best<F: Fitness>(fitness: &Vec<F>) -> usize
+pub fn find_best_fitness<F: Fitness>(fitness: &Vec<F>) -> usize
 {
     let mut best_index = 0;
     for i in 0..fitness.len() {
@@ -121,7 +121,7 @@ pub struct BSFSingleObjSolution<T: OptData> {
 
 impl<T: OptData> Solution<T, f64, f64> for BSFSingleObjSolution<T> {
     fn from_population(population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) -> Self {
-        let best_index = find_best(fitness_opt);
+        let best_index = find_best_fitness(fitness_opt);
         BSFSingleObjSolution { value: population[best_index].clone(), fitness: fitness_opt[best_index] }
     }
 
@@ -145,7 +145,7 @@ impl<T: OptData> Statistics<T, f64, f64> for BSFSingleObjStatistics {
     }
 
     fn report_iter(&mut self, _iter: usize, _population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {
-        let best_index = find_best(fitness_opt);
+        let best_index = find_best_fitness(fitness_opt);
         let mut curr_fitness = fitness_opt[best_index];
         if let Some(last) = self.fitness.last() {
             if *last < curr_fitness {
@@ -167,7 +167,7 @@ impl<T: OptData> Statistics<T, f64, f64> for IterSingleObjStatistics {
     }
 
     fn report_iter(&mut self, _iter: usize, _population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {
-        let best_index = find_best(fitness_opt);
+        let best_index = find_best_fitness(fitness_opt);
         self.fitness.push(fitness_opt[best_index]);
     }
 }

@@ -288,7 +288,7 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
         let local_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
         let local_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
         let local_selection = IdentitySelection {};
-        let local_replacement_strategy = GenerationalReplacementStrategy {};
+        let local_replacement_strategy = TruncationReplacementStrategy {};
         let local_crossover = IdentityCrossover {};
 
         let move_perturbation = CombinePerturbeMutOps { mut_ops: vec![
@@ -453,6 +453,122 @@ pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, _num_ite
 
     let mut file = File::create("data/gtsp/probs_evo.txt").expect("unable to create a file.");
     file.write(format!("{}, {}, {}, {}\n", best_probs[0], best_probs[1], best_probs[2], best_probs[3]).as_bytes()).unwrap();
+}
+
+struct EvoSearchParamsFitness {
+    num_repetitions: usize,
+    population_size: usize,
+    problems: Vec<Rc<GtspProblem>>
+}
+
+impl EvoSearchParamsFitness {
+    pub fn new(num_repetitions: usize, population_size: usize) -> Self {
+        let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+        let mut problems = Vec::<Rc<GtspProblem>>::with_capacity(input_files.len());
+        for i in 0..input_files.len() {
+            problems.push(Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_files[i]).as_str())))
+        }
+        EvoSearchParamsFitness { num_repetitions, population_size, problems }
+    }
+}
+
+impl FitnessFunc<FloatVec> for EvoSearchParamsFitness {
+    fn eval(&self, probs: &FloatVec) -> f64 {
+        let max_iters = [100, 300, 500, 500, 1000, 1500, 3000];
+        let mut fitness_sum = 0.0;
+        for i_problem in 0..self.problems.len() {
+            let num_iters = max_iters[i_problem];
+            let problem = self.problems[i_problem].clone();
+            let mut fitness = GtspFitness {};
+    
+            let evo_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: self.population_size };
+            let evo_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+            let evo_selection = RankSelection { select_count: self.population_size / 2 };
+            let evo_replacement_strategy = TruncationReplacementStrategy {};
+    
+            let perturbation = CombinePerturbeMutOps { mut_ops: vec![
+                ProbPerturbeMutOp { prob: probs.values[0], op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+                ProbPerturbeMutOp { prob: probs.values[1], op: Rc::from(GtspReverseGroupPerturbation {})}
+            ]};
+
+            let crossover = GtspGeneralCrossover {
+                city_prob: probs.values[2],
+                cycle_prob: probs.values[3],
+                order_prob: probs.values[4]
+            };
+            
+            let mut avg_sol_fitness = 0.0;
+    
+            for _rep in 0..self.num_repetitions {
+                let (sol, _) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                    = evolutionary_search(
+                    &mut fitness, 
+                    evo_init_population.clone(),
+                    &evo_selection,
+                    &crossover,
+                    perturbation.clone(), 
+                    &evo_replacement_strategy,
+                    &evo_termination_cond);
+    
+                avg_sol_fitness += sol.fitness;
+            }
+            avg_sol_fitness /= self.num_repetitions as f64;
+            fitness_sum += avg_sol_fitness;
+        }
+        fitness_sum
+    }
+}
+
+#[derive(Clone)]
+pub struct EvoOptStatistics {
+    pub best_fitness: f64,
+    pub best_probs: FloatVec
+}
+
+impl Statistics<FloatVec, f64, f64> for EvoOptStatistics {
+    fn new() -> Self {
+        EvoOptStatistics { best_fitness: f64::INFINITY, best_probs: FloatVec { values: vec![0.0; 5] } }
+    }
+
+    fn report_iter(&mut self, iter: usize, population: &Vec<FloatVec>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {
+        let best_index = find_best_fitness(fitness_opt);
+        let curr_fitness = fitness_opt[best_index];
+        if curr_fitness < self.best_fitness {
+            self.best_fitness = curr_fitness;
+            self.best_probs = population[best_index].clone();
+        }
+        let probs = &self.best_probs.values;
+        println!("i: {}, f: {}, p: {}, {}, {}, {}, {}", iter, self.best_fitness, probs[0], probs[1], probs[2], probs[3], probs[4]);
+        let mut file = File::create("data/gtsp/probs_evo.txt").expect("unable to create a file.");
+        file.write(format!("{}, {}, {}, {}, {}\n", probs[0], probs[1], probs[2], probs[3], probs[4]).as_bytes()).unwrap();
+    }
+}
+
+pub fn gtsp_find_opt_params_evolutionary_search_with_local_search(num_repetitions: usize, population_size: usize) {
+    let total_samples = 1000;
+    let mut fitness = EvoSearchParamsFitness::new(num_repetitions, population_size);
+
+    let init_population = InitPopulationFromValues { population: vec![FloatVec {
+        values: vec![0.5, 0.5, 0.3, 0.3, 0.3]   
+    }]};
+    let termination_cond = MaxIterTerminationCond { n_iters: total_samples };
+    let selection = IdentitySelection {};
+    let replacement_strategy = TruncationReplacementStrategy {};
+    let crossover = IdentityCrossover {};
+
+    let perturbation = BoundedNormalPerturbeRealMutOp::new(0.05,
+        &vec![Bounds { lower: 0.0, upper: 1.0}; 5]
+    );
+
+    let (_, _) : (BSFSingleObjSolution<FloatVec>, EvoOptStatistics)
+        = evolutionary_search(
+        &mut fitness, 
+        init_population.clone(),
+        &selection,
+        &crossover,
+        perturbation.clone(), 
+        &replacement_strategy,
+        &termination_cond);
 }
 
 pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, population_size: usize) {
