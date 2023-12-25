@@ -1,5 +1,6 @@
 use crate::opt_data::*;
-use std::collections::{BinaryHeap, binary_heap::Iter};
+use std::{collections::{BinaryHeap, binary_heap::Iter}, io::{stdout, Write}};
+use crossterm::{QueueableCommand, cursor, terminal, ExecutableCommand};
 
 pub fn bin_to_real_mut(bits: &[u8], bounds: &[Bounds], res: &mut Vec<f64>) {
     res.clear();
@@ -88,6 +89,26 @@ pub fn process_avg_stats(avg_stats: &mut Vec<BSFSingleObjStatistics>, opt_value:
     log_opt_value
 }
 
+
+pub fn start_progress_bar() {
+    stdout().execute(cursor::Hide).unwrap();
+}
+
+pub fn end_progress_bar() {
+    stdout().execute(cursor::Show).unwrap();
+}
+
+pub fn progress_bar_text(text: &str) {
+    stdout().queue(cursor::SavePosition).unwrap();
+    stdout().write_all(text.as_bytes()).unwrap();
+    stdout().queue(cursor::RestorePosition).unwrap();
+    stdout().flush().unwrap();
+}
+
+pub fn progress_bar_clear() {
+    stdout().queue(cursor::RestorePosition).unwrap();
+    stdout().queue(terminal::Clear(terminal::ClearType::FromCursorDown)).unwrap();
+}
 
 #[cfg(test)]
 mod tests {
