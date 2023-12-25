@@ -193,15 +193,18 @@ pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
 // TODO:
 // hledani optimalnich parametru
 // pravdepodobnosti u local searche u perturbacnich operatoru
-// - 4 varianty: move, swap, rev a vsechny dohromady
+// - 1 varianta: 4 pravdepodobnosti dohromady a projet najednou
+// - udelat grafy porovnavajici default local search a tenhle
 // pravdepodobnosti u evolucnich algoritmu - perturbacni operatory a crossover
 // - uvidim podle toho jak dopadne u local searche
 // - nejspis udelat pro obecny perturbacni operator a obecny crossover operator, celkem tedy 7 pravděpodobností
+// - udelat grafy porovnavajici default evo search a tenhle
 // grafy porovnani pro zakladni nastaveni parametru - mam
 // - vyresit ruzne iterace u local searche a evolucniho alg.
 // grafy porovnani pro optimalni nalezene parametry
 // - porovnani optimalinho local searche, optimalniho evolucniho algoritmu, specializovaneho algoritmu nastaveneho jako evolucni alg
 // - specializovany udelat pomoci heuristiky, potom predano jako init do evolucniho algoritmu
+//   - vybere nahodny vrchol a z něj začně skládat cestu, vždy vybere hranu s nejnižší vzdáleností co nevede zpět
 // vizualizace heuristickeho reseni pouziteho v specializovanem algoritmu, staci jeden priklad pro kazdy dataset (idealne, ale 1 dataset by taky stacil)
 // vizualizace behu jednoho vybraneho algoritmu - ukazat ten nejlepsi, idealne na slozitejsim problemu (pokud pujde snadno zobrazit)
 

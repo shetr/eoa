@@ -162,6 +162,51 @@ impl PerturbeMutOp<GtspPermutation> for GtspRandGroupVertPerturbation {
     }
 }
 
+#[derive(Clone)]
+pub struct GtspRouletteWheelGroupVertPerturbation {
+    // recommended to set to 1/number of groups
+    pub change_prob: f64
+}
+
+impl GtspRouletteWheelGroupVertPerturbation {
+    pub fn new(groups_count: usize) -> Self {
+        GtspRouletteWheelGroupVertPerturbation { change_prob: 1.0 / (groups_count as f64) }
+    }
+}
+
+impl PerturbeMutOp<GtspPermutation> for GtspRouletteWheelGroupVertPerturbation {
+    fn eval(&self, data: &mut GtspPermutation) {
+        for i in 0..data.perm.len() {
+            if rand::random::<f64>() < self.change_prob {
+                let group = data.perm[i].group;
+                let vert = data.spec.groups[group][data.perm[i].vert];
+                // prefer vertices with shorted distance
+                let mut inv_dist_sum = 0.0;
+                for vi in 0..data.spec.groups[group].len() {
+                    let v = data.spec.groups[group][vi];
+                    if v == vert {
+                        continue;
+                    }
+                    inv_dist_sum += 1.0 / data.spec.distances.get(vert, v);
+                }
+                let select_vert = rand::random::<f64>() * inv_dist_sum;
+                let mut inv_dist_acc = 0.0;
+                for vi in 0..data.spec.groups[group].len() {
+                    let v = data.spec.groups[group][vi];
+                    if v == vert {
+                        continue;
+                    }
+                    inv_dist_acc += 1.0 / data.spec.distances.get(vert, v);
+                    if select_vert <= inv_dist_acc {
+                        data.perm[i].vert = vi;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn crossover_gtsp_data<CrossoverFunT : CrossoverFun<GroupVert>>
     (population: &Vec<GtspPermutation>, parents_indices: &Vec<usize>, offsprings: &mut Vec<GtspPermutation>, crossover_fun: &CrossoverFunT)
 {
@@ -182,19 +227,22 @@ pub fn crossover_gtsp_data<CrossoverFunT : CrossoverFun<GroupVert>>
     }
 }
 
-pub fn gtsp_one_point_city_crossover(parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
-    let split_index = rand::thread_rng().gen_range(0..parents[0].len());
+pub fn gtsp_uniform_city_crossover(parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
     let mut group_indices = vec![[0usize;2]; parents[0].len()];
     for i in 0..parents[0].len() {
         for p in 0..2 {
             group_indices[parents[p][i].group][p] = i;
         }
     }
+    let mut swap_verts = vec![false; parents[0].len()];
+    for i in 0..swap_verts.len() {
+        swap_verts[i] = rand::random::<f64>() <= 0.5;
+    }
     for i in 0..parents[0].len() {
         for o in 0..2 {
             offsprings[o].push(parents[o][i].clone());
             let g = parents[o][i].group;
-            let vert_parent = if g < split_index { o } else { 1 - o } as usize;
+            let vert_parent = if swap_verts[g] { o } else { 1 - o } as usize;
             let g_index = group_indices[g][vert_parent];
             offsprings[o][i].vert = parents[vert_parent][g_index].vert;
         }
@@ -215,7 +263,7 @@ impl CrossoverFun<GroupVert> for GtspCycleCrossover {
     fn crossover_fun(&self, parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
         let r = rand::random::<f64>();
         if r <= self.city_prob {
-            gtsp_one_point_city_crossover(parents, offsprings);
+            gtsp_uniform_city_crossover(parents, offsprings);
         } else if (r - self.city_prob) <= self.cycle_prob {
             tsp_cycle_crossover(parents, offsprings);
         } else {
@@ -246,7 +294,7 @@ impl CrossoverFun<GroupVert> for GtspOrderCrossover {
     fn crossover_fun(&self, parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
         let r = rand::random::<f64>();
         if r <= self.city_prob {
-            gtsp_one_point_city_crossover(parents, offsprings);
+            gtsp_uniform_city_crossover(parents, offsprings);
         } else if (r - self.city_prob) <= self.order_prob {
             tsp_order_crossover(parents, offsprings);
         } else {
@@ -274,7 +322,7 @@ impl CrossoverFun<GroupVert> for GtspGeneralCrossover {
     fn crossover_fun(&self, parents: [&Vec<GroupVert>; 2], offsprings: [&mut Vec<GroupVert>; 2]) {
         let r = rand::random::<f64>();
         if r <= self.city_prob {
-            gtsp_one_point_city_crossover(parents, offsprings);
+            gtsp_uniform_city_crossover(parents, offsprings);
         } else if (r - self.city_prob) <= self.cycle_prob {
             tsp_cycle_crossover(parents, offsprings);
         } else if (r - self.city_prob - self.cycle_prob) <= self.order_prob {
