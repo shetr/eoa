@@ -341,9 +341,6 @@ impl Crossover<GtspPermutation> for GtspGeneralCrossover {
     }
 }
 
-// TODO: implement heuristic intial guess solution finder
-
-
 #[derive(Clone)]
 pub struct InitHeuristicGtspPopulation {
     pub spec: Rc<GtspProblem>,
