@@ -32,11 +32,11 @@ pub fn sem()
     // TODO: try seeding random generators
     let args = Cli::parse();
     //gtsp_basic_stats_gen_instance();
-    //gtsp_basic_stats_default_params(args.num_rep, args.num_iters, args.pop_size);
+    gtsp_basic_stats_default_params(args.num_rep, args.num_iters, args.pop_size);
     //gtsp_viz_gen_solution(args.num_iters, args.pop_size);
     //gtsp_find_opt_params_local_search(args.num_rep, args.num_iters, 10);
     //gtsp_local_search_stats(args.num_rep, args.num_iters);
     //gtsp_find_opt_params_evolutionary_search(args.num_rep, args.num_iters, args.pop_size, 10);
     //gtsp_evolutionary_search_stats(args.num_rep, args.num_iters, args.pop_size);
-    gtsp_stats_optimized_params(args.num_rep, args.num_iters, args.pop_size);
+    //gtsp_stats_optimized_params(args.num_rep, args.num_iters, args.pop_size);
 }

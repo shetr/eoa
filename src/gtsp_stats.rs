@@ -36,8 +36,8 @@ pub fn gtsp_basic_stats_gen_instance() {
     plot_gtsp_solution(&positions, &perm, &colors, 4, "out/points.svg", "gen points").unwrap();
 }
 
-pub fn gtsp_gen_problem() {
-    let (problem, positions) = gen_euclidean_gtsp_problem(24, 5);
+pub fn gtsp_gen_problem(vert_count: usize, group_count: usize) {
+    let (problem, positions) = gen_euclidean_gtsp_problem(vert_count, group_count);
     println!("vert count: {}", problem.vert_count);
     println!("group count: {}", problem.groups.len());
     println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
@@ -48,15 +48,18 @@ pub fn gtsp_gen_problem() {
     save_gtsp_positions("data/gtsp/gen1_pos.txt", &positions);
 }
 
-pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize, population_size: usize) {
+pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize, population_size: usize) {
     let method_names = vec!["local move", "local swap", "local rev", "evo move cycle", "evo move order"];
     let is_method_local = [true, true, true, false, false];
-    let input_files = vec!["gen1", "a", "b", "c", "d", "e", "f"];
+    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [50, 300, 500, 500, 1000, 1500, 3000];
     
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;
     start_progress_bar();
-    for input_file in input_files {
+    for f in 0..input_files.len() {
+        let num_iters = max_iters[f];
+        let input_file = input_files[f];
         let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
         let mut fitness = GtspFitness {};
         let opt_value = problem.best_known;
@@ -269,12 +272,15 @@ pub fn gtsp_find_opt_params_local_search(num_repetitions: usize, num_iters: usiz
 
 pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
     let method_names = vec!["local move", "local swap", "local rev", "local tweaked"];
-    let input_files = vec!["gen1", "a", "b", "c", "d", "e", "f"];
+    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [num_iters, num_iters, num_iters, num_iters, num_iters, num_iters, num_iters];
 
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;
     start_progress_bar();
-    for input_file in input_files {
+    for f in 0..input_files.len() {
+        let num_iters = max_iters[f];
+        let input_file = input_files[f];
         let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
         let mut fitness = GtspFitness {};
         let opt_value = problem.best_known;
@@ -364,30 +370,33 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
     end_progress_bar();
 }
 
-pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, num_iters: usize, population_size: usize, prob_samples: usize) {
+pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, _num_iters: usize, population_size: usize, prob_samples: usize) {
     let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [100, 300, 500, 500, 1000, 1500, 3000];
     let mut problems = Vec::<Rc<GtspProblem>>::with_capacity(input_files.len());
     for i in 0..input_files.len() {
         problems.push(Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_files[i]).as_str())))
     }
-    const PROB_COUNT: usize = 3;
+    const PROB_COUNT: usize = 4;
     let total_samples = prob_samples.pow(PROB_COUNT as u32);
     let mut best_probs = [0.0; PROB_COUNT];
     let mut best_fitness_sum = f64::INFINITY;
 
     start_progress_bar();
     for sample in 0..total_samples {
-        progress_bar_text(&format!("progress: {:.2}%", 100.0 * (sample as f64) / (total_samples as f64)));
+        progress_bar_text(&format!("progress: {:.3}%", 100.0 * (sample as f64) / (total_samples as f64)));
         let mut probs = [0.0; PROB_COUNT];
         let mut sample_decomposed = sample;
-        let mut probs_sum = 0.0;
+        let mut probs2to3_sum = 0.0;
         for p in 0..PROB_COUNT {
             probs[p] = ((sample_decomposed % prob_samples) as f64) / (prob_samples as f64);
-            probs_sum += probs[p];
+            if p > 1 {
+                probs2to3_sum += probs[p];
+            }
             sample_decomposed /= prob_samples;
         }
         // could iterated more cleverly so that we don't have to skip iterations
-        if probs_sum > 1.0 {
+        if probs2to3_sum > 1.0 {
             progress_bar_clear();
             continue;
         }
@@ -395,6 +404,7 @@ pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, num_iter
 
         let mut fitness_sum = 0.0;
         for i_problem in 0..problems.len() {
+            let num_iters = max_iters[i_problem];
             let problem = problems[i_problem].clone();
             let mut fitness = GtspFitness {};
     
@@ -404,14 +414,14 @@ pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, num_iter
             let evo_replacement_strategy = TruncationReplacementStrategy {};
     
             let perturbation = CombinePerturbeMutOps { mut_ops: vec![
-                ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
-                ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspReverseGroupPerturbation {})}
+                ProbPerturbeMutOp { prob: probs[0], op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+                ProbPerturbeMutOp { prob: probs[1], op: Rc::from(GtspReverseGroupPerturbation {})}
             ]};
 
             let crossover = GtspGeneralCrossover {
-                city_prob: probs[0],
-                cycle_prob: probs[1],
-                order_prob: probs[2]
+                city_prob: probs[2],
+                cycle_prob: 0.0,
+                order_prob: probs[3]
             };
             
             let mut avg_sol_fitness = 0.0;
@@ -439,20 +449,23 @@ pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, num_iter
         progress_bar_clear();
     }
     end_progress_bar();
-    println!("{}, {}, {}", best_probs[0], best_probs[1], best_probs[2]);
+    println!("{}, {}, {}, {}", best_probs[0], best_probs[1], best_probs[2], best_probs[3]);
 
     let mut file = File::create("data/gtsp/probs_evo.txt").expect("unable to create a file.");
-    file.write(format!("{}, {}, {}\n", best_probs[0], best_probs[1], best_probs[2]).as_bytes()).unwrap();
+    file.write(format!("{}, {}, {}, {}\n", best_probs[0], best_probs[1], best_probs[2], best_probs[3]).as_bytes()).unwrap();
 }
 
 pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, population_size: usize) {
     let method_names = vec!["evo cycle", "evo order", "evo opt"];
-    let input_files = vec!["gen1", "a", "b", "c", "d", "e", "f"];
+    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [num_iters, num_iters, num_iters, num_iters, num_iters, num_iters, num_iters];
     
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;
     start_progress_bar();
-    for input_file in input_files {
+    for f in 0..input_files.len() {
+        let num_iters = max_iters[f];
+        let input_file = input_files[f];
         let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
         let mut fitness = GtspFitness {};
         let opt_value = problem.best_known;
@@ -474,9 +487,9 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
         let cycle_crossover = GtspCycleCrossover::new();
         let order_crossover = GtspOrderCrossover::new();
         let opt_crossover = GtspGeneralCrossover {
-            city_prob: 0.8,
+            city_prob: 0.5,
             cycle_prob: 0.0,
-            order_prob: 0.0
+            order_prob: 0.5
         };
         
         let mut avg_stats = vec![BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}; method_names.len()];
@@ -532,12 +545,15 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
 pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, population_size: usize) {
     let method_names = vec!["local", "local heuristic", "evo", "evo heuristic"];
     let is_method_local = [true, true, false, false];
-    let input_files = vec!["gen1", "a", "b", "c", "d", "e", "f"];
+    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [num_iters, num_iters, num_iters, num_iters, num_iters, num_iters, num_iters];
     
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;
     start_progress_bar();
-    for input_file in input_files {
+    for f in 0..input_files.len() {
+        let num_iters = max_iters[f];
+        let input_file = input_files[f];
         let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
         let mut fitness = GtspFitness {};
         let opt_value = problem.best_known;
