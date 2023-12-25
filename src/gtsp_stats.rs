@@ -132,7 +132,7 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
                 evo_init_population.clone(),
                 &evo_selection,
                 &cycle_crossover,
-                move_perturbation.clone(), 
+                rev_perturbation.clone(), 
                 &evo_replacement_strategy,
                 &evo_termination_cond);
 
@@ -142,7 +142,7 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
                 evo_init_population.clone(),
                 &evo_selection,
                 &order_crossover,
-                move_perturbation.clone(), 
+                rev_perturbation.clone(), 
                 &evo_replacement_strategy,
                 &evo_termination_cond);
 
@@ -441,6 +441,90 @@ pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, num_iter
     println!("{}, {}, {}, {}, {}", best_probs[0], best_probs[1], best_probs[2], best_probs[3], best_probs[4]);
 }
 
+pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, population_size: usize) {
+    let method_names = vec!["evo cycle", "evo order", "evo opt"];
+    let input_files = vec!["gen1", "a", "b", "c", "d", "e", "f"];
+    
+    let mut iter = 0;
+    let total_iters = input_files.len() * num_repetitions;
+    start_progress_bar();
+    for input_file in input_files {
+        let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
+        let mut fitness = GtspFitness {};
+        let opt_value = problem.best_known;
+
+        let evo_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: population_size };
+        let evo_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+        let evo_selection = RankSelection { select_count: population_size / 2 };
+        let evo_replacement_strategy = TruncationReplacementStrategy {};
+
+        let rev_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+            ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+            ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspReverseGroupPerturbation {})}
+        ]};
+        let opt_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspReverseGroupPerturbation {})}
+        ]};
+
+        let cycle_crossover = GtspCycleCrossover::new();
+        let order_crossover = GtspOrderCrossover::new();
+        let opt_crossover = GtspGeneralCrossover {
+            city_prob: 0.3,
+            cycle_prob: 0.3,
+            order_prob: 0.3
+        };
+        
+        let mut avg_stats = vec![BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}; method_names.len()];
+
+        for _rep in 0..num_repetitions {
+            progress_bar_text(&format!("progress: {:.2}%", 100.0 * (iter as f64) / (total_iters as f64)));
+
+            let (_, stats1) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                 = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &cycle_crossover,
+                rev_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond);
+            
+            let (_, stats2) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                = evolutionary_search(
+               &mut fitness, 
+               evo_init_population.clone(),
+               &evo_selection,
+               &order_crossover,
+               rev_perturbation.clone(), 
+               &evo_replacement_strategy,
+               &evo_termination_cond);
+            
+            let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+               = evolutionary_search(
+              &mut fitness, 
+              evo_init_population.clone(),
+              &evo_selection,
+              &opt_crossover,
+              opt_perturbation.clone(), 
+              &evo_replacement_strategy,
+              &evo_termination_cond);
+
+            let curr_stats = vec![stats1, stats2, stats3];
+            for s in 0..avg_stats.len() {
+                for i in 0..num_iters {
+                    avg_stats[s].fitness[i] += curr_stats[s].fitness[i];
+                }
+            }
+            iter += 1;
+            progress_bar_clear();
+        }
+        let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/evo_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
+    }
+    end_progress_bar();
+}
+
 pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, population_size: usize) {
     let method_names = vec!["local", "evo"];
     let is_method_local = [true, false];
@@ -515,12 +599,13 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
             progress_bar_clear();
         }
         let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/default_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/best_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
     }
     end_progress_bar();
 }
 
 // TODO:
+// pridat nastaveni max poctu iteraci individualne pro konkretni problemy
 // hledani optimalnich parametru
 // pravdepodobnosti u evolucnich algoritmu - perturbacni operatory a crossover
 // - u perturbace staci 2 pravdepodobnosti podle predchozich mereni
