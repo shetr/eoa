@@ -356,7 +356,36 @@ impl InitHeuristicGtspPopulation {
             spec: self.spec.clone(),
             perm: Vec::<GroupVert>::with_capacity(self.spec.groups.len())
         };
-        
+        let start_group = rand::thread_rng().gen_range(0..self.spec.groups.len());
+        let start_group_vert = rand::thread_rng().gen_range(0..self.spec.groups[start_group].len());
+        perm.perm.push(GroupVert { group: start_group, vert: start_group_vert });
+        while perm.perm.len() < self.spec.groups.len() {
+            let curr = perm.perm.last().unwrap();
+            let curr_vert = self.spec.groups[curr.group][curr.vert];
+            let mut nearest = GroupVert { group: 0, vert: 0};
+            let mut nearest_dist = f64::INFINITY;
+            for g in 0..self.spec.groups.len() {
+                let mut g_visited = false;
+                for i in 0..perm.perm.len() {
+                    if g == perm.perm[i].group {
+                        g_visited = true;
+                        break;
+                    }
+                }
+                if g_visited {
+                    continue;
+                }
+                for v in 0..self.spec.groups[g].len() {
+                    let vert = self.spec.groups[g][v];
+                    let dist = self.spec.distances.get(curr_vert, vert);
+                    if dist < nearest_dist {
+                        nearest_dist = dist;
+                        nearest = GroupVert { group: g, vert: v};
+                    }
+                }
+            }
+            perm.perm.push(nearest);
+        }
         perm
     }
 }

@@ -60,7 +60,7 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
         let local_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
         let local_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
         let local_selection = IdentitySelection {};
-        let local_replacement_strategy = GenerationalReplacementStrategy {};
+        let local_replacement_strategy = TruncationReplacementStrategy {};
         let local_crossover = IdentityCrossover {};
 
         let evo_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: population_size };
@@ -196,7 +196,7 @@ pub fn gtsp_find_opt_params_local_search(num_repetitions: usize, num_iters: usiz
     for i in 0..input_files.len() {
         problems.push(Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_files[i]).as_str())))
     }
-    let prob_samples = 10usize;
+    let prob_samples = 20usize;
     let total_samples = prob_samples.pow(4);
     let mut best_problem_probs = vec![[0.0; 4]; problems.len()];
     let mut best_problem_fitness = vec![f64::INFINITY; problems.len()];
@@ -219,7 +219,7 @@ pub fn gtsp_find_opt_params_local_search(num_repetitions: usize, num_iters: usiz
             let local_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
             let local_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
             let local_selection = IdentitySelection {};
-            let local_replacement_strategy = GenerationalReplacementStrategy {};
+            let local_replacement_strategy = TruncationReplacementStrategy {};
             let local_crossover = IdentityCrossover {};
     
             let perturbation = CombinePerturbeMutOps { mut_ops: vec![
@@ -395,4 +395,5 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
 //   - vybere nahodny vrchol a z něj začně skládat cestu, vždy vybere hranu s nejnižší vzdáleností co nevede zpět
 // vizualizace heuristickeho reseni pouziteho v specializovanem algoritmu, staci jeden priklad pro kazdy dataset (idealne, ale 1 dataset by taky stacil)
 // vizualizace behu jednoho vybraneho algoritmu - ukazat ten nejlepsi, idealne na slozitejsim problemu (pokud pujde snadno zobrazit)
-
+// dalsi napad: vyresit klasicke tsp na jednotlive groupy podle prumerne vzdalenosti,
+// pote z vysledku vygenerovat inicialni populaci pro evolucni alg resici generalized tsp problem

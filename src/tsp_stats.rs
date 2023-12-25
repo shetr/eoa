@@ -31,40 +31,6 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
             BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
             BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]},
             BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}];
-
-        //let mut search_funs = [
-        //    EvolutionarySearchFunCall {
-        //        fitness_func: &mut fitness,
-        //        init_population: &init_population,
-        //        selection: &selection,
-        //        crossover: &cycle_crossover,
-        //        perturbe_mut_op: &move_perturbation,
-        //        replacement_strategy: &replacement_strategy,
-        //        termination_cond: &termination_cond,
-        //        search_fun: local_search_evolutionary_api
-        //    },
-        //    EvolutionarySearchFunCall {
-        //        fitness_func: &mut fitness,
-        //        init_population: &init_population,
-        //        selection: &selection,
-        //        crossover: &cycle_crossover,
-        //        perturbe_mut_op: &swap_perturbation,
-        //        replacement_strategy: &replacement_strategy,
-        //        termination_cond: &termination_cond,
-        //        search_fun: local_search_evolutionary_api
-        //    },
-        //    EvolutionarySearchFunCall {
-        //        fitness_func: &mut fitness,
-        //        init_population: &init_population,
-        //        selection: &selection,
-        //        crossover: &cycle_crossover,
-        //        perturbe_mut_op: &move_perturbation,
-        //        replacement_strategy: &replacement_strategy,
-        //        termination_cond: &termination_cond,
-        //        search_fun: local_search_evolutionary_api
-        //    }
-        //];
-        //let stats1: Statistics = search_funs[0].search();
         for _rep in 0..num_repetitions {
 
             let (_, stats1) =
