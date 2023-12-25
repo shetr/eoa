@@ -150,7 +150,7 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, num_iters: usize,
             }
         }
         let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/{}_default.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness").unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/{}_default.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", true).unwrap();
         
     }
 }
@@ -314,10 +314,10 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
             ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspReverseGroupPerturbation {})}
         ]};
         let opt_perturbation = CombinePerturbeMutOps { mut_ops: vec![
-            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
-            ProbPerturbeMutOp { prob: 0.4, op: Rc::from(GtspMoveGroupPerturbation {})},
-            ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspSwapGroupPerturbation {})},
-            ProbPerturbeMutOp { prob: 0.6, op: Rc::from(GtspReverseGroupPerturbation {})}
+            ProbPerturbeMutOp { prob: 0.8, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+            ProbPerturbeMutOp { prob: 0.1, op: Rc::from(GtspMoveGroupPerturbation {})},
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspSwapGroupPerturbation {})},
+            ProbPerturbeMutOp { prob: 0.4, op: Rc::from(GtspReverseGroupPerturbation {})}
         ]};
         
 
@@ -372,7 +372,7 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
             }
         }
         let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/{}_local.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness").unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/{}_local.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
         
     }
 }

@@ -34,6 +34,6 @@ pub fn sem()
     //gtsp_basic_stats_gen_instance();
     //gtsp_basic_stats_default_params(args.num_rep, args.num_iters, args.pop_size);
     //gtsp_viz_gen_solution(args.num_iters, args.pop_size);
-    gtsp_find_opt_params_local_search(args.num_rep, args.num_iters);
-    //gtsp_local_search_stats(args.num_rep, args.num_iters);
+    //gtsp_find_opt_params_local_search(args.num_rep, args.num_iters);
+    gtsp_local_search_stats(args.num_rep, args.num_iters);
 }

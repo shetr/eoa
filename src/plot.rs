@@ -45,7 +45,7 @@ pub fn plot(stats: &BSFSingleObjStatistics, out_name: &str, fun_name: &str) -> R
     Ok(())
 }
 
-pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64, y_desc: &str) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64, y_desc: &str, use_optimum: bool) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max_fitness = f64::NEG_INFINITY;
     let mut min_fitness = f64::INFINITY;
@@ -53,7 +53,9 @@ pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>,
         max_fitness = max_fitness.max(stats[i].fitness.iter().copied().fold(f64::NEG_INFINITY, f64::max));
         min_fitness = min_fitness.min(stats[i].fitness.iter().copied().fold(f64::INFINITY, f64::min));
     }
-    min_fitness = min_fitness.min(log_optimum);
+    if use_optimum {
+        min_fitness = min_fitness.min(log_optimum);
+    }
     let range = max_fitness - min_fitness;
     min_fitness -= 0.1 * range;
     if max_fitness == min_fitness {
@@ -87,14 +89,16 @@ pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>,
             .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], color));
     }
 
-    let opt_color = colors[stats.len()];
-    chart
+    if use_optimum {
+        let opt_color = colors[stats.len()];
+        chart
             .draw_series(LineSeries::new(
                 (0..stats[0].fitness.len()).map(|iter| (iter, log_optimum)),
                 opt_color,
             ))?
             .label("optimum")
             .legend(move |(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], opt_color));
+    }
 
     chart
         .configure_series_labels()

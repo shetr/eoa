@@ -342,3 +342,37 @@ impl Crossover<GtspPermutation> for GtspGeneralCrossover {
 }
 
 // TODO: implement heuristic intial guess solution finder
+
+
+#[derive(Clone)]
+pub struct InitHeuristicGtspPopulation {
+    pub spec: Rc<GtspProblem>,
+    pub size: usize
+}
+
+impl InitHeuristicGtspPopulation {
+    fn gen_perm(&self) -> GtspPermutation {
+        let mut perm = GtspPermutation {
+            spec: self.spec.clone(),
+            perm: Vec::<GroupVert>::with_capacity(self.spec.groups.len())
+        };
+        
+        perm
+    }
+}
+
+impl InitPopulation<GtspPermutation> for InitHeuristicGtspPopulation {
+    fn init(&self) -> Vec<GtspPermutation> {
+        let mut population = Vec::<GtspPermutation>::with_capacity(self.size);
+        for _ in 0..self.size {
+            population.push(self.gen_perm());
+        }
+        population
+    }
+}
+
+impl InitFunc<GtspPermutation> for InitHeuristicGtspPopulation {
+    fn init(&self) -> GtspPermutation {
+        self.gen_perm()
+    }
+}
