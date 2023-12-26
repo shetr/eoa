@@ -24,7 +24,8 @@ fn _test_tsp()
         &crossover,
         perturbe_mut_op, 
         &replacement_strategy,
-        &termination_cond);
+        &termination_cond,
+        false);
     println!("Solution:  {:?}", solution.value.vert_perm);
     println!("Fitness:  {:?}", solution.fitness);
     plot(&stats, "out/tsp_test.svg", "TSP").unwrap();
@@ -52,7 +53,8 @@ fn test_tsp_file()
         &crossover,
         perturbe_mut_op, 
         &replacement_strategy,
-        &termination_cond);
+        &termination_cond,
+        false);
     println!("Solution:  {:?}", solution.value.vert_perm);
     println!("Fitness:  {:?}", solution.fitness);
     println!("Optimal fitness:  {:?}", opt_value);

@@ -54,7 +54,8 @@ impl Fitness for Vec<f64> {
 pub trait GeneralFitnessFunc<T: OptData, F: Fitness> {
     fn eval_general(&self, data: &T, out: &mut F);
 
-    fn eval_population(&mut self, poulation: &mut Vec<T>, fitness: &mut Vec<F>);
+    fn eval_population(&mut self, poulation: &Vec<T>, fitness: &mut Vec<F>);
+    fn reeval_population(&mut self, poulation: &Vec<T>, fitness: &mut Vec<F>);
 }
 
 pub trait FitnessFunc<T: OptData> {
@@ -66,9 +67,22 @@ impl<T: OptData, FitnessFuncT : FitnessFunc<T>> GeneralFitnessFunc<T, f64> for F
         *out = self.eval(data);
     }
 
-    fn eval_population(&mut self, poulation: &mut Vec<T>, fitness: &mut Vec<f64>) {
+    fn eval_population(&mut self, poulation: &Vec<T>, fitness: &mut Vec<f64>) {
         fitness.resize(poulation.len(), 0.0);
         for i in 0..poulation.len() {
+            self.eval_general(&poulation[i], &mut fitness[i]);
+        }
+    }
+
+    fn reeval_population(&mut self, poulation: &Vec<T>, fitness: &mut Vec<f64>) {
+        let prev_len = fitness.len();
+        fitness.resize(poulation.len(), 0.0);
+        for i in 0..prev_len {
+            let mut f = 0.0;
+            self.eval_general(&poulation[i], &mut f);
+            fitness[i] = 0.5 * (f + fitness[i]);
+        }
+        for i in prev_len..poulation.len() {
             self.eval_general(&poulation[i], &mut fitness[i]);
         }
     }
@@ -83,9 +97,23 @@ impl<T: OptData, MultiObjFitnessFuncT : MultiObjFitnessFunc<T>> GeneralFitnessFu
         self.eval(data, out)
     }
 
-    fn eval_population(&mut self, poulation: &mut Vec<T>, fitness: &mut Vec<Vec<f64>>) {
+    fn eval_population(&mut self, poulation: &Vec<T>, fitness: &mut Vec<Vec<f64>>) {
         fitness.resize(poulation.len(), Vec::<f64>::new());
         for i in 0..poulation.len() {
+            self.eval_general(&poulation[i], &mut fitness[i]);
+        }
+    }
+    fn reeval_population(&mut self, poulation: &Vec<T>, fitness: &mut Vec<Vec<f64>>) {
+        let prev_len = fitness.len();
+        fitness.resize(poulation.len(), Vec::<f64>::new());
+        let mut f = Vec::<f64>::new();
+        for i in 0..prev_len {
+            self.eval_general(&poulation[i], &mut f);
+            for j in 0..fitness[i].len() {
+                fitness[i][j] = 0.5 * (f[j] + fitness[i][j]);
+            }
+        }
+        for i in prev_len..poulation.len() {
             self.eval_general(&poulation[i], &mut fitness[i]);
         }
     }

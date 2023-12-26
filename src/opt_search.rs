@@ -108,7 +108,8 @@ pub fn evolutionary_search<
         crossover: &CrossoverT,
         mut perturbe_mut_op: PerturbeMutOpT,
         replacement_strategy: &ReplacementStrategyT,
-        termination_cond: &TerminationCondT
+        termination_cond: &TerminationCondT,
+        recompute_fitness: bool
     )
     -> (BSFSingleObjSolution<T>, StatisticsT)
 {
@@ -119,7 +120,7 @@ pub fn evolutionary_search<
     let mut parents_indices = Vec::<usize>::new();
     let mut offsprings = Vec::<T>::new();
     let mut offsprings_fitness = Vec::<f64>::new();
-    fitness_func.eval_population(&mut population, &mut fitness);
+    fitness_func.eval_population(&population, &mut fitness);
     let mut iter: usize = 0;
     let mut diff = f64::INFINITY;
     let mut best_index = find_best(&fitness);
@@ -127,10 +128,13 @@ pub fn evolutionary_search<
     let mut best_fitness = fitness[best_index];
     let mut stats = StatisticsT::new();
     while !termination_cond.eval(iter, diff) {
+        if recompute_fitness {
+            fitness_func.reeval_population(&population, &mut fitness);
+        }
         selection.select(&fitness, &mut parents_indices);
         crossover.crossover(&population, &parents_indices, &mut offsprings);
         mutate(&mut offsprings, &perturbe_mut_op);
-        fitness_func.eval_population(&mut offsprings, &mut offsprings_fitness);
+        fitness_func.eval_population(&offsprings, &mut offsprings_fitness);
         let prev_best_fitness = fitness[best_index];
         let offsprings_from = population.len();
         join_populations(&mut population, &mut fitness, &mut offsprings, &mut offsprings_fitness);
@@ -184,7 +188,7 @@ pub fn general_evolutionary_search<
     let mut parents_indices = Vec::<usize>::new();
     let mut offsprings = Vec::<T>::new();
     let mut offsprings_fitness = Vec::<FIn>::new();
-    fitness_func.eval_population(&mut population, &mut fitness);
+    fitness_func.eval_population(&population, &mut fitness);
     fitness_transformer.transform(&population, &fitness, &mut opt_fitness);
 
     let mut iter: usize = 0;
@@ -196,7 +200,7 @@ pub fn general_evolutionary_search<
         selection.select(&opt_fitness, &mut parents_indices);
         crossover.crossover(&population, &parents_indices, &mut offsprings);
         mutate(&mut offsprings, &perturbe_mut_op);
-        fitness_func.eval_population(&mut offsprings, &mut offsprings_fitness);
+        fitness_func.eval_population(&offsprings, &mut offsprings_fitness);
         let offsprings_from = population.len();
         join_populations(&mut population, &mut fitness, &mut offsprings, &mut offsprings_fitness);
         fitness_transformer.transform(&population, &fitness, &mut opt_fitness);

@@ -105,7 +105,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize
                 &local_crossover,
                 move_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
 
             let (_, stats2) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                  = evolutionary_search(
@@ -115,7 +116,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize
                 &local_crossover,
                 swap_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
 
             let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                  = evolutionary_search(
@@ -125,7 +127,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize
                 &local_crossover,
                 rev_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
             
             // evolutionary searches
 
@@ -137,7 +140,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize
                 &cycle_crossover,
                 rev_perturbation.clone(), 
                 &evo_replacement_strategy,
-                &evo_termination_cond);
+                &evo_termination_cond,
+                false);
 
             let (_, stats5) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                  = evolutionary_search(
@@ -147,7 +151,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize
                 &order_crossover,
                 rev_perturbation.clone(), 
                 &evo_replacement_strategy,
-                &evo_termination_cond);
+                &evo_termination_cond,
+                false);
 
             let curr_stats = vec![stats1, stats2, stats3, stats4, stats5];
             for s in 0..avg_stats.len() {
@@ -193,7 +198,8 @@ pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
         &order_crossover,
         move_perturbation.clone(), 
         &evo_replacement_strategy,
-        &evo_termination_cond);
+        &evo_termination_cond,
+        false);
     
     let colors = uniform_colors(problem.groups.len());
     plot_gtsp_solution(&positions, &sol.value, &colors, 4, "out/gtsp/viz_gen1.svg", "gen1").unwrap();
@@ -250,7 +256,8 @@ pub fn gtsp_find_opt_params_local_search(num_repetitions: usize, num_iters: usiz
                     &local_crossover,
                     perturbation.clone(), 
                     &local_replacement_strategy,
-                    &local_termination_cond);
+                    &local_termination_cond,
+                    false);
     
                 avg_sol_fitness += sol.fitness;
             }
@@ -322,7 +329,8 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
                 &local_crossover,
                 move_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
 
             let (_, stats2) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                  = evolutionary_search(
@@ -332,7 +340,8 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
                 &local_crossover,
                 swap_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
 
             let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                  = evolutionary_search(
@@ -342,7 +351,8 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
                 &local_crossover,
                 rev_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
             
             let (_, stats4) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                 = evolutionary_search(
@@ -352,7 +362,8 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
                &local_crossover,
                opt_perturbation.clone(), 
                &local_replacement_strategy,
-               &local_termination_cond);
+               &local_termination_cond,
+               false);
 
             let curr_stats = vec![stats1, stats2, stats3, stats4];
             for s in 0..avg_stats.len() {
@@ -435,7 +446,8 @@ pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, _num_ite
                     &crossover,
                     perturbation.clone(), 
                     &evo_replacement_strategy,
-                    &evo_termination_cond);
+                    &evo_termination_cond,
+                    false);
     
                 avg_sol_fitness += sol.fitness;
             }
@@ -494,7 +506,7 @@ impl FitnessFunc<FloatVec> for EvoSearchParamsFitness {
             let crossover = GtspGeneralCrossover {
                 city_prob: probs.values[2],
                 cycle_prob: probs.values[3],
-                order_prob: probs.values[4]
+                order_prob: 0.0
             };
             
             let mut avg_sol_fitness = 0.0;
@@ -508,7 +520,8 @@ impl FitnessFunc<FloatVec> for EvoSearchParamsFitness {
                     &crossover,
                     perturbation.clone(), 
                     &evo_replacement_strategy,
-                    &evo_termination_cond);
+                    &evo_termination_cond,
+                    false);
     
                 avg_sol_fitness += sol.fitness;
             }
@@ -527,7 +540,7 @@ pub struct EvoOptStatistics {
 
 impl Statistics<FloatVec, f64, f64> for EvoOptStatistics {
     fn new() -> Self {
-        EvoOptStatistics { best_fitness: f64::INFINITY, best_probs: FloatVec { values: vec![0.0; 5] } }
+        EvoOptStatistics { best_fitness: f64::INFINITY, best_probs: FloatVec { values: vec![0.0; 4] } }
     }
 
     fn report_iter(&mut self, iter: usize, population: &Vec<FloatVec>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {
@@ -536,14 +549,13 @@ impl Statistics<FloatVec, f64, f64> for EvoOptStatistics {
         if curr_fitness < self.best_fitness {
             self.best_fitness = curr_fitness;
             self.best_probs = population[best_index].clone();
+            let probs = &self.best_probs.values;
+            let mut file = File::create("data/gtsp/probs_evo.txt").expect("unable to create a file.");
+            file.write(format!("{}, {}, {}, {}\n", probs[0], probs[1], probs[2], probs[3]).as_bytes()).unwrap();
         }
-        let curr = &population[best_index].values;
         let probs = &self.best_probs.values;
         println!("iter: {}", iter);
-        println!("  best f: {}, p: {}, {}, {}, {}, {}", self.best_fitness, probs[0], probs[1], probs[2], probs[3], probs[4]);
-        println!("  curr f: {}, p: {}, {}, {}, {}, {}", curr_fitness, curr[0], curr[1], curr[2], curr[3], curr[4]);
-        let mut file = File::create("data/gtsp/probs_evo.txt").expect("unable to create a file.");
-        file.write(format!("{}, {}, {}, {}, {}\n", probs[0], probs[1], probs[2], probs[3], probs[4]).as_bytes()).unwrap();
+        println!("  best f: {}, p: {}, {}, {}, {}", self.best_fitness, probs[0], probs[1], probs[2], probs[3]);
     }
 }
 
@@ -556,26 +568,25 @@ impl PerturbeMutOp<FloatVec> for EvoProbsPerturbeMutOp {
         data.values[1] = rand::random::<f64>();
         data.values[2] = rand::random::<f64>();
         data.values[3] = rand::random::<f64>() * (1.0 - data.values[2]);
-        data.values[4] = rand::random::<f64>() * (1.0 - data.values[2] - data.values[3]);
     }
 }
 
 pub fn gtsp_find_opt_params_evolutionary_search_with_local_search(num_repetitions: usize, population_size: usize) {
-    let total_samples = 1000;
+    let total_samples = 20000;
     let mut fitness = EvoSearchParamsFitness::new(num_repetitions, population_size);
 
     let init_population = InitPopulationFromValues { population: vec![FloatVec {
-        values: vec![0.4060939761657277, 0.40935250380661686, 0.319313633689781, 0.25402753304639797, 0.21936227552384477]   
+        values: vec![0.32996120096827025, 0.8843005619818586, 0.8567588214309648, 0.07155645271913313]
     }]};
     let termination_cond = MaxIterTerminationCond { n_iters: total_samples };
     let selection = IdentitySelection {};
     let replacement_strategy = TruncationReplacementStrategy {};
     let crossover = IdentityCrossover {};
 
-    //let perturbation = BoundedNormalPerturbeRealMutOp::new(0.05,
-    //    &vec![Bounds { lower: 0.0, upper: 1.0}; 5]
-    //);
-    let perturbation = EvoProbsPerturbeMutOp {};
+    let perturbation = BoundedNormalPerturbeRealMutOp::new(0.05,
+        &vec![Bounds { lower: 0.0, upper: 1.0}; 4]
+    );
+    //let perturbation = EvoProbsPerturbeMutOp {};
 
     let (_, _) : (BSFSingleObjSolution<FloatVec>, EvoOptStatistics)
         = evolutionary_search(
@@ -585,7 +596,8 @@ pub fn gtsp_find_opt_params_evolutionary_search_with_local_search(num_repetition
         &crossover,
         perturbation.clone(), 
         &replacement_strategy,
-        &termination_cond);
+        &termination_cond,
+        true);
 }
 
 pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, population_size: usize) {
@@ -638,7 +650,8 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
                 &cycle_crossover,
                 rev_perturbation.clone(), 
                 &evo_replacement_strategy,
-                &evo_termination_cond);
+                &evo_termination_cond,
+                false);
             
             let (_, stats2) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                 = evolutionary_search(
@@ -648,7 +661,8 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
                &order_crossover,
                rev_perturbation.clone(), 
                &evo_replacement_strategy,
-               &evo_termination_cond);
+               &evo_termination_cond,
+               false);
             
             let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                = evolutionary_search(
@@ -658,7 +672,8 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
               &opt_crossover,
               opt_perturbation.clone(), 
               &evo_replacement_strategy,
-              &evo_termination_cond);
+              &evo_termination_cond,
+              false);
 
             let curr_stats = vec![stats1, stats2, stats3];
             for s in 0..avg_stats.len() {
@@ -734,7 +749,8 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
                 &local_crossover,
                 local_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
             
             let (_, stats2) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                 = evolutionary_search(
@@ -744,7 +760,8 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
                 &local_crossover,
                 local_perturbation.clone(), 
                 &local_replacement_strategy,
-                &local_termination_cond);
+                &local_termination_cond,
+                false);
             
             // evolutionary searches
             let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
@@ -755,7 +772,8 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
                 &crossover,
                 evo_perturbation.clone(), 
                 &evo_replacement_strategy,
-                &evo_termination_cond);
+                &evo_termination_cond,
+                false);
             
             let (_, stats4) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                 = evolutionary_search(
@@ -765,7 +783,8 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
                &crossover,
                evo_perturbation.clone(), 
                &evo_replacement_strategy,
-               &evo_termination_cond);
+               &evo_termination_cond,
+               false);
 
             let curr_stats = vec![stats1, stats2, stats3, stats4];
             for s in 0..avg_stats.len() {

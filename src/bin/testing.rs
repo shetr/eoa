@@ -66,7 +66,8 @@ fn test_evolutionary_search() -> Result<(), Box<dyn std::error::Error>>
         &crossover,
         perturbe_mut_op, 
         &replacement_strategy,
-        &termination_cond);
+        &termination_cond,
+        false);
     println!("Solution:  {:?}", solution.value.values);
     println!("Fitness:  {:?}", solution.fitness);
     plot(&stats, "out.svg", "Sphere")

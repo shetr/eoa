@@ -49,7 +49,8 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
                 &cycle_crossover,
                 move_perturbation.clone(), 
                 &replacement_strategy,
-                &termination_cond);
+                &termination_cond,
+                false);
 
             let (_, stats5) = evolutionary_search(
                 &mut fitness, 
@@ -58,7 +59,8 @@ pub fn create_comparison_graphs(num_repetitions: usize, num_iters: usize, popula
                 &order_crossover,
                 move_perturbation.clone(), 
                 &replacement_strategy,
-                &termination_cond);
+                &termination_cond,
+                false);
 
             let curr_stats = vec![stats1, stats2, stats3, stats4, stats5];
             for s in 0..avg_stats.len() {
@@ -110,7 +112,8 @@ pub fn create_vizualization_graphs(num_iters: usize, population_size: usize)
         &crossover,
         perturbation.clone(), 
         &replacement_strategy,
-        &termination_cond);
+        &termination_cond,
+        false);
 
     plot_tsp_viz(&vert_positions, &opt_vert_permutation, "out/tsp/opt_viz.svg", "berlin52 optimum").unwrap();
     plot_tsp_viz(&vert_positions, &solution.value, format!("out/tsp/iter{}_viz.svg", num_iters).as_str(), format!("berlin52 iter{}", num_iters).as_str()).unwrap();
