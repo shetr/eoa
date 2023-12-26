@@ -149,6 +149,7 @@ pub struct GroupVertPos {
     pub pos: [f64; 2]
 }
 
+// abbandoned, it would be probably very misleading
 pub fn gtsp_force_directed_positions(problem: &GtspProblem) -> Vec<GroupVertPos> {
     let mut positions = vec![GroupVertPos { group: 0, pos: [0.0, 0.0]}; problem.vert_count];
     let mut max_distance = 1.0;

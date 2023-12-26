@@ -537,10 +537,26 @@ impl Statistics<FloatVec, f64, f64> for EvoOptStatistics {
             self.best_fitness = curr_fitness;
             self.best_probs = population[best_index].clone();
         }
+        let curr = &population[best_index].values;
         let probs = &self.best_probs.values;
-        println!("i: {}, f: {}, p: {}, {}, {}, {}, {}", iter, self.best_fitness, probs[0], probs[1], probs[2], probs[3], probs[4]);
+        println!("iter: {}", iter);
+        println!("  best f: {}, p: {}, {}, {}, {}, {}", self.best_fitness, probs[0], probs[1], probs[2], probs[3], probs[4]);
+        println!("  curr f: {}, p: {}, {}, {}, {}, {}", curr_fitness, curr[0], curr[1], curr[2], curr[3], curr[4]);
         let mut file = File::create("data/gtsp/probs_evo.txt").expect("unable to create a file.");
         file.write(format!("{}, {}, {}, {}, {}\n", probs[0], probs[1], probs[2], probs[3], probs[4]).as_bytes()).unwrap();
+    }
+}
+
+#[derive(Clone)]
+struct EvoProbsPerturbeMutOp {}
+
+impl PerturbeMutOp<FloatVec> for EvoProbsPerturbeMutOp {
+    fn eval(&self, data: &mut FloatVec) {
+        data.values[0] = rand::random::<f64>();
+        data.values[1] = rand::random::<f64>();
+        data.values[2] = rand::random::<f64>();
+        data.values[3] = rand::random::<f64>() * (1.0 - data.values[2]);
+        data.values[4] = rand::random::<f64>() * (1.0 - data.values[2] - data.values[3]);
     }
 }
 
@@ -549,16 +565,17 @@ pub fn gtsp_find_opt_params_evolutionary_search_with_local_search(num_repetition
     let mut fitness = EvoSearchParamsFitness::new(num_repetitions, population_size);
 
     let init_population = InitPopulationFromValues { population: vec![FloatVec {
-        values: vec![0.5, 0.5, 0.3, 0.3, 0.3]   
+        values: vec![0.4060939761657277, 0.40935250380661686, 0.319313633689781, 0.25402753304639797, 0.21936227552384477]   
     }]};
     let termination_cond = MaxIterTerminationCond { n_iters: total_samples };
     let selection = IdentitySelection {};
     let replacement_strategy = TruncationReplacementStrategy {};
     let crossover = IdentityCrossover {};
 
-    let perturbation = BoundedNormalPerturbeRealMutOp::new(0.05,
-        &vec![Bounds { lower: 0.0, upper: 1.0}; 5]
-    );
+    //let perturbation = BoundedNormalPerturbeRealMutOp::new(0.05,
+    //    &vec![Bounds { lower: 0.0, upper: 1.0}; 5]
+    //);
+    let perturbation = EvoProbsPerturbeMutOp {};
 
     let (_, _) : (BSFSingleObjSolution<FloatVec>, EvoOptStatistics)
         = evolutionary_search(
@@ -767,6 +784,13 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, pop
 }
 
 // TODO:
+// vykaslat se na force directed layout, barvy permutovat nahodne, vygenerovat dalsi mid a large datasety
+// mozna upravit scale u generovanych pozic - aby sedel na pomer stran u vizualizace
+// pustit optimalizaci evo parametru s kompletne random perturbatorem, pak mozna vylepsit pomoci one fift rule normal rozdeleni
+// vizualizace - udelat jen pro euclidovske datasety, vizualizovat pocatecni heuristiku.
+// - vizualizovat u nejlepsich algoritmu prubeh v gifu
+// pridat do vsech grafu grid - ale jen u hodnot vyznacenych na osach
+//
 // pridat nastaveni max poctu iteraci individualne pro konkretni problemy
 // hledani optimalnich parametru
 // pravdepodobnosti u evolucnich algoritmu - perturbacni operatory a crossover

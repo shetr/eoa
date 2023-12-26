@@ -2,6 +2,7 @@ use crate::GroupVertPos;
 use crate::GtspPermutation;
 use crate::opt_data::*;
 use crate::tsp::*;
+use rand::seq::SliceRandom;
 
 use plotters::prelude::*;
 
@@ -233,10 +234,9 @@ pub fn uniform_colors(colors_count: usize) -> Vec<RGBColor> {
     for i in 0..colors_count {
         colors.push(hsl_to_rgb(HSLColor((i as f64) / (colors_count as f64), 0.9, 0.5)));
     }
+    colors.shuffle(&mut rand::thread_rng());
     colors
 }
-
-// TODO: Generate better distribute colors based on the distance matrix
 
 pub fn rand_colors(colors_count: usize, min: f64, max: f64) -> Vec<RGBColor> {
     let mut colors = Vec::<RGBColor>::with_capacity(colors_count);
