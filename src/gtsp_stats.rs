@@ -19,8 +19,8 @@ pub fn gtsp_basic_stats() {
 }
 
 pub fn gtsp_basic_stats_gen_instance() {
-    let problem = load_gtsp_problem("data/gtsp/gen1.txt");
-    let positions = load_gtsp_positions("data/gtsp/gen1_pos.txt");
+    let problem = load_gtsp_problem("data/gtsp/g1.txt");
+    let positions = load_gtsp_positions("data/gtsp/g1_pos.txt");
     println!("vert count: {}", problem.vert_count);
     println!("group count: {}", problem.groups.len());
     println!("euclidean:  {}", are_distances_euclidean(&problem.distances));
@@ -36,7 +36,7 @@ pub fn gtsp_basic_stats_gen_instance() {
     plot_gtsp_solution(&positions, &perm, &colors, 4, "out/points.svg", "gen points").unwrap();
 }
 
-pub fn gtsp_gen_problem(vert_count: usize, group_count: usize) {
+pub fn gtsp_gen_problem(vert_count: usize, group_count: usize, file_name: &str) {
     let (problem, positions) = gen_euclidean_gtsp_problem(vert_count, group_count);
     println!("vert count: {}", problem.vert_count);
     println!("group count: {}", problem.groups.len());
@@ -44,15 +44,15 @@ pub fn gtsp_gen_problem(vert_count: usize, group_count: usize) {
     println!("metric:     {}", are_distances_a_metric(&problem.distances));
     let colors = uniform_colors(problem.groups.len());
     plot_gtsp_points(&positions, &colors, 4, "out/points.svg", "gen points").unwrap();
-    save_gtsp_problem("data/gtsp/gen1.txt", &problem);
-    save_gtsp_positions("data/gtsp/gen1_pos.txt", &positions);
+    save_gtsp_problem(&format!("data/gtsp/{}.txt", file_name), &problem);
+    save_gtsp_positions(&format!("data/gtsp/{}_pos.txt", file_name), &positions);
 }
 
-pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize, population_size: usize) {
+pub fn gtsp_basic_stats_default_params(num_repetitions: usize, population_size: usize) {
     let method_names = vec!["local move", "local swap", "local rev", "evo move cycle", "evo move order"];
     let is_method_local = [true, true, true, false, false];
-    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
-    let max_iters = [50, 300, 500, 500, 1000, 1500, 3000];
+    let input_files = ["g1", "g2", "g3", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [20, 300, 2500, 40, 90, 350, 600, 1000, 3000];
     
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;
@@ -172,7 +172,8 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, _num_iters: usize
 
 pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
 {
-    let input_file = "gen1";
+    let input_file = "g3";
+    let point_size = 4;
 
     let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
     let positions = load_gtsp_positions(format!("data/gtsp/{}_pos.txt", input_file).as_str());
@@ -202,12 +203,12 @@ pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
         false);
     
     let colors = uniform_colors(problem.groups.len());
-    plot_gtsp_solution(&positions, &sol.value, &colors, 4, "out/gtsp/viz_gen1.svg", "gen1").unwrap();
+    plot_gtsp_solution(&positions, &sol.value, &colors, point_size, &format!("out/gtsp/viz_{}.svg", input_file), input_file).unwrap();
     
 }
 
 pub fn gtsp_find_opt_params_local_search(num_repetitions: usize, num_iters: usize, prob_samples: usize) {
-    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+    let input_files = ["g1", "a", "b", "c", "d", "e", "f"];
     let mut problems = Vec::<Rc<GtspProblem>>::with_capacity(input_files.len());
     for i in 0..input_files.len() {
         problems.push(Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_files[i]).as_str())))
@@ -277,10 +278,10 @@ pub fn gtsp_find_opt_params_local_search(num_repetitions: usize, num_iters: usiz
     file.write(format!("{}, {}, {}, {}\n", best_probs[0], best_probs[1], best_probs[2], best_probs[3]).as_bytes()).unwrap();
 }
 
-pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
+pub fn gtsp_local_search_stats(num_repetitions: usize) {
     let method_names = vec!["local move", "local swap", "local rev", "local tweaked"];
-    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
-    let max_iters = [num_iters, num_iters, num_iters, num_iters, num_iters, num_iters, num_iters];
+    let input_files = ["g1", "g2", "g3", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [600, 3000, 6000, 1500, 2000, 3000, 4000, 5000, 6000];
 
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;
@@ -382,7 +383,7 @@ pub fn gtsp_local_search_stats(num_repetitions: usize, num_iters: usize) {
 }
 
 pub fn gtsp_find_opt_params_evolutionary_search(num_repetitions: usize, _num_iters: usize, population_size: usize, prob_samples: usize) {
-    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+    let input_files = ["g1", "a", "b", "c", "d", "e", "f"];
     let max_iters = [100, 300, 500, 500, 1000, 1500, 3000];
     let mut problems = Vec::<Rc<GtspProblem>>::with_capacity(input_files.len());
     for i in 0..input_files.len() {
@@ -475,7 +476,7 @@ struct EvoSearchParamsFitness {
 
 impl EvoSearchParamsFitness {
     pub fn new(num_repetitions: usize, population_size: usize) -> Self {
-        let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
+        let input_files = ["g1", "a", "b", "c", "d", "e", "f"];
         let mut problems = Vec::<Rc<GtspProblem>>::with_capacity(input_files.len());
         for i in 0..input_files.len() {
             problems.push(Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_files[i]).as_str())))
@@ -554,8 +555,10 @@ impl Statistics<FloatVec, f64, f64> for EvoOptStatistics {
             file.write(format!("{}, {}, {}, {}\n", probs[0], probs[1], probs[2], probs[3]).as_bytes()).unwrap();
         }
         let probs = &self.best_probs.values;
+        let currp = &population[best_index].values;
         println!("iter: {}", iter);
         println!("  best f: {}, p: {}, {}, {}, {}", self.best_fitness, probs[0], probs[1], probs[2], probs[3]);
+        println!("  curr f: {}, p: {}, {}, {}, {}",      curr_fitness, currp[0], currp[1], currp[2], currp[3]);
     }
 }
 
@@ -576,17 +579,17 @@ pub fn gtsp_find_opt_params_evolutionary_search_with_local_search(num_repetition
     let mut fitness = EvoSearchParamsFitness::new(num_repetitions, population_size);
 
     let init_population = InitPopulationFromValues { population: vec![FloatVec {
-        values: vec![0.32996120096827025, 0.8843005619818586, 0.8567588214309648, 0.07155645271913313]
+        values: vec![0.9096472983082879, 0.4195441504092986, 0.2818948804986545, 0.37922819461965035]
     }]};
     let termination_cond = MaxIterTerminationCond { n_iters: total_samples };
     let selection = IdentitySelection {};
     let replacement_strategy = TruncationReplacementStrategy {};
     let crossover = IdentityCrossover {};
 
-    let perturbation = BoundedNormalPerturbeRealMutOp::new(0.05,
-        &vec![Bounds { lower: 0.0, upper: 1.0}; 4]
-    );
-    //let perturbation = EvoProbsPerturbeMutOp {};
+    //let perturbation = BoundedNormalPerturbeRealMutOp::new(0.05,
+    //    &vec![Bounds { lower: 0.0, upper: 1.0}; 4]
+    //);
+    let perturbation = EvoProbsPerturbeMutOp {};
 
     let (_, _) : (BSFSingleObjSolution<FloatVec>, EvoOptStatistics)
         = evolutionary_search(
@@ -600,10 +603,10 @@ pub fn gtsp_find_opt_params_evolutionary_search_with_local_search(num_repetition
         true);
 }
 
-pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, population_size: usize) {
-    let method_names = vec!["evo cycle", "evo order", "evo opt"];
-    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
-    let max_iters = [num_iters, num_iters, num_iters, num_iters, num_iters, num_iters, num_iters];
+pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, population_size: usize) {
+    let method_names = vec!["evo move cycle", "evo move order", "evo swap cycle", "evo swap order", "evo rev cycle", "evo rev order"];
+    let input_files = ["g1", "g2", "g3", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [40, 400, 3000, 30, 1000, 1000, 1500, 2500, 4000];
     
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;
@@ -620,22 +623,21 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
         let evo_selection = RankSelection { select_count: population_size / 2 };
         let evo_replacement_strategy = TruncationReplacementStrategy {};
 
-        let rev_perturbation = CombinePerturbeMutOps { mut_ops: vec![
-            ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
-            ProbPerturbeMutOp { prob: 0.5, op: Rc::from(GtspReverseGroupPerturbation {})}
+        let move_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspMoveGroupPerturbation {})}
         ]};
-        let opt_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+        let swap_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspSwapGroupPerturbation {})}
+        ]};
+        let rev_perturbation = CombinePerturbeMutOps { mut_ops: vec![
             ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
             ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspReverseGroupPerturbation {})}
         ]};
 
         let cycle_crossover = GtspCycleCrossover::new();
         let order_crossover = GtspOrderCrossover::new();
-        let opt_crossover = GtspGeneralCrossover {
-            city_prob: 0.5,
-            cycle_prob: 0.0,
-            order_prob: 0.5
-        };
         
         let mut avg_stats = vec![BSFSingleObjStatistics { fitness: vec![0.0f64; num_iters]}; method_names.len()];
 
@@ -648,34 +650,67 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
                 evo_init_population.clone(),
                 &evo_selection,
                 &cycle_crossover,
-                rev_perturbation.clone(), 
+                move_perturbation.clone(), 
                 &evo_replacement_strategy,
                 &evo_termination_cond,
                 false);
             
             let (_, stats2) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
                 = evolutionary_search(
-               &mut fitness, 
-               evo_init_population.clone(),
-               &evo_selection,
-               &order_crossover,
-               rev_perturbation.clone(), 
-               &evo_replacement_strategy,
-               &evo_termination_cond,
-               false);
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &order_crossover,
+                move_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond,
+                false);
             
             let (_, stats3) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
-               = evolutionary_search(
-              &mut fitness, 
-              evo_init_population.clone(),
-              &evo_selection,
-              &opt_crossover,
-              opt_perturbation.clone(), 
-              &evo_replacement_strategy,
-              &evo_termination_cond,
-              false);
+                = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &cycle_crossover,
+                swap_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond,
+                false);
 
-            let curr_stats = vec![stats1, stats2, stats3];
+            let (_, stats4) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &order_crossover,
+                swap_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond,
+                false);
+            
+            let (_, stats5) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &cycle_crossover,
+                rev_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond,
+                false);
+
+            let (_, stats6) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &order_crossover,
+                rev_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond,
+                false);
+
+            let curr_stats = vec![stats1, stats2, stats3, stats4, stats5, stats6];
             for s in 0..avg_stats.len() {
                 for i in 0..num_iters {
                     avg_stats[s].fitness[i] += curr_stats[s].fitness[i];
@@ -690,11 +725,11 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, num_iters: usize, 
     end_progress_bar();
 }
 
-pub fn gtsp_stats_optimized_params(num_repetitions: usize, num_iters: usize, population_size: usize) {
+pub fn gtsp_stats_optimized_params(num_repetitions: usize, population_size: usize) {
     let method_names = vec!["local", "local heuristic", "evo", "evo heuristic"];
     let is_method_local = [true, true, false, false];
-    let input_files = ["gen1", "a", "b", "c", "d", "e", "f"];
-    let max_iters = [num_iters, num_iters, num_iters, num_iters, num_iters, num_iters, num_iters];
+    let input_files = ["g1", "g2", "g3", "a", "b", "c", "d", "e", "f"];
+    let max_iters = [20, 1000, 3000, 25, 200, 600, 1000, 1500, 3000];
     
     let mut iter = 0;
     let total_iters = input_files.len() * num_repetitions;

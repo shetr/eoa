@@ -32,12 +32,20 @@ pub fn sem()
     // TODO: try seeding random generators
     let args = Cli::parse();
     //gtsp_basic_stats_gen_instance();
-    //gtsp_basic_stats_default_params(args.num_rep, args.num_iters, args.pop_size);
+    //gtsp_gen_problem(100, 20, "g2");
+    //gtsp_gen_problem(500, 80, "g3");
     //gtsp_viz_gen_solution(args.num_iters, args.pop_size);
     //gtsp_find_opt_params_local_search(args.num_rep, args.num_iters, 10);
-    //gtsp_local_search_stats(args.num_rep, args.num_iters);
     //gtsp_find_opt_params_evolutionary_search(args.num_rep, args.num_iters, args.pop_size, 10);
-    gtsp_find_opt_params_evolutionary_search_with_local_search(args.num_rep, args.pop_size);
-    //gtsp_evolutionary_search_stats(args.num_rep, args.num_iters, args.pop_size);
-    //gtsp_stats_optimized_params(args.num_rep, args.num_iters, args.pop_size);
+    //gtsp_find_opt_params_evolutionary_search_with_local_search(args.num_rep, args.pop_size);
+
+    // stats
+    //gtsp_basic_stats_default_params(args.num_rep, args.pop_size);
+    println!("default algs plots finished");
+    //gtsp_local_search_stats(args.num_rep);
+    println!("locoal algs plots finished");
+    //gtsp_evolutionary_search_stats(args.num_rep, args.pop_size);
+    println!("evolutionary algs plots finished");
+    gtsp_stats_optimized_params(args.num_rep, args.pop_size);
+    println!("best algs plots finished");
 }
