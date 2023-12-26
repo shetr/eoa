@@ -40,11 +40,11 @@ pub fn sem()
     //gtsp_find_opt_params_evolutionary_search_with_local_search(args.num_rep, args.pop_size);
 
     // stats
-    //gtsp_basic_stats_default_params(args.num_rep, args.pop_size);
+    gtsp_basic_stats_default_params(args.num_rep, args.pop_size);
     println!("default algs plots finished");
-    //gtsp_local_search_stats(args.num_rep);
-    println!("locoal algs plots finished");
-    //gtsp_evolutionary_search_stats(args.num_rep, args.pop_size);
+    gtsp_local_search_stats(args.num_rep);
+    println!("local algs plots finished");
+    gtsp_evolutionary_search_stats(args.num_rep, args.pop_size);
     println!("evolutionary algs plots finished");
     gtsp_stats_optimized_params(args.num_rep, args.pop_size);
     println!("best algs plots finished");

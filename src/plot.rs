@@ -46,7 +46,7 @@ pub fn plot(stats: &BSFSingleObjStatistics, out_name: &str, fun_name: &str) -> R
     Ok(())
 }
 
-pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64, y_desc: &str, use_optimum: bool) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>, colors: &[RGBColor], out_file_name: &str, plot_name: &str, log_optimum: f64, y_desc: &str, use_optimum: bool, use_mesh: bool) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max_fitness = f64::NEG_INFINITY;
     let mut min_fitness = f64::INFINITY;
@@ -72,12 +72,20 @@ pub fn plot_multiple(stats: &Vec<BSFSingleObjStatistics>, fun_names: &Vec<&str>,
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
         .build_cartesian_2d(0..stats[0].fitness.len(), min_fitness..max_fitness)?;
 
-    chart.configure_mesh()
-        .x_desc("Iterations")
-        .y_desc(y_desc)
-        .disable_x_mesh()
-        .disable_y_mesh()
-        .draw()?;
+    if use_mesh {
+        chart.configure_mesh()
+            .x_desc("Iterations")
+            .y_desc(y_desc)
+            .light_line_style(WHITE)
+            .draw()?;
+    } else {
+        chart.configure_mesh()
+            .x_desc("Iterations")
+            .y_desc(y_desc)
+            .disable_x_mesh()
+            .disable_y_mesh()
+            .draw()?;
+    }
 
     for i in 0..stats.len() {
         let color = colors[i];

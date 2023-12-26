@@ -165,7 +165,7 @@ pub fn gtsp_basic_stats_default_params(num_repetitions: usize, population_size: 
             progress_bar_clear();
         }
         let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/default_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/default_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false, true).unwrap();
     }
     end_progress_bar();
 }
@@ -376,7 +376,7 @@ pub fn gtsp_local_search_stats(num_repetitions: usize) {
             iter += 1;
         }
         let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/local_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/local_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false, true).unwrap();
         
     }
     end_progress_bar();
@@ -720,7 +720,7 @@ pub fn gtsp_evolutionary_search_stats(num_repetitions: usize, population_size: u
             progress_bar_clear();
         }
         let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/evo_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/evo_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false, true).unwrap();
     }
     end_progress_bar();
 }
@@ -832,30 +832,17 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, population_size: usiz
             progress_bar_clear();
         }
         let log_opt_value = process_avg_stats(&mut avg_stats, opt_value, num_iters, num_repetitions);
-        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/best_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false).unwrap();
+        plot_multiple(&avg_stats, &method_names, &TAB_COLORS, format!("out/gtsp/best_{}.svg", input_file).as_str(), input_file, log_opt_value, "Log avg. fitness", false, true).unwrap();
     }
     end_progress_bar();
 }
 
 // TODO:
-// vykaslat se na force directed layout, barvy permutovat nahodne, vygenerovat dalsi mid a large datasety
-// mozna upravit scale u generovanych pozic - aby sedel na pomer stran u vizualizace
-// pustit optimalizaci evo parametru s kompletne random perturbatorem, pak mozna vylepsit pomoci one fift rule normal rozdeleni
 // vizualizace - udelat jen pro euclidovske datasety, vizualizovat pocatecni heuristiku.
 // - vizualizovat u nejlepsich algoritmu prubeh v gifu
-// pridat do vsech grafu grid - ale jen u hodnot vyznacenych na osach
 //
-// pridat nastaveni max poctu iteraci individualne pro konkretni problemy
-// hledani optimalnich parametru
-// pravdepodobnosti u evolucnich algoritmu - perturbacni operatory a crossover
-// - u perturbace staci 2 pravdepodobnosti podle predchozich mereni
-// - nejspis udelat pro obecny perturbacni operator a obecny crossover operator, celkem tedy 5 pravděpodobností
-// - udelat grafy porovnavajici default evo search a tenhle
-// grafy porovnani pro optimalni nalezene parametry
-// - porovnani optimalinho local searche, optimalniho evolucniho algoritmu, specializovaneho algoritmu nastaveneho jako evolucni alg
-// - specializovany udelat pomoci heuristiky, potom predano jako init do evolucniho algoritmu
-//   - vybere nahodny vrchol a z něj začně skládat cestu, vždy vybere hranu s nejnižší vzdáleností co nevede zpět
 // vizualizace heuristickeho reseni pouziteho v specializovanem algoritmu, staci jeden priklad pro kazdy dataset (idealne, ale 1 dataset by taky stacil)
 // vizualizace behu jednoho vybraneho algoritmu - ukazat ten nejlepsi, idealne na slozitejsim problemu (pokud pujde snadno zobrazit)
+
 // dalsi napad: vyresit klasicke tsp na jednotlive groupy podle prumerne vzdalenosti,
 // pote z vysledku vygenerovat inicialni populaci pro evolucni alg resici generalized tsp problem
