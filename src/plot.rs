@@ -188,7 +188,7 @@ pub fn plot_gtsp_points(positions: &Vec<GroupVertPos>, group_colors: &Vec<RGBCol
     Ok(())
 }
 
-pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutation, group_colors: &Vec<RGBColor>, point_size: i32, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
+pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutation, fitness: f64, group_colors: &Vec<RGBColor>, point_size: i32, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
     let mut max = [f64::NEG_INFINITY; 2];
     let mut min = [f64::INFINITY; 2];
@@ -211,6 +211,8 @@ pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutat
 
     let mut chart = ChartBuilder::on(&root)
         .caption(plot_name, ("sans-serif", 50))
+        .margin(2)
+        .set_label_area_size(LabelAreaPosition::Bottom, 10)
         .build_cartesian_2d(min[0]..max[0], min[1]..max[1])?;
 
     let mut vertices: Vec<(f64, f64)> = (0..solution.perm.len()).map(|i| {
@@ -219,6 +221,14 @@ pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutat
     }).collect();
     let v0 = solution.spec.groups[solution.perm[0].group][solution.perm[0].vert];
     vertices.push((positions[v0].pos[0], positions[v0].pos[1]));
+
+    chart.configure_mesh()
+        .x_desc(format!("Fitness = {:.2}", fitness))
+        .y_desc("")
+        .disable_x_mesh()
+        .disable_y_mesh()
+        .disable_x_axis()
+        .draw()?;
 
     chart.draw_series(std::iter::once(PathElement::new(vertices, BLACK)))?;
 

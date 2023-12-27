@@ -39,13 +39,23 @@ pub fn sem()
     //gtsp_find_opt_params_evolutionary_search(args.num_rep, args.num_iters, args.pop_size, 10);
     //gtsp_find_opt_params_evolutionary_search_with_local_search(args.num_rep, args.pop_size);
 
+    let plot_stats = false;
+    let plot_viz = true;
+
     // stats
-    gtsp_basic_stats_default_params(args.num_rep, args.pop_size);
-    println!("default algs plots finished");
-    gtsp_local_search_stats(args.num_rep);
-    println!("local algs plots finished");
-    gtsp_evolutionary_search_stats(args.num_rep, args.pop_size);
-    println!("evolutionary algs plots finished");
-    gtsp_stats_optimized_params(args.num_rep, args.pop_size);
-    println!("best algs plots finished");
+    if plot_stats {
+        gtsp_basic_stats_default_params(args.num_rep, args.pop_size);
+        println!("default algs plots finished");
+        gtsp_local_search_stats(args.num_rep);
+        println!("local algs plots finished");
+        gtsp_evolutionary_search_stats(args.num_rep, args.pop_size);
+        println!("evolutionary algs plots finished");
+        gtsp_stats_optimized_params(args.num_rep, args.pop_size);
+        println!("best algs plots finished");
+    }
+
+    if plot_viz {
+        // viz
+        init_solution_viz();
+    }
 }

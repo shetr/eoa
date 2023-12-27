@@ -33,7 +33,7 @@ pub fn gtsp_basic_stats_gen_instance() {
     for g in 0..problem.groups.len() {
         perm.perm.push(GroupVert { group: g, vert: 0 });
     }
-    plot_gtsp_solution(&positions, &perm, &colors, 4, "out/points.svg", "gen points").unwrap();
+    plot_gtsp_solution(&positions, &perm, 0.0, &colors, 4, "out/points.svg", "gen points").unwrap();
 }
 
 pub fn gtsp_gen_problem(vert_count: usize, group_count: usize, file_name: &str) {
@@ -203,7 +203,7 @@ pub fn gtsp_viz_gen_solution(num_iters: usize, population_size: usize)
         false);
     
     let colors = uniform_colors(problem.groups.len());
-    plot_gtsp_solution(&positions, &sol.value, &colors, point_size, &format!("out/gtsp/viz_{}.svg", input_file), input_file).unwrap();
+    plot_gtsp_solution(&positions, &sol.value, sol.fitness, &colors, point_size, &format!("out/gtsp/viz_{}.svg", input_file), input_file).unwrap();
     
 }
 
@@ -840,9 +840,39 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, population_size: usiz
 // TODO:
 // vizualizace - udelat jen pro euclidovske datasety, vizualizovat pocatecni heuristiku.
 // - vizualizovat u nejlepsich algoritmu prubeh v gifu
+// udelat convex hull u group bodu ve vizualizacich
 //
 // vizualizace heuristickeho reseni pouziteho v specializovanem algoritmu, staci jeden priklad pro kazdy dataset (idealne, ale 1 dataset by taky stacil)
 // vizualizace behu jednoho vybraneho algoritmu - ukazat ten nejlepsi, idealne na slozitejsim problemu (pokud pujde snadno zobrazit)
 
-// dalsi napad: vyresit klasicke tsp na jednotlive groupy podle prumerne vzdalenosti,
-// pote z vysledku vygenerovat inicialni populaci pro evolucni alg resici generalized tsp problem
+pub fn init_solution_viz() {
+
+    let input_files = ["g1", "g2", "g3"];
+    let point_sizes = [4, 4, 2];
+
+    for i in 0..input_files.len() {
+        let input_file = input_files[i];
+        let point_size = point_sizes[i];
+    
+        let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
+        let positions = load_gtsp_positions(format!("data/gtsp/{}_pos.txt", input_file).as_str());
+        let fitness = GtspFitness {};
+
+        let heuristic_init_population = InitHeuristicGtspPopulation { spec: problem.clone(), size: 1 };
+        let heuristic_sol = InitFunc::init(&heuristic_init_population);
+        let heuristic_fitness = fitness.eval(&heuristic_sol);
+        
+        let random_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
+        let random_sol = InitFunc::init(&random_init_population);
+        let random_fitness = fitness.eval(&random_sol);
+
+        let colors = uniform_colors(problem.groups.len());
+        let out_file_name = format!("out/gtsp/viz_init_heuristic_{}.svg", input_file);
+        let plot_name = format!("{} heuristic", input_file);
+        plot_gtsp_solution(&positions, &heuristic_sol, heuristic_fitness, &colors, point_size, &out_file_name, &plot_name).unwrap();
+        let out_file_name = format!("out/gtsp/viz_init_random_{}.svg", input_file);
+        let plot_name = format!("{} random", input_file);
+        plot_gtsp_solution(&positions, &random_sol, random_fitness, &colors, point_size, &out_file_name, &plot_name).unwrap();
+        
+    }
+}
