@@ -58,18 +58,76 @@ TODO: popsat co je obecne na grafech - optimum je 0, jaka data pouzivam, jaky ma
 
 ### Porovnání při základním nastavení parametrů
 
+![default_a.svg](out/gtsp/default_a.svg) 
+![default_b.svg](out/gtsp/default_b.svg) 
+![default_c.svg](out/gtsp/default_c.svg) 
+![default_d.svg](out/gtsp/default_d.svg) 
+![default_e.svg](out/gtsp/default_e.svg) 
+![default_f.svg](out/gtsp/default_f.svg) 
+![default_g1.svg](out/gtsp/default_g1.svg) 
+![default_g2.svg](out/gtsp/default_g2.svg) 
+![default_g3.svg](out/gtsp/default_g3.svg) 
+
 ### Porovnání různých variant lokálního prohledávání
+
+![local_a.svg](out/gtsp/local_a.svg) 
+![local_b.svg](out/gtsp/local_b.svg) 
+![local_c.svg](out/gtsp/local_c.svg) 
+![local_d.svg](out/gtsp/local_d.svg) 
+![local_e.svg](out/gtsp/local_e.svg) 
+![local_f.svg](out/gtsp/local_f.svg) 
+![local_g1.svg](out/gtsp/local_g1.svg) 
+![local_g2.svg](out/gtsp/local_g2.svg) 
+![local_g3.svg](out/gtsp/local_g3.svg) 
 
 ### Porovnání různých variant evolučního algoritmu
 
+![evo_a.svg](out/gtsp/evo_a.svg) 
+![evo_b.svg](out/gtsp/evo_b.svg) 
+![evo_c.svg](out/gtsp/evo_c.svg) 
+![evo_d.svg](out/gtsp/evo_d.svg) 
+![evo_e.svg](out/gtsp/evo_e.svg) 
+![evo_f.svg](out/gtsp/evo_f.svg) 
+![evo_g1.svg](out/gtsp/evo_g1.svg) 
+![evo_g2.svg](out/gtsp/evo_g2.svg) 
+![evo_g3.svg](out/gtsp/evo_g3.svg) 
+
 ### Porovnání nejlepších variant různých algoritmů
+
+![best_a.svg](out/gtsp/best_a.svg) 
+![best_b.svg](out/gtsp/best_b.svg) 
+![best_c.svg](out/gtsp/best_c.svg) 
+![best_d.svg](out/gtsp/best_d.svg) 
+![best_e.svg](out/gtsp/best_e.svg) 
+![best_f.svg](out/gtsp/best_f.svg) 
+![best_g1.svg](out/gtsp/best_g1.svg) 
+![best_g2.svg](out/gtsp/best_g2.svg) 
+![best_g3.svg](out/gtsp/best_g3.svg) 
 
 ## Vizualizace
 
-test
+### Iniciální řešení
 
-![viz_best_sol_g3](out/gtsp/viz_best_sol_g3.svg) 
+vždy random a pak heuristika
 
-test2
+![viz_init_random_g1.svg](out/gtsp/viz_init_random_g1.svg) 
+![viz_init_heuristic_g1.svg](out/gtsp/viz_init_heuristic_g1.svg) 
+![viz_init_random_g2.svg](out/gtsp/viz_init_random_g2.svg) 
+![viz_init_heuristic_g2.svg](out/gtsp/viz_init_heuristic_g2.svg) 
+![viz_init_random_g3.svg](out/gtsp/viz_init_random_g3.svg) 
+![viz_init_heuristic_g3.svg](out/gtsp/viz_init_heuristic_g3.svg) 
 
+### Nejlepší nalezená řešení
+
+![viz_best_sol_g1.svg](out/gtsp/viz_best_sol_g1.svg) 
+![viz_best_sol_g2.svg](out/gtsp/viz_best_sol_g2.svg) 
+![viz_best_sol_g3.svg](out/gtsp/viz_best_sol_g3.svg) 
+
+### Běh lokálního prohledávání
+
+![viz_local_g1.gif](out/gtsp/viz_local_g1.gif) 
 ![viz_local_g2.gif](out/gtsp/viz_local_g2.gif) 
+![viz_local_g3.gif](out/gtsp/viz_local_g3.gif) 
+
+### Běh evolučního algoritmu
+
