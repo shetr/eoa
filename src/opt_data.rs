@@ -157,6 +157,32 @@ impl<T: OptData> Statistics<T, f64, f64> for BSFSingleObjStatistics {
 }
 
 #[derive(Clone)]
+pub struct BSFSingleObjStatisticsSolutions<T: OptData>  {
+    pub fitness: Vec<f64>,
+    pub solutons: Vec<T>
+}
+
+impl<T: OptData> Statistics<T, f64, f64> for BSFSingleObjStatisticsSolutions<T> {
+    fn new() -> Self {
+        BSFSingleObjStatisticsSolutions::<T> { fitness: Vec::<f64>::new(), solutons: Vec::<T>::new() }
+    }
+
+    fn report_iter(&mut self, _iter: usize, population: &Vec<T>, _fitness_in: &Vec<f64>, fitness_opt: &Vec<f64>) {
+        let best_index = find_best_fitness(fitness_opt);
+        let mut curr_fitness = fitness_opt[best_index];
+        let mut curr_solution = population[best_index].clone();
+        if let Some(last) = self.fitness.last() {
+            if *last < curr_fitness {
+                curr_fitness = *last;
+                curr_solution = self.solutons.last().unwrap().clone();
+            }
+        }
+        self.fitness.push(curr_fitness);
+        self.solutons.push(curr_solution);
+    }
+}
+
+#[derive(Clone)]
 pub struct IterSingleObjStatistics {
     pub fitness: Vec<f64>
 }

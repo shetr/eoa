@@ -56,6 +56,6 @@ pub fn sem()
 
     if plot_viz {
         // viz
-        init_solution_viz();
+        viz_all();
     }
 }

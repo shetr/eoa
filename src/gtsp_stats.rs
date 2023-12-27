@@ -845,18 +845,23 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, population_size: usiz
 // vizualizace heuristickeho reseni pouziteho v specializovanem algoritmu, staci jeden priklad pro kazdy dataset (idealne, ale 1 dataset by taky stacil)
 // vizualizace behu jednoho vybraneho algoritmu - ukazat ten nejlepsi, idealne na slozitejsim problemu (pokud pujde snadno zobrazit)
 
-pub fn init_solution_viz() {
-
+pub fn viz_all() {
+    let population_size = 64;
     let input_files = ["g1", "g2", "g3"];
     let point_sizes = [4, 4, 2];
+    let max_iters = [50, 1000, 3000];
+    let local_max_iters = [100, 1000, 7000];
+    let local_steps = [1, population_size / 5, population_size / 5];
+    let local_delays = [100, 100, 100];
 
     for i in 0..input_files.len() {
+        let num_iters = max_iters[i];
         let input_file = input_files[i];
         let point_size = point_sizes[i];
     
         let problem = Rc::from(load_gtsp_problem(format!("data/gtsp/{}.txt", input_file).as_str()));
         let positions = load_gtsp_positions(format!("data/gtsp/{}_pos.txt", input_file).as_str());
-        let fitness = GtspFitness {};
+        let mut fitness = GtspFitness {};
 
         let heuristic_init_population = InitHeuristicGtspPopulation { spec: problem.clone(), size: 1 };
         let heuristic_sol = InitFunc::init(&heuristic_init_population);
@@ -866,6 +871,52 @@ pub fn init_solution_viz() {
         let random_sol = InitFunc::init(&random_init_population);
         let random_fitness = fitness.eval(&random_sol);
 
+        let local_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
+        let local_termination_cond = MaxIterTerminationCond { n_iters: max_iters[i] };
+        let local_selection = IdentitySelection {};
+        let local_replacement_strategy = TruncationReplacementStrategy {};
+        let local_crossover = IdentityCrossover {};
+        let local_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspReverseGroupPerturbation {})}
+        ]};
+
+        let (_, local_stats) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatisticsSolutions<GtspPermutation>)
+                = evolutionary_search(
+                &mut fitness, 
+                local_init_population.clone(),
+                &local_selection,
+                &local_crossover,
+                local_perturbation.clone(), 
+                &local_replacement_strategy,
+                &local_termination_cond,
+                false);
+
+        let evo_heuristic_init_population = InitHeuristicGtspPopulation { spec: problem.clone(), size: population_size };
+        let evo_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+        let evo_selection = RankSelection { select_count: population_size / 2 };
+        let evo_replacement_strategy = TruncationReplacementStrategy {};
+        let evo_perturbation = CombinePerturbeMutOps { mut_ops: vec![
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspRandGroupVertPerturbation::new(problem.groups.len()))},
+            ProbPerturbeMutOp { prob: 0.9, op: Rc::from(GtspReverseGroupPerturbation {})}
+        ]};
+        let crossover = GtspGeneralCrossover {
+            city_prob: 0.5,
+            cycle_prob: 0.0,
+            order_prob: 0.5
+        };
+
+        let (evo_sol, _) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatistics)
+                = evolutionary_search(
+               &mut fitness, 
+               evo_heuristic_init_population.clone(),
+               &evo_selection,
+               &crossover,
+               evo_perturbation.clone(), 
+               &evo_replacement_strategy,
+               &evo_termination_cond,
+               false);
+
         let colors = uniform_colors(problem.groups.len());
         let out_file_name = format!("out/gtsp/viz_init_heuristic_{}.svg", input_file);
         let plot_name = format!("{} heuristic", input_file);
@@ -873,6 +924,12 @@ pub fn init_solution_viz() {
         let out_file_name = format!("out/gtsp/viz_init_random_{}.svg", input_file);
         let plot_name = format!("{} random", input_file);
         plot_gtsp_solution(&positions, &random_sol, random_fitness, &colors, point_size, &out_file_name, &plot_name).unwrap();
+        let out_file_name = format!("out/gtsp/viz_best_sol_{}.svg", input_file);
+        let plot_name = format!("{} best found", input_file);
+        plot_gtsp_solution(&positions, &evo_sol.value, evo_sol.fitness, &colors, point_size, &out_file_name, &plot_name).unwrap();
+        let out_file_name = format!("out/gtsp/viz_local_{}.gif", input_file);
+        let plot_name = format!("{} local", input_file);
+        plot_gtsp_solutions(&positions, &local_stats.solutons, &local_stats.fitness, local_max_iters[i], local_steps[i], local_delays[i], &colors, point_size, &out_file_name, &plot_name).unwrap();
         
     }
 }
