@@ -46,6 +46,12 @@ Pro experimenty je většnou použita kombinace **uniform_city** crossoveru a je
 
 ### Heuristický algoritmus kombinovaný s lokálním nebo evolučním algoritmem
 
+Heuristický algoritmus vygeneruje řešení s rozumnou fitness v polynomiálním čase. Funguje velice jednodušše, nejprve vybere náhodný vrchol a poté postupně přidává do permutace vrchol, který má nejkratší vzdálenost k poslednímu přidanému vrcholu a je ze skupiny, která ještě nebyla navštívena.
+
+V kombinaci s lokálním prohledáváním je výsledek jednoduše použit jako iniciální řešení.
+
+V kombinaci s evolučním algoritmem se vygeneruje do iniciální populace několik těchto heuristických řešení s různými počátečními vrcholy. Avšak není takto vygenerována celá populace, jen její čtvrtina. Zbytek jsou opět náhodné permutace jako v klasické inicializaci evolučního algoritmu. Dle mých pozorování to vede na výrazně lepší výsledky. Pokud vygeneruji populaci celou z heuristických řešení, pak se velice rychle zasekne v lokálním optimu.
+
 ## Porovnání metod
 
 TODO: popsat co je obecne na grafech - optimum je 0, jaka data pouzivam, jaky maji data charakter, jak porovnávám local search a evolucni algoritmus, ruzne pocty iteraci u ruznych problemu, atd..
