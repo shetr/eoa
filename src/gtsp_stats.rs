@@ -49,7 +49,7 @@ pub fn gtsp_gen_problem(vert_count: usize, group_count: usize, file_name: &str) 
 }
 
 pub fn gtsp_basic_stats_default_params(num_repetitions: usize, population_size: usize) {
-    let method_names = vec!["local move", "local swap", "local rev", "evo move cycle", "evo move order"];
+    let method_names = vec!["local move", "local swap", "local rev", "evo rev cycle", "evo rev order"];
     let is_method_local = [true, true, true, false, false];
     let input_files = ["g1", "g2", "g3", "a", "b", "c", "d", "e", "f"];
     let max_iters = [20, 300, 2500, 40, 90, 350, 600, 1000, 3000];

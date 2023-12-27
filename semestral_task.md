@@ -58,6 +58,7 @@ V kombinaci s evolučním algoritmem se vygeneruje do iniciální populace něko
 V následujích grafech je znározněná závislost fitness různých metod na počtu iterací.
  - Pokud jsou metody na grafu buď jen varianty lokálního prohledávání, a nebo jen varianty evolučních algoritmů, pak znázorněný počet iterací odpovídá počtu iterací daných metod.
  - V případě porovnání lokálního prohledávání a evolučního algoritmu odovídá znázorněný počet iterací počtu iterací evolučního algoritmu. U lokálního prohledávání je skutečné číslo iterace rovno velikosti populace evolučního algoritmu (všude 64) krát znázorněné číslo iterace. Tímto způsobem vyjadřuje jeden krok na grafu stejné množství vyhodnocení fitness funkce pro oba typy algoritmů.
+ - Celkový počet iterací pro konkrétní problémy je přizpůsoben pro lepší čitelnost grafu. Tedy např. pokud se v nějakém bodě všechny algoritmy zaseknou v lokálním optimu, pak je graf zobrazen pouze do tohoto bodu.
 
 Hodnoty fitness jsou posunuty do 1 odečtením nejlepší známé fitness a následně zlogaritmovány. Optimum by teda na grafu mělo zhruba odpovídat hodnotě 0 (log 1 = 0). Výsledky jsou půměrovány z několika opakování (defalutně 7).
 
@@ -71,11 +72,15 @@ Vysvětlivky na grafech:
  - **order** - order crossover v kombinaci s uniform_city crossoverem
  - **heuristic** - inicializace daného algoritmu heuristikou
 
-Pro měření používám 2 typy datasetů. První jsou datasety poskytnuté na stránkách předmětu, tedy soubory **a**, **b**, **c**, **d**, **e** a **f**. Vzdálenosti u těchto instancí nesplňují vlastnosti metriky (konkrétně trojúhelníkovou nerovnost), a proto tyto datasety nejsou úplně vhodné na vizualizaci (i kdybych bych udělal např. force directed layout, tak skutečné vzdálnosti nikdy nebudou odpovídat vzdálenostem ve 2D euklidovském prostoru).
+Pro měření používám 2 typy datasetů. První jsou datasety poskytnuté na stránkách předmětu, tedy soubory **a**, **b**, **c**, **d**, **e** a **f** (pořadí odpovídá velikosti datasetů). Vzdálenosti u těchto instancí nesplňují vlastnosti metriky (konkrétně trojúhelníkovou nerovnost), a proto tyto datasety nejsou úplně vhodné na vizualizaci (i kdybych bych udělal např. force directed layout, tak skutečné vzdálnosti nikdy nebudou odpovídat vzdálenostem ve 2D euklidovském prostoru).
 
-Proto jsem si vygeneroval druhý typ svých vlastních datasetů, soubory **g1**, **g2** a **g3**, u kterých vzdálenosti odpovídají euklidovské metrice a mám uložené 2D pozice, které můžu přímo použít pro vizualizaci (bude v poslední sekci tohoto dokumentu). Data generuji tak, že nejdříve náhodně vygeneruji požadovaný počet bodů, poté jednotlivé body přiřadím do skupin pomocí algoritmu k-means.
+Proto jsem si vygeneroval druhý typ svých vlastních datasetů, soubory **g1**, **g2** a **g3** (pořadí odpovídá velikosti datasetů), u kterých vzdálenosti odpovídají euklidovské metrice a mám uložené 2D pozice, které můžu přímo použít pro vizualizaci (bude v poslední sekci tohoto dokumentu). Data generuji tak, že nejdříve náhodně vygeneruji požadovaný počet bodů, poté jednotlivé body přiřadím do skupin pomocí algoritmu k-means.
 
 ### Porovnání při základním nastavení parametrů
+
+Zde jsou všechny pravděpodobnosti jednotlivých stavebních operátorů nastaveny na 50%. Tedy např. **evo move cycle** je evoluční algoritmus pravděpodobnostmi: 50% **move**, 50% **city**, 50% **cycle** a 50% **uniform_city**.
+
+Je vidět že si většinou nejlépe vede local search s **rev** perturbací. Zároveň evoluční algoritmy mají sice pomalejší rozjezd, ale časem lokální metody doženou a mají někdy potenciál řešení vylepšit ještě dál.
 
 ![default_a.svg](out/gtsp/default_a.svg) 
 ![default_b.svg](out/gtsp/default_b.svg) 
@@ -88,6 +93,12 @@ Proto jsem si vygeneroval druhý typ svých vlastních datasetů, soubory **g1**
 ![default_g3.svg](out/gtsp/default_g3.svg) 
 
 ### Porovnání různých variant lokálního prohledávání
+
+Nyní se zaměříme na lokální prohledávání. Zde jsem se pokusil najít optimální pravděpodobnosti aplikace perturbačních operátorů pro lokální prohledávání. To jsem udělal tak, že jsem iteroval pravděpodobnosti od 0 do 1 s krokem 0.1 pro všechny kombinace **move**, **swap**, **reverse** a **city** perturbací a porovnával součet průměrných fitness skrze všechny datasety. Výsledné pravděpodobnosti byly: 0 **move**, 0 **swap**, 0.9 **reverse** a 0.9 **city**. Tedy operátory **move** a **swap** jsou ignorovány, oba **reverse** a **city** se provedou s pravděp. 0.81, buď **reverse**, a nebo **city** pravděp. 0.18 a ani jeden pravděp. 0.01.
+
+Výsledky po zpětném zamyšlení vypadají docela rozumě. Byl vybrán **reverse** operátor který dopadl nejlépe v předchozích měřeních, **city** operátor musí být zahrnut pro mutaci měst v rámci skupin. Pravděp. 0.18 dává slušnou šanci na individuální perturbaci buď permutace skupin, nebo perturbaci měst ve skupině. Zároveň je malá šance že se neaplikuje ani jeden operátor, což výrazně zrychlí prohledávání.
+
+Na následujících grafech jsou vždy znázorněny nejprve 3 varianty lokálního prohledávání totožné s těmi v předchozí sekci. K tomu navíc je zde **local tweaked**, který má nastavené výše zmíněné optimální pravděpodobnosti. Je vidět, že ve většině případů došlo k výraznému zlepšení.
 
 ![local_a.svg](out/gtsp/local_a.svg) 
 ![local_b.svg](out/gtsp/local_b.svg) 
