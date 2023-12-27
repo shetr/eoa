@@ -19,3 +19,5 @@ cargo run --bin hw1
 HW1 report is in hw1_report.md
 
 HW2 report is in hw2_report.md
+
+Semestral task report is in semestral_task.md
