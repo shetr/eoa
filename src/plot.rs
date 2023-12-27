@@ -1,5 +1,9 @@
+use std::rc::Rc;
+
 use crate::GroupVertPos;
 use crate::GtspPermutation;
+use crate::GtspProblem;
+use crate::jarvis_convex_hull;
 use crate::opt_data::*;
 use crate::tsp::*;
 use rand::seq::SliceRandom;
@@ -188,8 +192,31 @@ pub fn plot_gtsp_points(positions: &Vec<GroupVertPos>, group_colors: &Vec<RGBCol
     Ok(())
 }
 
+fn get_convex_hulls(positions: &Vec<GroupVertPos>, spec: Rc<GtspProblem>) -> Vec<Vec<(f64, f64)>>
+{
+    let mut hulls = vec![Vec::<(f64, f64)>::new(); spec.groups.len()];
+    let mut hull = Vec::<GroupVertPos>::new();
+    let mut group_positions = Vec::<GroupVertPos>::new();
+    for g in 0..spec.groups.len() {
+        group_positions.clear();
+        for v in &spec.groups[g] {
+            group_positions.push(positions[*v].clone());
+        }
+        jarvis_convex_hull(&group_positions, &mut hull);
+        for i in 0..hull.len() {
+            hulls[g].push((hull[i].pos[0], hull[i].pos[1]));
+        }
+        hulls[g].push((hull[0].pos[0], hull[0].pos[1]));
+    }
+    hulls
+}
+
+const HULL_COLOR_MUL: f64 = 0.25;
+
 pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutation, fitness: f64, group_colors: &Vec<RGBColor>, point_size: i32, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
+    let hulls = get_convex_hulls(positions, solution.spec.clone());
+
     let root: DrawingArea<SVGBackend<'_>, plotters::coord::Shift> = SVGBackend::new(out_file_name, (640, 480)).into_drawing_area();
     let mut max = [f64::NEG_INFINITY; 2];
     let mut min = [f64::INFINITY; 2];
@@ -231,6 +258,10 @@ pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutat
 
     chart.draw_series(std::iter::once(PathElement::new(vertices, BLACK)))?;
 
+    for g in 0..hulls.len() {
+        chart.draw_series(std::iter::once(PathElement::new(hulls[g].clone(), group_colors[g].mix(HULL_COLOR_MUL))))?;
+    }
+
     chart.draw_series(
         positions
             .iter()
@@ -243,6 +274,8 @@ pub fn plot_gtsp_solution(positions: &Vec<GroupVertPos>, solution: &GtspPermutat
 
 pub fn plot_gtsp_solutions(positions: &Vec<GroupVertPos>, solutions: &Vec<GtspPermutation>, fitness: &Vec<f64>, max_iter: usize, iter_step: usize, delay: u32, group_colors: &Vec<RGBColor>, point_size: i32, out_file_name: &str, plot_name: &str) -> Result<(), Box<dyn std::error::Error>>
 {
+    let hulls = get_convex_hulls(positions, solutions[0].spec.clone());
+
     let mut max = [f64::NEG_INFINITY; 2];
     let mut min = [f64::INFINITY; 2];
     for i in 0..positions.len() {
@@ -288,6 +321,10 @@ pub fn plot_gtsp_solutions(positions: &Vec<GroupVertPos>, solutions: &Vec<GtspPe
             .draw()?;
 
         chart.draw_series(std::iter::once(PathElement::new(vertices, BLACK)))?;
+
+        for g in 0..hulls.len() {
+            chart.draw_series(std::iter::once(PathElement::new(hulls[g].clone(), group_colors[g].mix(HULL_COLOR_MUL))))?;
+        }
 
         chart.draw_series(
             positions
