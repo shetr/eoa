@@ -293,3 +293,73 @@ pub fn gtsp_group_avg_distances(problem: GtspProblem) -> DistanceHalfMatrix {
     }
     distances
 }
+
+enum OrientationType {
+    RightTurn,
+    Straight,
+    LeftTurn
+}
+
+fn orient2d(a: [f64; 2], b: [f64; 2], c: [f64; 2]) -> OrientationType
+{
+    let res = (a[0] - c[0])*(b[1] - c[1]) - (a[1] - c[1])*(b[0] - c[0]);
+    if res > 0.0 {
+        OrientationType::LeftTurn
+    } else if res < 0.0 {
+        OrientationType::RightTurn
+    } else {
+        OrientationType::Straight
+    }
+}
+
+fn extended(p: [f64; 2], q: [f64; 2], r: [f64; 2]) -> bool
+{
+    return (q[0]-p[0]) * (r[0]-q[0]) >= (p[1]-q[1]) * (r[1]-q[1]);
+}
+
+pub fn jarvis_convex_hull(points: &Vec<GroupVertPos>, out_hull: &mut Vec<GroupVertPos>)
+{
+    out_hull.clear();
+    if points.len() <= 2 {
+        for i in 0..points.len() {
+            out_hull.push(points[i].clone());
+        }
+        return;
+    }
+    let mut min_y_point_index = 0usize;
+    for i in 1..points.len() {
+        if points[i].pos[1] < points[min_y_point_index].pos[1] {
+            min_y_point_index = i;
+        }
+    }
+    let mut current_index = min_y_point_index;
+    let mut iter = 0usize;
+
+    loop {
+        out_hull.push(points[current_index].clone());
+        let mut rightmost_index = 0usize;
+        for i in 1..points.len() {
+            if i == current_index {
+                continue;
+            }
+            let orient_res = orient2d(points[current_index].pos, points[rightmost_index].pos, points[i].pos);
+            match orient_res {
+                OrientationType::RightTurn => {
+                    rightmost_index = i;
+                },
+                OrientationType::Straight => {
+                    if extended(points[current_index].pos, points[rightmost_index].pos, points[i].pos) {
+                        rightmost_index = i;
+                    }
+                },
+                OrientationType::LeftTurn => ()
+            }
+        }
+        current_index = rightmost_index;
+        iter += 1;
+        if current_index == min_y_point_index || iter >= points.len() {
+            break;
+        }
+    }
+
+}

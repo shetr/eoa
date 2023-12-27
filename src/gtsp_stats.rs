@@ -838,12 +838,8 @@ pub fn gtsp_stats_optimized_params(num_repetitions: usize, population_size: usiz
 }
 
 // TODO:
-// vizualizace - udelat jen pro euclidovske datasety, vizualizovat pocatecni heuristiku.
-// - vizualizovat u nejlepsich algoritmu prubeh v gifu
 // udelat convex hull u group bodu ve vizualizacich
-//
-// vizualizace heuristickeho reseni pouziteho v specializovanem algoritmu, staci jeden priklad pro kazdy dataset (idealne, ale 1 dataset by taky stacil)
-// vizualizace behu jednoho vybraneho algoritmu - ukazat ten nejlepsi, idealne na slozitejsim problemu (pokud pujde snadno zobrazit)
+// vizualizovat i beh evolucniho alg, mozna i varianty s heuristikama
 
 pub fn viz_all() {
     let population_size = 64;
