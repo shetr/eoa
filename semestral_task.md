@@ -30,6 +30,20 @@ Nikdy nepoužívám pouze jeden konkrétní operátor. Implementoval jsem ješt�
 
 ### Evoluční algoritmus
 
+Pro všechny běhy evolučního algoritmu jsou následující parametry stejné:
+ - Velikost populace je 64, pro základní použití bez kombinace s heuristickým přístupem je **iniciální populace** vytvořena z náhodně vygenerovaných permutací s náhodným výběrem měst v rámci skupin
+ - Operátor **selekce** je nastaven na **rank selection**, kde velikost výběru je polovina populace.
+ - Operátor **replacement strategie** je nastaven na **truncation replacement**, při které se zachovává konstantní velikost populace.
+
+Jediné co se vždy liší jsou operátory **perturbace** a **crossover**. Operátor **perturbace** můžeme vybírat ze stejných variant jako je popsáno v sekci o lokálním prohledávání.
+
+Operátor **crossover** je podobně jako operátor **perturbace** implementován v několika základních variantách, které pak můžeme kombinovat dohromady do jednoho crossover operátoru, který každou variantu vyhodnotí s nastavitelnou pravděpodobnosti. Zde se avšak vyhodnotí nejvíše jeden, proto součet pravděpodobností musí být menší nebo roven 1. Také podobně jako u **perturbace** i zde jsou dva typy operátorů, jeden co mění pouze permutaci skupin, druhý co mění pouze výběr města v rámci skupiny. Pro změnu permutace skupin jsou tu operátory **cycle** a **order** (opět převzato z prvního úkolu), pro změnu města v rámci skupiny je zde operátor **uniform_city**.
+ - **cycle** crossover operátor identifikuje totožné cykly skupin na stejných indexech a prohodí je.
+ - **order** crossover operátor vezme náhodnou podsekvenci prvního rodiče a k ní doplní zbývající index z druhého rodiče v pořadí postupně jak jdou za sebou u druhého rodiče. Tuto operaci udělá symetricky pro oba rodiče.
+ - **uniform_city** crossover operátor, je podobný jako uniformní binární křížení - pro 2 řešení pro totožné skupiny měst s 50% pravděpodobností prohodí jejich vybraná města.
+
+Pro experimenty je většnou použita kombinace **uniform_city** crossoveru a jednoho z **cycle** a **order** crossoverů.
+
 ### Heuristický algoritmus kombinovaný s lokálním nebo evolučním algoritmem
 
 ## Porovnání metod
