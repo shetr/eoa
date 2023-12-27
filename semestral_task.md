@@ -55,7 +55,25 @@ V kombinaci s evolučním algoritmem se vygeneruje do iniciální populace něko
 
 ## Porovnání metod
 
-TODO: popsat co je obecne na grafech - optimum je 0, jaka data pouzivam, jaky maji data charakter, jak porovnávám local search a evolucni algoritmus, ruzne pocty iteraci u ruznych problemu, atd..
+V následujích grafech je znározněná závislost fitness různých metod na počtu iterací.
+ - Pokud jsou metody na grafu buď jen varianty lokálního prohledávání, a nebo jen varianty evolučních algoritmů, pak znázorněný počet iterací odpovídá počtu iterací daných metod.
+ - V případě porovnání lokálního prohledávání a evolučního algoritmu odovídá znázorněný počet iterací počtu iterací evolučního algoritmu. U lokálního prohledávání je skutečné číslo iterace rovno velikosti populace evolučního algoritmu (všude 64) krát znázorněné číslo iterace. Tímto způsobem vyjadřuje jeden krok na grafu stejné množství vyhodnocení fitness funkce pro oba typy algoritmů.
+
+Hodnoty fitness jsou posunuty do 1 odečtením nejlepší známé fitness a následně zlogaritmovány. Optimum by teda na grafu mělo zhruba odpovídat hodnotě 0 (log 1 = 0). Výsledky jsou půměrovány z několika opakování (defalutně 7).
+
+Vysvětlivky na grafech:
+ - **local** - lokální prohledávání
+ - **evo** - evoluční algoritmus
+ - **move** - move perturbační operátor v kombinaci s city operátorem
+ - **swap** - swap perturbační operátor v kombinaci s city operátorem
+ - **rev** - reverse perturbační operátor v kombinaci s city operátorem
+ - **cycle** - cycle crossover v kombinaci s uniform_city crossoverem
+ - **order** - order crossover v kombinaci s uniform_city crossoverem
+ - **heuristic** - inicializace daného algoritmu heuristikou
+
+Pro měření používám 2 typy datasetů. První jsou datasety poskytnuté na stránkách předmětu, tedy soubory **a**, **b**, **c**, **d**, **e** a **f**. Vzdálenosti u těchto instancí nesplňují vlastnosti metriky (konkrétně trojúhelníkovou nerovnost), a proto tyto datasety nejsou úplně vhodné na vizualizaci (i kdybych bych udělal např. force directed layout, tak skutečné vzdálnosti nikdy nebudou odpovídat vzdálenostem ve 2D euklidovském prostoru).
+
+Proto jsem si vygeneroval druhý typ svých vlastních datasetů, soubory **g1**, **g2** a **g3**, u kterých vzdálenosti odpovídají euklidovské metrice a mám uložené 2D pozice, které můžu přímo použít pro vizualizaci (bude v poslední sekci tohoto dokumentu). Data generuji tak, že nejdříve náhodně vygeneruji požadovaný počet bodů, poté jednotlivé body přiřadím do skupin pomocí algoritmu k-means.
 
 ### Porovnání při základním nastavení parametrů
 
