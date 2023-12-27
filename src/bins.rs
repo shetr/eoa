@@ -13,6 +13,18 @@ struct Cli {
     pop_size: usize
 }
 
+#[derive(Parser)]
+struct SemCli {
+    #[arg(short = 's', long, default_value_t = false)]
+    stats: bool,
+    #[arg(short = 'v', long, default_value_t = false)]
+    viz: bool,
+    #[arg(short = 'r', long, default_value_t = 7)]
+    num_rep: usize,
+    #[arg(short = 'p', long, default_value_t = 64)]
+    pop_size: usize
+}
+
 pub fn hw1()
 {
     let args = Cli::parse();
@@ -30,7 +42,7 @@ pub fn sem()
 {
     create_dir_all("out/gtsp").unwrap();
     // TODO: maybe try seeding random generators
-    //let args = Cli::parse();
+    let args = SemCli::parse();
     //gtsp_basic_stats_gen_instance();
     //gtsp_gen_problem(100, 20, "g2");
     //gtsp_gen_problem(500, 80, "g3");
@@ -39,11 +51,11 @@ pub fn sem()
     //gtsp_find_opt_params_evolutionary_search(args.num_rep, args.num_iters, args.pop_size, 10);
     //gtsp_find_opt_params_evolutionary_search_with_local_search(args.num_rep, args.pop_size);
 
-    let plot_stats = true;
-    let plot_viz = true;
+    let plot_stats = args.stats;
+    let plot_viz = args.viz;
 
-    let num_rep = 7;
-    let pop_size = 64;
+    let num_rep = args.num_rep;
+    let pop_size = args.pop_size;
 
     // stats
     if plot_stats {

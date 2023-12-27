@@ -3,8 +3,9 @@
 Experimenty můžete spustit pomocí následujícího příkazu. Příkaz vyplotuje všechny obrázky nacházející se v tomto dokumentu - tedy buď graf porovnání různých metod, nebo vizualizace řešení. Pokud by se nějaký svg obrázek nebo gif nezobrazoval, nachází se všechny ve složce **out/gtsp/**.
 
 ```bash
-cargo run --release --bin sem
+cargo run --release --bin sem -- --stats --viz --num-rep 7 --pop-size 64
 ```
+
 
 ## Implementace
 
@@ -125,9 +126,10 @@ vždy random a pak heuristika
 
 ### Běh lokálního prohledávání
 
-![viz_local_g1.gif](out/gtsp/viz_local_g1.gif) 
 ![viz_local_g2.gif](out/gtsp/viz_local_g2.gif) 
 ![viz_local_g3.gif](out/gtsp/viz_local_g3.gif) 
 
 ### Běh evolučního algoritmu
 
+![viz_evo_g2.gif](out/gtsp/viz_evo_g2.gif) 
+![viz_evo_g3.gif](out/gtsp/viz_evo_g3.gif) 

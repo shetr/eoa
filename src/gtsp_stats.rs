@@ -846,9 +846,14 @@ pub fn viz_all() {
     let input_files = ["g1", "g2", "g3"];
     let point_sizes = [4, 4, 2];
     let max_iters = [50, 1000, 3000];
-    let local_max_iters = [100, 1000, 7000];
+
+    let local_max_iters = [50, 1000, 3000];
     let local_steps = [1, population_size / 5, population_size / 5];
     let local_delays = [100, 100, 100];
+    
+    let evo_max_iters = [10, 500, 3000];
+    let evo_steps = [1, population_size / 10, population_size / 5];
+    let evo_delays = [1000, 200, 100];
 
     for i in 0..input_files.len() {
         let num_iters = max_iters[i];
@@ -868,7 +873,7 @@ pub fn viz_all() {
         let random_fitness = fitness.eval(&random_sol);
 
         let local_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: 1 };
-        let local_termination_cond = MaxIterTerminationCond { n_iters: max_iters[i] };
+        let local_termination_cond = MaxIterTerminationCond { n_iters: local_max_iters[i] };
         let local_selection = IdentitySelection {};
         let local_replacement_strategy = TruncationReplacementStrategy {};
         let local_crossover = IdentityCrossover {};
@@ -889,7 +894,9 @@ pub fn viz_all() {
                 false);
 
         let evo_heuristic_init_population = InitHeuristicGtspPopulation { spec: problem.clone(), size: population_size };
-        let evo_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+        let evo_init_population = InitRandomGtspPopulation { spec: problem.clone(), size: population_size };
+        let best_termination_cond = MaxIterTerminationCond { n_iters: num_iters };
+        let evo_termination_cond = MaxIterTerminationCond { n_iters: evo_max_iters[i] };
         let evo_selection = RankSelection { select_count: population_size / 2 };
         let evo_replacement_strategy = TruncationReplacementStrategy {};
         let evo_perturbation = CombinePerturbeMutOps { mut_ops: vec![
@@ -910,8 +917,19 @@ pub fn viz_all() {
                &crossover,
                evo_perturbation.clone(), 
                &evo_replacement_strategy,
-               &evo_termination_cond,
+               &best_termination_cond,
                false);
+
+        let (_, evo_stats) : (BSFSingleObjSolution<GtspPermutation>, BSFSingleObjStatisticsSolutions<GtspPermutation>)
+            = evolutionary_search(
+                &mut fitness, 
+                evo_init_population.clone(),
+                &evo_selection,
+                &crossover,
+                evo_perturbation.clone(), 
+                &evo_replacement_strategy,
+                &evo_termination_cond,
+                false);
 
         let colors = uniform_colors(problem.groups.len());
         let out_file_name = format!("out/gtsp/viz_init_heuristic_{}.svg", input_file);
@@ -926,6 +944,8 @@ pub fn viz_all() {
         let out_file_name = format!("out/gtsp/viz_local_{}.gif", input_file);
         let plot_name = format!("{} local", input_file);
         plot_gtsp_solutions(&positions, &local_stats.solutons, &local_stats.fitness, local_max_iters[i], local_steps[i], local_delays[i], &colors, point_size, &out_file_name, &plot_name).unwrap();
-        
+        let out_file_name = format!("out/gtsp/viz_evo_{}.gif", input_file);
+        let plot_name = format!("{} evo", input_file);
+        plot_gtsp_solutions(&positions, &evo_stats.solutons, &evo_stats.fitness, evo_max_iters[i], evo_steps[i], evo_delays[i], &colors, point_size, &out_file_name, &plot_name).unwrap();
     }
 }
