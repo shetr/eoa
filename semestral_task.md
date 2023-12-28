@@ -19,7 +19,7 @@ Samotný problém reprezentuji podobně jako je tomu v souborech poskytnutých d
 
 ### Lokální prohledávání
 
-Standardní lokální prohledávání, v kódu je voláno pomocí obecné funkce *evolutionary_search* implementující primárně evoluční algoritmus (radši píšu, abyste se nelekl, když to uvidíte v kódu). To že to skutečně vykonává lokální prohledávání je dosaženo tím, že populace má velikost 1, operátory selekce a křížení jsou identita a replacement strategie je truncation. Takže jediné co se mění je perturbační/mutační operátor. Dělám to takto z důvodu větší jednoduchosti kódu, protože je sdílené rozhraní pro všechny varianty algoritmů.
+Standardní lokální prohledávání, v kódu je voláno pomocí obecné funkce *evolutionary_search* implementující primárně evoluční algoritmus (radši píšu, abyste se nelekl, když to uvidíte v kódu). Toho, že to skutečně vykonává lokální prohledávání je dosaženo tím, že populace má velikost 1, operátory selekce a křížení jsou identita a replacement strategie je truncation. Takže jediné co se mění je perturbační/mutační operátor. Dělám to takto z důvodu větší jednoduchosti kódu, protože je sdílené rozhraní pro všechny varianty algoritmů.
 
 Používám 4 základní perturbační operátory: **move**, **swap**, **reverse** a **city**. Operátory **move**, **swap** a **reverse** mění pouze permutaci skupin a konkrétní města v nich ponechávají. Tyto operátory jsou převzaty z prvního úkolu. Operátor **city** naopak mění pouze konkrétní města ve skupinách a permutaci skupin ponechává stejnou.
  - **move** perturbační operátor náhodně přesune jednu skupinu v permutaci
@@ -164,7 +164,7 @@ Je vidět, že ve většině případů heuristická inicializace algoritmu výr
 
 ## Vizualizace
 
-V této části si ukážeme vizualizace řešení a průběhu konkrétních algoritmů pro problémy **g1**, **g2** a **g3**, které jsou k těmto účelům přizpůsobeny. Ve všech vizualizacích je každé skupině měst přiřazena náhodná barva a stejnou barvou je zároveň vyznačena konvexní obálka těchto měst pro snazší odlišení jednotlivých skupin (někdy se může stát, že jsou skupiny s podobnou barvou vedle sebe). Konkrétní řešení v daném příkladu je vyznačeno vždy červenou barvou.
+V této části si ukážeme vizualizace řešení a průběhu konkrétních algoritmů pro problémy **g1**, **g2** a **g3**, které jsou k těmto účelům přizpůsobeny. Ve všech vizualizacích je každé skupině měst přiřazena náhodná barva a stejnou barvou je zároveň vyznačena konvexní obálka těchto měst pro snazší odlišení jednotlivých skupin (někdy se může stát, že jsou skupiny s podobnou barvou vedle sebe). Konkrétní řešení v daném příkladu je vyznačeno vždy černou barvou.
 
 ### Iniciální řešení
 
