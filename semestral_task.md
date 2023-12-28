@@ -132,7 +132,9 @@ Nejprve jsem to zkusil redukovat na 5 proměnných vynecháním **move** a **swa
 
 Poté jsem ještě zkusil random search na daných 5 proměnných a následně vylepšovat některá řešení lokálním prohledáváním (fitness byla vyhodnocena způměrováním několika běhů evolučního algoritmu s danými pravděpodobnostmi). Ale i tento přístu vedl na velice zvláštní a nestabilní výsledky, nejspíše opět z důvodů zmíněných víše.
 
-Proto jsem nakonec tento přístup zavrhl a rozhodl se alespoň kvalitněji porovnat 6 konkrétních variant parametrů.
+Proto jsem nakonec tento přístup zavrhl a rozhodl se alespoň kvalitněji porovnat 6 konkrétních variant parametrů. Ve všech případech má **city** perturbační operátor nastavenou pravděpodobnost 0.9. K němu je vždy přidán jeden z **move**, **swap** a **reverse** perturbačních operátorů také s pravděpodobností 0.9. Crossover vždy obsahuje **uniform_city** operátor s pravděpodobností 0.5 a k němu jeden z **cycle** nebo **order** operátorů také s pravděpodobností 0.5.
+
+Zde jsou výsledky o něco více chaotické než na předchozích grafech. Pro menší instance má mětšinou lepší výsledky **move** perturbační operátor, pro větší instance zase **reverse** operátor. Varianty s **cycle** a **order** crossovery se stejným perturbačním operátorem se chovají velice podobně.
 
 ![evo_a.svg](out/gtsp/evo_a.svg) 
 ![evo_b.svg](out/gtsp/evo_b.svg) 
@@ -146,6 +148,10 @@ Proto jsem nakonec tento přístup zavrhl a rozhodl se alespoň kvalitněji poro
 
 ### Porovnání nejlepších variant různých algoritmů
 
+V této sekci jsem porovnal nejlepší variantu lokálního prohledávání (**city** 0.9, **reverse** 0.9), nelepší variantu evolučního algoritmu (**city** 0.9, **reverse** 0.9, **uniform_city** 0.5, **order** 0.5) a k oboum jejich variantu s inicializací pomocí heuristického algoritmu.
+
+Je vidět, že ve většině případů heuristická inicializace algoritmu výrazně zkvalitní výsledky jak lokálního prohledávání, tak evolučního algoritmu.
+
 ![best_a.svg](out/gtsp/best_a.svg) 
 ![best_b.svg](out/gtsp/best_b.svg) 
 ![best_c.svg](out/gtsp/best_c.svg) 
@@ -158,18 +164,25 @@ Proto jsem nakonec tento přístup zavrhl a rozhodl se alespoň kvalitněji poro
 
 ## Vizualizace
 
+V této části si ukážeme vizualizace řešení a průběhu konkrétních algoritmů pro problémy **g1**, **g2** a **g3**, které jsou k těmto účelům přizpůsobeny. Ve všech vizualilzacích je každé skupině měst přiřazena náhodná barva a stejnou barvou je zároveň vyznačena konvexní obálka těchto měst pro snazší odlišení jednotlivých skupin (někdy se může stát že jsou skupiny s podobnou barvou vedle sebe). Konkrétní řešení v daném příkladu je vyznačeno vždy červenou barvou.
+
 ### Iniciální řešení
 
-vždy random a pak heuristika
+Zde je vždy pro stejný problém porovnání náhodné inicializace a inicializace pomocí heuristického algoritmu.
 
+#### g1
 ![viz_init_random_g1.svg](out/gtsp/viz_init_random_g1.svg) 
 ![viz_init_heuristic_g1.svg](out/gtsp/viz_init_heuristic_g1.svg) 
+#### g2
 ![viz_init_random_g2.svg](out/gtsp/viz_init_random_g2.svg) 
 ![viz_init_heuristic_g2.svg](out/gtsp/viz_init_heuristic_g2.svg) 
+#### g3
 ![viz_init_random_g3.svg](out/gtsp/viz_init_random_g3.svg) 
 ![viz_init_heuristic_g3.svg](out/gtsp/viz_init_heuristic_g3.svg) 
 
 ### Nejlepší nalezená řešení
+
+Zde jsou zobrazena nejlepší nalezená řešení pomocí evolučního algoritmu s heuristickou inicializací.
 
 ![viz_best_sol_g1.svg](out/gtsp/viz_best_sol_g1.svg) 
 ![viz_best_sol_g2.svg](out/gtsp/viz_best_sol_g2.svg) 
@@ -177,10 +190,14 @@ vždy random a pak heuristika
 
 ### Běh lokálního prohledávání
 
+Zde je vizualizace běhu nejlepší varianty lokálního prohledávání s náhodnou inicializací. U **g1** je optimum nalezeno příliš rychle, proto jsem ho vynechal.
+
 ![viz_local_g2.gif](out/gtsp/viz_local_g2.gif) 
 ![viz_local_g3.gif](out/gtsp/viz_local_g3.gif) 
 
 ### Běh evolučního algoritmu
+
+Zde je vizualizace běhu nejlepší varianty evolučního algoritmu s náhodnou inicializací. U **g1** je optimum nalezeno příliš rychle, proto jsem ho vynechal.
 
 ![viz_evo_g2.gif](out/gtsp/viz_evo_g2.gif) 
 ![viz_evo_g3.gif](out/gtsp/viz_evo_g3.gif) 
