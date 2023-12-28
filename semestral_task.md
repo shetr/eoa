@@ -13,21 +13,21 @@ Podle zadání jsem vytvořil a porovnával 3 různé algoritmy pro řešení da
 
 ### Reprezentace
 
-Samotný problém reprezentuji podobně jako je tomu v souborech poskytunutých datasetů, tedy jako symetrickou matici vzdáleností (takže řeším jen úlohy s neorientovaným grafem) a k tomu list listů který rozděluje města do jednotlivých skupin (regionů).
+Samotný problém reprezentuji podobně jako je tomu v souborech poskytnutých datasetů, tedy jako symetrickou matici vzdáleností (takže řeším jen úlohy s neorientovaným grafem) a k tomu list listů který rozděluje města do jednotlivých skupin (regionů).
 
-Řešení reprezentuji jako permutaci jednotlivých skupin a k tomu pro každou skupinu je přiřazeno jedno konkrékrétní město, které se v dané skupině nachází. Díky této reprezentaci můžu použít část implementace z prvního úkolu.
+Řešení reprezentuji jako permutaci jednotlivých skupin a k tomu pro každou skupinu je přiřazeno jedno konkrétní město, které se v dané skupině nachází. Díky této reprezentaci můžu použít část implementace z prvního úkolu.
 
 ### Lokální prohledávání
 
-Standardní lokální prohledávání, v kódu je voláno pomocí obecné funkce *evolutionary_search* implementujicí primálně evoluční algoritmus (radši píšu, abyste se nelekl když to uvidíte v kódu). To že to skutečně vykonává lokální prohledávání je dosaženo tím, že populace má velikost 1, operátory selekce a křížení jsou identita a replacement strategie je truncation. Takže jediná věci co se mění je perturbační/mutační operátor. Dělám to takto z důvodu větší jednoduchosti kódu, protože je sdílené rozhraní pro všechny varianty algoritmů.
+Standardní lokální prohledávání, v kódu je voláno pomocí obecné funkce *evolutionary_search* implementující primárně evoluční algoritmus (radši píšu, abyste se nelekl, když to uvidíte v kódu). To že to skutečně vykonává lokální prohledávání je dosaženo tím, že populace má velikost 1, operátory selekce a křížení jsou identita a replacement strategie je truncation. Takže jediné co se mění je perturbační/mutační operátor. Dělám to takto z důvodu větší jednoduchosti kódu, protože je sdílené rozhraní pro všechny varianty algoritmů.
 
-Používám 4 základní perturbační operátory: **move**, **swap**, **reverse** a **city**. Operátory **move**, **swap** a **reverse** mění pouze permutaci skupin a konkrétní města v nich ponechávají. Tyto operátory jsou přepoužity z prvního úkolu. Operátor **city** naopak mění pouze konkrétní města ve skupinách a permutaci skupin ponechává stejnou.
+Používám 4 základní perturbační operátory: **move**, **swap**, **reverse** a **city**. Operátory **move**, **swap** a **reverse** mění pouze permutaci skupin a konkrétní města v nich ponechávají. Tyto operátory jsou převzaty z prvního úkolu. Operátor **city** naopak mění pouze konkrétní města ve skupinách a permutaci skupin ponechává stejnou.
  - **move** perturbační operátor náhodně přesune jednu skupinu v permutaci
  - **swap** perturbační operátor prohodí dvě náhodné skupiny v permutaci
  - **reverse** perturbační operátor obrátí náhodnou podsekvenci permutace skupin
  - **city** perturbační operátor v rámci skupiny náhodně změní vybrané město (s uniformní pravděpodobností) a to pro každou skupinu s pravděpodobností 1/(počet skupin)
 
-Nikdy nepoužívám pouze jeden konkrétní operátor. Implementoval jsem ještě jeden operátor, který může obsahovat kombinaci výše zmíněných operátorů a ke kažnému má přiřazenou požadovanou pravděpodobnost. Tento operátor při vyhodnocení aplikuje na vstupní data každý jeho vnitřní perturbační operátor s danou pravděpodobností. Pravděpodobnosti jsou na sobě nezávislé, může se tedy aplikovat více operátorů najednou. Ve většině případů používa kombinaci **city** operátoru a jednoho z **move**, **swap** a **reverse** operátorů.
+Nikdy nepoužívám pouze jeden konkrétní operátor. Implementoval jsem ještě jeden operátor, který může obsahovat kombinaci výše zmíněných operátorů a ke každému má přiřazenou požadovanou pravděpodobnost. Tento operátor při vyhodnocení aplikuje na vstupní data každý jeho vnitřní perturbační operátor s danou pravděpodobností. Pravděpodobnosti jsou na sobě nezávislé, může se tedy aplikovat více operátorů najednou. Ve většině případů používá kombinaci **city** operátoru a jednoho z **move**, **swap** a **reverse** operátorů.
 
 ### Evoluční algoritmus
 
@@ -36,18 +36,18 @@ Pro všechny běhy evolučního algoritmu jsou následující parametry stejné:
  - Operátor **selekce** je nastaven na **rank selection**, kde velikost výběru je polovina populace.
  - Operátor **replacement strategie** je nastaven na **truncation replacement**, při které se zachovává konstantní velikost populace.
 
-Jediné co se vždy liší jsou operátory **perturbace** a **crossover**. Operátor **perturbace** můžeme vybírat ze stejných variant jako je popsáno v sekci o lokálním prohledávání.
+Jediné, co se vždy liší jsou operátory **perturbace** a **crossover**. Operátor **perturbace** můžeme vybírat ze stejných variant jako je popsáno v sekci o lokálním prohledávání.
 
-Operátor **crossover** je podobně jako operátor **perturbace** implementován v několika základních variantách, které pak můžeme kombinovat dohromady do jednoho crossover operátoru, který každou variantu vyhodnotí s nastavitelnou pravděpodobnosti. Zde se avšak vyhodnotí nejvíše jeden, proto součet pravděpodobností musí být menší nebo roven 1. Také podobně jako u **perturbace** i zde jsou dva typy operátorů, jeden co mění pouze permutaci skupin, druhý co mění pouze výběr města v rámci skupiny. Pro změnu permutace skupin jsou tu operátory **cycle** a **order** (opět převzato z prvního úkolu), pro změnu města v rámci skupiny je zde operátor **uniform_city**.
+Operátor **crossover** je podobně jako operátor **perturbace** implementován v několika základních variantách, které pak můžeme kombinovat dohromady do jednoho crossover operátoru, který každou variantu vyhodnotí s nastavitelnou pravděpodobnosti. Zde se avšak vyhodnotí nejvýše jeden, proto součet pravděpodobností musí být menší nebo roven 1. Také podobně jako u **perturbace** i zde jsou dva typy operátorů, jeden co mění pouze permutaci skupin, druhý co mění pouze výběr města v rámci skupiny. Pro změnu permutace skupin jsou tu operátory **cycle** a **order** (opět převzato z prvního úkolu), pro změnu města v rámci skupiny je zde operátor **uniform_city**.
  - **cycle** crossover operátor identifikuje totožné cykly skupin na stejných indexech a prohodí je.
  - **order** crossover operátor vezme náhodnou podsekvenci prvního rodiče a k ní doplní zbývající index z druhého rodiče v pořadí postupně jak jdou za sebou u druhého rodiče. Tuto operaci udělá symetricky pro oba rodiče.
  - **uniform_city** crossover operátor, je podobný jako uniformní binární křížení - pro 2 řešení pro totožné skupiny měst s 50% pravděpodobností prohodí jejich vybraná města.
 
-Pro experimenty je většnou použita kombinace **uniform_city** crossoveru a jednoho z **cycle** a **order** crossoverů.
+Pro experimenty je většinou použita kombinace **uniform_city** crossoveru a jednoho z **cycle** a **order** crossoverů.
 
 ### Heuristický algoritmus kombinovaný s lokálním nebo evolučním algoritmem
 
-Heuristický algoritmus vygeneruje řešení s rozumnou fitness v polynomiálním čase. Funguje velice jednodušše, nejprve vybere náhodný vrchol a poté postupně přidává do permutace vrchol, který má nejkratší vzdálenost k poslednímu přidanému vrcholu a je ze skupiny, která ještě nebyla navštívena.
+Heuristický algoritmus vygeneruje řešení s rozumnou fitness v polynomiálním čase. Funguje velice jednoduše, nejprve vybere náhodný vrchol a poté postupně přidává do permutace vrchol, který má nejkratší vzdálenost k poslednímu přidanému vrcholu a je ze skupiny, která ještě nebyla navštívena.
 
 V kombinaci s lokálním prohledáváním je výsledek jednoduše použit jako iniciální řešení.
 
@@ -55,12 +55,12 @@ V kombinaci s evolučním algoritmem se vygeneruje do iniciální populace něko
 
 ## Porovnání metod
 
-V následujích grafech je znározněná závislost fitness různých metod na počtu iterací.
- - Pokud jsou metody na grafu buď jen varianty lokálního prohledávání, a nebo jen varianty evolučních algoritmů, pak znázorněný počet iterací odpovídá počtu iterací daných metod.
- - V případě porovnání lokálního prohledávání a evolučního algoritmu odovídá znázorněný počet iterací počtu iterací evolučního algoritmu. U lokálního prohledávání je skutečné číslo iterace rovno velikosti populace evolučního algoritmu (všude 64) krát znázorněné číslo iterace. Tímto způsobem vyjadřuje jeden krok na grafu stejné množství vyhodnocení fitness funkce pro oba typy algoritmů.
+V následujících grafech je znázorněná závislost fitness různých metod na počtu iterací.
+ - Pokud jsou metody na grafu buď jen varianty lokálního prohledávání, anebo jen varianty evolučních algoritmů, pak znázorněný počet iterací odpovídá počtu iterací daných metod.
+ - V případě porovnání lokálního prohledávání a evolučního algoritmu odpovídá znázorněný počet iterací počtu iterací evolučního algoritmu. U lokálního prohledávání je skutečné číslo iterace rovno velikosti populace evolučního algoritmu (všude 64) krát znázorněné číslo iterace. Tímto způsobem vyjadřuje jeden krok na grafu stejné množství vyhodnocení fitness funkce pro oba typy algoritmů.
  - Celkový počet iterací pro konkrétní problémy je přizpůsoben pro lepší čitelnost grafu. Tedy např. pokud se v nějakém bodě všechny algoritmy zaseknou v lokálním optimu, pak je graf zobrazen pouze do tohoto bodu.
 
-Hodnoty fitness jsou posunuty do 1 odečtením nejlepší známé fitness a následně zlogaritmovány. Optimum by teda na grafu mělo zhruba odpovídat hodnotě 0 (log 1 = 0). Výsledky jsou půměrovány z několika opakování (defalutně 7).
+Hodnoty fitness jsou posunuty do 1 odečtením nejlepší známé fitness a následně zlogaritmovány. Optimum by teda na grafu mělo zhruba odpovídat hodnotě 0 (log 1 = 0). Výsledky jsou průměrovány z několika opakování (defalutně 7).
 
 Vysvětlivky na grafech:
  - **local** - lokální prohledávání
@@ -72,7 +72,7 @@ Vysvětlivky na grafech:
  - **order** - order crossover v kombinaci s uniform_city crossoverem
  - **heuristic** - inicializace daného algoritmu heuristikou
 
-Pro měření používám 2 typy datasetů. První jsou datasety poskytnuté na stránkách předmětu, tedy soubory **a**, **b**, **c**, **d**, **e** a **f** (pořadí odpovídá velikosti datasetů). Vzdálenosti u těchto instancí nesplňují vlastnosti metriky (konkrétně trojúhelníkovou nerovnost), a proto tyto datasety nejsou úplně vhodné na vizualizaci (i kdybych bych udělal např. force directed layout, tak skutečné vzdálnosti nikdy nebudou odpovídat vzdálenostem ve 2D euklidovském prostoru).
+Pro měření používám 2 typy datasetů. První jsou datasety poskytnuté na stránkách předmětu, tedy soubory **a**, **b**, **c**, **d**, **e** a **f** (pořadí odpovídá velikosti datasetů). Vzdálenosti u těchto instancí nesplňují vlastnosti metriky (konkrétně trojúhelníkovou nerovnost), a proto tyto datasety nejsou úplně vhodné na vizualizaci (i kdybych bych udělal např. force directed layout, tak skutečné vzdálenosti nikdy nebudou odpovídat vzdálenostem ve 2D euklidovském prostoru).
 
 Proto jsem si vygeneroval druhý typ svých vlastních datasetů, soubory **g1**, **g2** a **g3** (pořadí odpovídá velikosti datasetů), u kterých vzdálenosti odpovídají euklidovské metrice a mám uložené 2D pozice, které můžu přímo použít pro vizualizaci (bude v poslední sekci tohoto dokumentu). Data generuji tak, že nejdříve náhodně vygeneruji požadovaný počet bodů, poté jednotlivé body přiřadím do skupin pomocí algoritmu k-means.
 
@@ -110,7 +110,7 @@ Je vidět že si většinou nejlépe vede local search s **rev** perturbací. Z�
 
 Nyní se zaměříme na lokální prohledávání. Zde jsem se pokusil najít optimální pravděpodobnosti aplikace perturbačních operátorů pro lokální prohledávání. To jsem udělal tak, že jsem iteroval pravděpodobnosti od 0 do 1 s krokem 0.1 pro všechny kombinace **move**, **swap**, **reverse** a **city** perturbací a porovnával součet průměrných fitness skrze všechny datasety. Výsledné pravděpodobnosti byly: 0 **move**, 0 **swap**, 0.9 **reverse** a 0.9 **city**. Tedy operátory **move** a **swap** jsou ignorovány, oba **reverse** a **city** se provedou s pravděp. 0.81, buď **reverse**, a nebo **city** pravděp. 0.18 a ani jeden pravděp. 0.01.
 
-Výsledky po zpětném zamyšlení vypadají docela rozumě. Byl vybrán **reverse** operátor který dopadl nejlépe v předchozích měřeních, **city** operátor musí být zahrnut pro mutaci měst v rámci skupin. Pravděp. 0.18 dává slušnou šanci na individuální perturbaci buď permutace skupin, nebo perturbaci měst ve skupině. Zároveň je malá šance že se neaplikuje ani jeden operátor, což výrazně zrychlí prohledávání.
+Výsledky po zpětném zamyšlení vypadají docela rozumně. Byl vybrán **reverse** operátor který dopadl nejlépe v předchozích měřeních, **city** operátor musí být zahrnut pro mutaci měst v rámci skupin. Pravděp. 0.18 dává slušnou šanci na individuální perturbaci buď permutace skupin, nebo perturbaci měst ve skupině. Zároveň je malá šance že se neaplikuje ani jeden operátor, což výrazně zrychlí prohledávání.
 
 Na následujících grafech jsou vždy znázorněny nejprve 3 varianty lokálního prohledávání totožné s těmi v předchozí sekci. K tomu navíc je zde **local tweaked**, který má nastavené výše zmíněné optimální pravděpodobnosti. Je vidět, že ve většině případů došlo k výraznému zlepšení.
 
@@ -128,13 +128,13 @@ Na následujících grafech jsou vždy znázorněny nejprve 3 varianty lokální
 
 Pro tuto část jsem původně chtěl podobně jako v předchozí sekci najít optimální pravděpodobnosti jednotlivých operátorů pro evoluční algoritmus. Toho je už ale mnohem těžší dosáhnout, protože k pravděpodobnostem perturbačních operátorů se přidají pravděpodobnosti crossover operátorů a máme tedy celkem 7 proměnných (hledat v kombinacích s krokem 0.1 by trvalo příliš dlouho).
 
-Nejprve jsem to zkusil redukovat na 5 proměnných vynecháním **move** a **swap**, protože **reverse** se zatím ukázal jako nejlepší. To ale vedlo na zvláštní výsledky, které se výrazně měnily pokud jsem experiment zopakoval a při porovnání se základním nastavením parametrů se nejevily o moc lepší. Řekl bych, že je to způsobeno tím, že běh algoritmu je už tolik ovlivněn náhodou, že je velký rozptyl mezi jednotlivýmy běhy a je velice těžké je mezi sebou porovnávat v malém počtu běhů.
+Nejprve jsem to zkusil redukovat na 5 proměnných vynecháním **move** a **swap**, protože **reverse** se zatím ukázal jako nejlepší. To ale vedlo na zvláštní výsledky, které se výrazně měnily pokud jsem experiment zopakoval a při porovnání se základním nastavením parametrů se nejevily o moc lepší. Řekl bych, že je to způsobeno tím, že běh algoritmu je už tolik ovlivněn náhodou, že je velký rozptyl mezi jednotlivými běhy a je velice těžké je mezi sebou porovnávat v malém počtu běhů.
 
-Poté jsem ještě zkusil random search na daných 5 proměnných a následně vylepšovat některá řešení lokálním prohledáváním (fitness byla vyhodnocena způměrováním několika běhů evolučního algoritmu s danými pravděpodobnostmi). Ale i tento přístu vedl na velice zvláštní a nestabilní výsledky, nejspíše opět z důvodů zmíněných víše.
+Poté jsem ještě zkusil random search na daných 5 proměnných a následně vylepšovat některá řešení lokálním prohledáváním (fitness byla vyhodnocena zprůměrováním několika běhů evolučního algoritmu s danými pravděpodobnostmi). Ale i tento přístup vedl na velice zvláštní a nestabilní výsledky, nejspíše opět z důvodů zmíněných víše.
 
 Proto jsem nakonec tento přístup zavrhl a rozhodl se alespoň kvalitněji porovnat 6 konkrétních variant parametrů. Ve všech případech má **city** perturbační operátor nastavenou pravděpodobnost 0.9. K němu je vždy přidán jeden z **move**, **swap** a **reverse** perturbačních operátorů také s pravděpodobností 0.9. Crossover vždy obsahuje **uniform_city** operátor s pravděpodobností 0.5 a k němu jeden z **cycle** nebo **order** operátorů také s pravděpodobností 0.5.
 
-Zde jsou výsledky o něco více chaotické než na předchozích grafech. Pro menší instance má mětšinou lepší výsledky **move** perturbační operátor, pro větší instance zase **reverse** operátor. Varianty s **cycle** a **order** crossovery se stejným perturbačním operátorem se chovají velice podobně.
+Zde jsou výsledky o něco více chaotické než na předchozích grafech. Pro menší instance má většinou lepší výsledky **move** perturbační operátor, pro větší instance zase **reverse** operátor. Varianty s **cycle** a **order** crossovery se stejným perturbačním operátorem se chovají velice podobně.
 
 ![evo_a.svg](out/gtsp/evo_a.svg) 
 ![evo_b.svg](out/gtsp/evo_b.svg) 
@@ -148,7 +148,7 @@ Zde jsou výsledky o něco více chaotické než na předchozích grafech. Pro m
 
 ### Porovnání nejlepších variant různých algoritmů
 
-V této sekci jsem porovnal nejlepší variantu lokálního prohledávání (**city** 0.9, **reverse** 0.9), nelepší variantu evolučního algoritmu (**city** 0.9, **reverse** 0.9, **uniform_city** 0.5, **order** 0.5) a k oboum jejich variantu s inicializací pomocí heuristického algoritmu.
+V této sekci jsem porovnal nejlepší variantu lokálního prohledávání (**city** 0.9, **reverse** 0.9), nejlepší variantu evolučního algoritmu (**city** 0.9, **reverse** 0.9, **uniform_city** 0.5, **order** 0.5) a pro oba jejich variantu s inicializací pomocí heuristického algoritmu.
 
 Je vidět, že ve většině případů heuristická inicializace algoritmu výrazně zkvalitní výsledky jak lokálního prohledávání, tak evolučního algoritmu.
 
@@ -164,7 +164,7 @@ Je vidět, že ve většině případů heuristická inicializace algoritmu výr
 
 ## Vizualizace
 
-V této části si ukážeme vizualizace řešení a průběhu konkrétních algoritmů pro problémy **g1**, **g2** a **g3**, které jsou k těmto účelům přizpůsobeny. Ve všech vizualilzacích je každé skupině měst přiřazena náhodná barva a stejnou barvou je zároveň vyznačena konvexní obálka těchto měst pro snazší odlišení jednotlivých skupin (někdy se může stát že jsou skupiny s podobnou barvou vedle sebe). Konkrétní řešení v daném příkladu je vyznačeno vždy červenou barvou.
+V této části si ukážeme vizualizace řešení a průběhu konkrétních algoritmů pro problémy **g1**, **g2** a **g3**, které jsou k těmto účelům přizpůsobeny. Ve všech vizualizacích je každé skupině měst přiřazena náhodná barva a stejnou barvou je zároveň vyznačena konvexní obálka těchto měst pro snazší odlišení jednotlivých skupin (někdy se může stát, že jsou skupiny s podobnou barvou vedle sebe). Konkrétní řešení v daném příkladu je vyznačeno vždy červenou barvou.
 
 ### Iniciální řešení
 
