@@ -76,6 +76,20 @@ Pro měření používám 2 typy datasetů. První jsou datasety poskytnuté na 
 
 Proto jsem si vygeneroval druhý typ svých vlastních datasetů, soubory **g1**, **g2** a **g3** (pořadí odpovídá velikosti datasetů), u kterých vzdálenosti odpovídají euklidovské metrice a mám uložené 2D pozice, které můžu přímo použít pro vizualizaci (bude v poslední sekci tohoto dokumentu). Data generuji tak, že nejdříve náhodně vygeneruji požadovaný počet bodů, poté jednotlivé body přiřadím do skupin pomocí algoritmu k-means.
 
+Zde jsou velikosti jednotlivých problémů pro představu jejich složitosti:
+
+| Dataset | Počet vrcholů | Počet skupin |
+|---|---|---|
+| a | 24 | 5 |
+| b | 48 | 10 |
+| c | 100 | 20 |
+| d | 150 | 30 |
+| e | 200 | 40 |
+| f | 442 | 89 |
+| g1 | 24 | 5 |
+| g2 | 100 | 20 |
+| g3 | 500 | 80 |
+
 ### Porovnání při základním nastavení parametrů
 
 Zde jsou všechny pravděpodobnosti jednotlivých stavebních operátorů nastaveny na 50%. Tedy např. **evo move cycle** je evoluční algoritmus pravděpodobnostmi: 50% **move**, 50% **city**, 50% **cycle** a 50% **uniform_city**.
@@ -111,6 +125,14 @@ Na následujících grafech jsou vždy znázorněny nejprve 3 varianty lokální
 ![local_g3.svg](out/gtsp/local_g3.svg) 
 
 ### Porovnání různých variant evolučního algoritmu
+
+Pro tuto část jsem původně chtěl podobně jako v předchozí sekci najít optimální pravděpodobnosti jednotlivých operátorů pro evoluční algoritmus. Toho je už ale mnohem těžší dosáhnout, protože k pravděpodobnostem perturbačních operátorů se přidají pravděpodobnosti crossover operátorů a máme tedy celkem 7 proměnných (hledat v kombinacích s krokem 0.1 by trvalo příliš dlouho).
+
+Nejprve jsem to zkusil redukovat na 5 proměnných vynecháním **move** a **swap**, protože **reverse** se zatím ukázal jako nejlepší. To ale vedlo na zvláštní výsledky, které se výrazně měnily pokud jsem experiment zopakoval a při porovnání se základním nastavením parametrů se nejevily o moc lepší. Řekl bych, že je to způsobeno tím, že běh algoritmu je už tolik ovlivněn náhodou, že je velký rozptyl mezi jednotlivýmy běhy a je velice těžké je mezi sebou porovnávat v malém počtu běhů.
+
+Poté jsem ještě zkusil random search na daných 5 proměnných a následně vylepšovat některá řešení lokálním prohledáváním (fitness byla vyhodnocena způměrováním několika běhů evolučního algoritmu s danými pravděpodobnostmi). Ale i tento přístu vedl na velice zvláštní a nestabilní výsledky, nejspíše opět z důvodů zmíněných víše.
+
+Proto jsem nakonec tento přístup zavrhl a rozhodl se alespoň kvalitněji porovnat 6 konkrétních variant parametrů.
 
 ![evo_a.svg](out/gtsp/evo_a.svg) 
 ![evo_b.svg](out/gtsp/evo_b.svg) 
